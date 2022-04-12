@@ -151,6 +151,128 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/04/12/%E5%BC%80%E5%8F%91AIDL%E7%A4%BA%E4%BE%8B%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/12/%E5%BC%80%E5%8F%91AIDL%E7%A4%BA%E4%BE%8B%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B/" class="post-title-link" itemprop="url">开发AIDL示例项目的完整流程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-12 14:56:43 / 修改时间：17:08:33" itemprop="dateCreated datePublished" datetime="2022-04-12T14:56:43+08:00">2022-04-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>科研的第二个任务是AIDL和binder机制相关内容，b站上找到了binder源码剖析的很好的讲解，但是AIDL的很多博客都已经过时了。<br>由于本人没有任何安卓开发经验，所以很需要一步一步示范的教程。在ytb上找到了一个教程，基于此解决了Android11以后bindService无法绑定成功、不会回调onServiceConnected的问题，经测试可以在Android12 (Samsung G9910)上跑通</p>
+</blockquote>
+<h2 id="AIDL概述"><a href="#AIDL概述" class="headerlink" title="AIDL概述"></a>AIDL概述</h2><p>AIDL是安卓为进程间通讯留下的接口，和其他RPC框架一样，AIDL也包括代理层，协议层和通讯层。代理层是安卓的跨进程通讯机制Binder，协议层是安卓接口定义语言AIDL，代理层除了AIDL自动生成的存根代码之外，还需要手动实现服务的绑定以及服务并将存根转换为服务接口。这就构成了整个AIDL的框架。<br>具体实现AIDL的过程分为以下几步：</p>
+<ol>
+<li>创建服务端项目，编写AIDL</li>
+<li>注册服务，实现服务方法并回传服务存根</li>
+<li>创建客户端项目，拷贝AIDL</li>
+<li>设计客户端UI，在客户端实现业务逻辑</li>
+<li>在客户端注册queries</li>
+</ol>
+<blockquote>
+<p><strong>注意，缺少这一步将无法在Android11以上的机器中绑定服务</strong></p>
+</blockquote>
+<ol start="6">
+<li>在客户端实现服务绑定并用AIDL存根作为通讯接口</li>
+<li>利用存根中的方法实现需求功能</li>
+</ol>
+<p>在本例中，我们将实现一个进行四则运算计算器，以及一个计算器的服务器。计算器通过绑定到服务器上的服务来完成计算功能</p>
+<h2 id="示例开发"><a href="#示例开发" class="headerlink" title="示例开发"></a>示例开发</h2><blockquote>
+<p>先决条件：<br>Android Studio<br>Android Studio 虚拟机或开启了USB调试功能的Android实体机</p>
+</blockquote>
+<h4 id="安装android虚拟机的方法"><a href="#安装android虚拟机的方法" class="headerlink" title="安装android虚拟机的方法"></a>安装android虚拟机的方法</h4><ul>
+<li>首先找到设备管理器<br><img src="/.io//devicemanager.bmp" alt="devicemanager"></li>
+<li>然后点击创建设备<br><img src="/.io//createdevice.bmp" alt="createdevice"></li>
+<li>没有特殊需求就选默认硬件<br><img src="/.io//hardware.bmp" alt="hardware"></li>
+<li>操作系统映像选默认的（和硬件匹配的）点Download，许可协议选accept然后再点next就开始下载了。我这里是已经装好了<br><img src="/.io//image.bmp" alt="image"></li>
+<li>最后点finish就完成<br><img src="/.io//finishdevice.bmp" alt="finishdevice"></li>
+</ul>
+<h4 id="开启USB调试的方法"><a href="#开启USB调试的方法" class="headerlink" title="开启USB调试的方法"></a>开启USB调试的方法</h4><p>这个各个设备不太一样，一般要先在设备信息界面点击某个信息十次解锁，比如我是点击设置-设备信息-软件信息-编译编号解锁开发者模式</p>
+<p>解锁了之后在设置-开发者选项里找到<em>USB调试</em>打开就可以了。</p>
+<h3 id="创建服务端项目，编写AIDL代码"><a href="#创建服务端项目，编写AIDL代码" class="headerlink" title="创建服务端项目，编写AIDL代码"></a>创建服务端项目，编写AIDL代码</h3><h4 id="创建新项目"><a href="#创建新项目" class="headerlink" title="创建新项目"></a>创建新项目</h4><p>从左上角File-New-New Project新建项目，注意选择”Empty Activity”<br><img src="/.io//newproject.bmp" alt="newproject"><br>接下来可以点next，但在最后的界面记得把语言改成java,项目名字也可以自定义成AIDLServer<br><img src="/.io//java.bmp" alt="java"></p>
+<h4 id="创建新的包"><a href="#创建新的包" class="headerlink" title="创建新的包"></a>创建新的包</h4><p>在项目列表里选择java目录，右键，点击new，点击Package，在目录结构里选main<br><img src="/.io//newpackage.bmp" alt="newpackage"><br>给它起个名字，注意过会需要创建这个包的一个副本，所以名字别起太怪，不方便检查</p>
+<h4 id="创建新的AIDL文件"><a href="#创建新的AIDL文件" class="headerlink" title="创建新的AIDL文件"></a>创建新的AIDL文件</h4><p>在<strong>刚才的创建的包</strong>上右键创建AIDL文件，名字也别起太怪<br><img src="/.io//newaidlfile.bmp" alt="newaidlfile"><br>应该能看到如下的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// &lt;AidlFileName&gt;.aidl</span></span><br><span class="line"><span class="keyword">package</span> &lt;PackageName&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Declare any non-default types here with import statements</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> &lt;<span class="title">AidlFileName</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Demonstrates some basic types that you can use as parameters</span></span><br><span class="line"><span class="comment">     * and return values in AIDL.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">basicTypes</span><span class="params">(<span class="keyword">int</span> anInt, <span class="keyword">long</span> aLong, <span class="keyword">boolean</span> aBoolean, <span class="keyword">float</span> aFloat,</span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="keyword">double</span> aDouble, String aString)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编写接口定义"><a href="#编写接口定义" class="headerlink" title="编写接口定义"></a>编写接口定义</h4><p>我们要把计算的过程委托给远程服务器，也就是传递两个运算数和一个运算符，接受一个结果。方便起见，规定运算是整数运算，并且用<code>1</code> <code>2</code> <code>3</code> <code>4</code>表示<code>+</code> <code>-</code> <code>*</code> <code>/</code>,这样我们就形成了如下接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// &lt;AidlFileName&gt;.aidl</span></span><br><span class="line"><span class="keyword">package</span> &lt;PackageName&gt;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Declare any non-default types here with import statements</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> &lt;<span class="title">AidlFileName</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">calculate</span><span class="params">(<span class="keyword">int</span> v1, <span class="keyword">int</span> v2, <span class="keyword">int</span> op)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后需要点击Build-Rebuild。注意，<strong>每次修改AIDL文件都要进行rebuild</strong><br>到此为止，我们的服务应用程序框架就创建完成。</p>
+<h3 id="注册服务，实现方法"><a href="#注册服务，实现方法" class="headerlink" title="注册服务，实现方法"></a>注册服务，实现方法</h3><p>在APP里右键创建新的Service，注意<strong>不要</strong>选<code>Service(Intent)</code>,在接下来的窗口里<code>enabled</code>和<code>exported</code>都要选中<br><img src="/.io//newservice.bmp" alt="newservice"></p>
+<h4 id="新建存根"><a href="#新建存根" class="headerlink" title="新建存根"></a>新建存根</h4><p>打开<code>app/java/&lt;PackageName&gt;/&lt;ServiceName&gt;.java</code>，为<code>&lt;ServiceName&gt;</code>类添加一个存根变量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> &lt;AidlFileName&gt;.Stub</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>注意，这里按下<code>.</code>之后，应该提示后面的Stub类型，如果没有提示就说明刚才没有进行Rebuild！<br><img src="/.io//rebuild.bmp" alt="rebuild"><br>确认自己rebuild完成之后继续写。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> &lt;AidlFileName&gt;.Stub = <span class="keyword">new</span> &lt;AidlFileName&gt;.</span><br></pre></td></tr></table></figure>
+
+<p>现在应该能自动补全Stub了，按Tab键之后，就应该出现类似下面的内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> IAidlDemo.Stub stub = <span class="keyword">new</span> IAidlDemo.Stub() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">calculate</span><span class="params">(<span class="keyword">int</span> v1, <span class="keyword">int</span> v2, <span class="keyword">int</span> op)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">//不会自动打分号</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注意到calculate正是我们之前定义的接口定义语言，因为AIDL生成的存根类型是个抽象类，因此系统会自动提醒我们复写其中的<code>calculate</code>方法。</p>
+<h4 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h4><p>接下来，我们就来修改这个存根的内部的方法，这里就简单的复制一份代码吧！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> IAidlDemo.Stub stub = <span class="keyword">new</span> IAidlDemo.Stub() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">calculate</span><span class="params">(<span class="keyword">int</span> v1, <span class="keyword">int</span> v2, <span class="keyword">int</span> op)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">            <span class="keyword">switch</span> (op) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                    <span class="keyword">return</span> v1 + v2;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                    <span class="keyword">return</span> v1 - v2;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">                    <span class="keyword">return</span> v1 * v2;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">                    <span class="keyword">return</span>  v1 / v2;</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                    Log.e(<span class="string">&quot;Error: &quot;</span>,<span class="string">&quot;Invalid Operator&quot;</span>);</span><br><span class="line">                    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">//记得打分号</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于这是一个远程方法，因此默认会抛出一个远程异常，不过我们不必管他，一般不会出现这种情况。</p>
+<h4 id="传递存根"><a href="#传递存根" class="headerlink" title="传递存根"></a>传递存根</h4><p>在<code>&lt;ServiceName&gt;.java</code>中应该还有一个默认的方法<code>onBind</code>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> IBinder <span class="title">onBind</span><span class="params">(Intent intent)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> Return the communication channel to the service.</span></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException(<span class="string">&quot;Not yet implemented&quot;</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是因为我们的服务继承了Service抽象类。这个方法就是当服务绑定时会进行的操作，可以看到这里有一个待实现的提示。我们只需要返回刚才创建的存根即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> IBinder <span class="title">onBind</span><span class="params">(Intent intent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> stub;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>到此为止我们的服务端项目就编写完成，可以跑一下试试看：</p>
+<p><img src="/.io//server.bmp" alt="server"></p>
+<p>虽然没有UI界面，但是服务已经就绪了~</p>
+<h3 id="创建客户端项目，拷贝AIDL"><a href="#创建客户端项目，拷贝AIDL" class="headerlink" title="创建客户端项目，拷贝AIDL"></a>创建客户端项目，拷贝AIDL</h3><p>新建客户端项目的流程就不再赘述，可以单开一个project也可以就在这个project里操作，这里选择单开一个project。过程就不再赘述，注意仍然用<code>Empty Activity</code>作为界面。</p>
+<p>这里仍然在<code>app\java</code>上右键，选<code>New-Package</code>新建包，注意<strong>包名要与刚刚创建的包名相同</strong><br>在包上右键，新建Aidl文件，注意<strong>文件名要和刚刚创建的文件相同</strong><br><strong>复制</strong>刚刚的Aidl文件内容，粘贴到新的Aidl文件里<br>包名、文件名、文件内容完全相同。<br><img src="/.io//copyaidl.bmp" alt="copyaidl"></p>
+<h2 id="未完待续…"><a href="#未完待续…" class="headerlink" title="未完待续…"></a>未完待续…</h2>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/04/08/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -174,10 +296,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-04-08 18:41:50 / 修改时间：19:19:58" itemprop="dateCreated datePublished" datetime="2022-04-08T18:41:50+08:00">2022-04-08</time>
+              <time title="创建时间：2022-04-08 18:41:50" itemprop="dateCreated datePublished" datetime="2022-04-08T18:41:50+08:00">2022-04-08</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-12 14:57:34" itemprop="dateModified" datetime="2022-04-12T14:57:34+08:00">2022-04-12</time>
+              </span>
 
           
 
@@ -208,9 +336,9 @@
 <p>这样可以确保再想找的时候一定能找到</p>
 <h3 id="重新安装软件"><a href="#重新安装软件" class="headerlink" title="重新安装软件"></a>重新安装软件</h3><p>首先安装latern,然后安装clash,然后安装IDM,chrome<br>接下来安装QQ,微信,腾讯会议,火绒,讯飞输入法,网易云音乐,WinRAR<br>vscode,wsl,git,windows terminal<br>如果有大型软件可以等有空了再安装,其他软件可以按需安装  </p>
 <h3 id="重新加载配置"><a href="#重新加载配置" class="headerlink" title="重新加载配置"></a>重新加载配置</h3><ol>
-<li>网络配置<br>用小蓝灯登录小蓝猫的官网,加载小蓝猫的配置<br>按照这篇文章为wsl配置代理<br><a target="_blank" rel="noopener" href="https://zinglix.xyz/2020/04/18/wsl2-proxy/">https://zinglix.xyz/2020/04/18/wsl2-proxy/</a><br>安装谷歌tampermonkey插件,在gressyfork插件里找到简易下载助手</li>
-<li>软件配置<br>vsc: 加载settings.json,重新安装插件<br>git: 确认ssh链接良好,如果没有就再配一个,config文件也要改一下<br>微信&#x2F;qq: 更改下载路径,并且把之前下载的文件也扔进去</li>
-<li>其他配置<br>按照这篇文章重新加载博客<a target="_blank" rel="noopener" href="https://blog.csdn.net/DreamcoffeeZS/article/details/79401109">https://blog.csdn.net/DreamcoffeeZS/article/details/79401109</a><br>按照这篇文章重新加载latex(不要安装这个配置settings.json) <a target="_blank" rel="noopener" href="https://blog.csdn.net/yinqingwang/article/details/79684419">https://blog.csdn.net/yinqingwang/article/details/79684419</a></li>
+<li>网络配置<br>用小蓝灯登录小蓝猫的官网,加载小蓝猫的配置<br>按照这篇文章为wsl配置代理<br><a target="_blank" rel="noopener" href="https://zinglix.xyz/2020/04/18/wsl2-proxy/">https://zinglix.xyz/2020/04/18/wsl2-proxy/</a><br>安装谷歌tampermonkey插件,在gressyfork插件里找到简易下载助手<br>为IDM进行谷歌插件配置,然后点击”绿化.bat”完成配置<a target="_blank" rel="noopener" href="https://blog.csdn.net/Cappuccino_jay/article/details/105299073">https://blog.csdn.net/Cappuccino_jay/article/details/105299073</a></li>
+<li>软件配置<br>vsc: 加载settings.json,重新安装插件（现在可以使用sync插件进行同步）<br>git: 确认ssh链接良好,如果没有就再配一个,config文件也要改一下<br>微信&#x2F;qq: 更改下载路径,并且把之前下载的文件也扔进去<br>Android Studio：汉字中文乱码需要将File-Settings-Editor-Encoding的所有选项都改成UTF-8.还需要在studio64.exe.vmoptions里加一句“-Dfile.encoding&#x3D;UTF-8”，注意要在安装目录下的文件里加，不能直接在help里找这个选项修改否则会无法启动。</li>
+<li>其他配置<br>按照这篇文章重新配置nodejs和hexo<a target="_blank" rel="noopener" href="https://blog.csdn.net/DreamcoffeeZS/article/details/79401109">https://blog.csdn.net/DreamcoffeeZS/article/details/79401109</a><br>按照这篇文章重新加载latex(不要按照这个配置settings.json) <a target="_blank" rel="noopener" href="https://blog.csdn.net/yinqingwang/article/details/79684419">https://blog.csdn.net/yinqingwang/article/details/79684419</a></li>
 </ol>
 
       
@@ -254,10 +382,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-26 14:07:34 / 修改时间：20:09:56" itemprop="dateCreated datePublished" datetime="2022-03-26T14:07:34+08:00">2022-03-26</time>
+              <time title="创建时间：2022-03-26 14:07:34" itemprop="dateCreated datePublished" datetime="2022-03-26T14:07:34+08:00">2022-03-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-12 14:57:10" itemprop="dateModified" datetime="2022-04-12T14:57:10+08:00">2022-04-12</time>
+              </span>
 
           
 
@@ -348,7 +482,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-08 19:19:27" itemprop="dateModified" datetime="2022-04-08T19:19:27+08:00">2022-04-08</time>
+                <time title="修改时间：2022-04-12 14:57:29" itemprop="dateModified" datetime="2022-04-12T14:57:29+08:00">2022-04-12</time>
               </span>
 
           
@@ -529,10 +663,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-19 21:42:32 / 修改时间：22:10:32" itemprop="dateCreated datePublished" datetime="2022-03-19T21:42:32+08:00">2022-03-19</time>
+              <time title="创建时间：2022-03-19 21:42:32" itemprop="dateCreated datePublished" datetime="2022-03-19T21:42:32+08:00">2022-03-19</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-12 15:33:13" itemprop="dateModified" datetime="2022-04-12T15:33:13+08:00">2022-04-12</time>
+              </span>
 
           
 
@@ -805,12 +945,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
