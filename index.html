@@ -151,6 +151,249 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/04/README/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/04/README/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-07-04 11:11:05" itemprop="dateCreated datePublished" datetime="2022-07-04T11:11:05+08:00">2022-07-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-28 20:37:25" itemprop="dateModified" datetime="2022-05-28T20:37:25+08:00">2022-05-28</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="grpc-Benchmarks"><a href="#grpc-Benchmarks" class="headerlink" title="grpc Benchmarks"></a>grpc Benchmarks</h1><h2 id="QPS-Benchmark"><a href="#QPS-Benchmark" class="headerlink" title="QPS Benchmark"></a>QPS Benchmark</h2><p>The “Queries Per Second Benchmark” allows you to get a quick overview of the throughput and latency characteristics of grpc.</p>
+<p>To build the benchmark type</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ./gradlew :grpc-benchmarks:installDist</span><br></pre></td></tr></table></figure>
+
+<p>from the grpc-java directory.</p>
+<p>You can now find the client and the server executables in <code>benchmarks/build/install/grpc-benchmarks/bin</code>.</p>
+<p>The <code>C++</code> counterpart can be found at <a target="_blank" rel="noopener" href="https://github.com/grpc/grpc/tree/master/test/cpp/qps">https://github.com/grpc/grpc/tree/master/test/cpp/qps</a></p>
+<p>The <a href="src/jmh/java/io/grpc/benchmarks/netty">netty benchmark</a> directory contains<br>the standard benchmarks used to assess the performance of GRPC. Since these<br>benchmarks run on localhost over loopback the performance of the underlying network is considerably<br>different to real networks and their behavior. To address this issue we recommend the use of<br>a network emulator to make loopback behave more like a real network. To this end the benchmark<br>code looks for a loopback interface with ‘benchmark’ in its name and attempts to use the address<br>bound to that interface when creating the client and server. If it cannot find such an interface it<br>will print a warning and continue with the default localhost address.</p>
+<p>To attempt to standardize benchmark behavior across machines we attempt to emulate a 10gbit<br>ethernet interface with a packet delay of 0.1ms.</p>
+<h3 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h3><p>On Linux we can use <a target="_blank" rel="noopener" href="https://www.linuxfoundation.org/collaborate/workgroups/networking/netem">netem</a>  to shape the traffic appropriately.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Remove all traffic shaping from loopback</span></span><br><span class="line">sudo tc qdisc del dev lo root</span><br><span class="line"><span class="comment"># Add a priority traffic class to the root of loopback</span></span><br><span class="line">sudo tc qdisc add dev lo root handle 1: prio</span><br><span class="line"><span class="comment"># Add a qdisc under the new class with the appropriate shaping</span></span><br><span class="line">sudo tc qdisc add dev lo parent 1:1 handle 2: netem delay 0.1ms rate 10gbit</span><br><span class="line"><span class="comment"># Add a filter which selects the new qdisc class for traffic to 127.127.127.127</span></span><br><span class="line">sudo tc filter add dev lo parent 1:0 protocol ip prio 1 u32 match ip dst 127.127.127.127 flowid 2:1</span><br><span class="line"><span class="comment"># Create an interface alias call &#x27;lo:benchmark&#x27; that maps 127.127.127.127 to loopback</span></span><br><span class="line">sudo ip addr add dev lo 127.127.127.127/32 label lo:benchmark</span><br></pre></td></tr></table></figure>
+
+<p>to remove this configuration</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo tc qdisc del dev lo root</span><br><span class="line">sudo ip addr del dev lo 127.127.127.127/32 label lo:benchmark</span><br></pre></td></tr></table></figure>
+
+<h3 id="Other-Platforms"><a href="#Other-Platforms" class="headerlink" title="Other Platforms"></a>Other Platforms</h3><p>Contributions are welcome!</p>
+<h2 id="Visualizing-the-Latency-Distribution"><a href="#Visualizing-the-Latency-Distribution" class="headerlink" title="Visualizing the Latency Distribution"></a>Visualizing the Latency Distribution</h2><p>The QPS client comes with the option <code>--save_histogram=FILE</code>, if set it serializes the histogram to <code>FILE</code> which can then be used with a plotter to visualize the latency distribution. The histogram is stored in the file format of <a target="_blank" rel="noopener" href="https://hdrhistogram.org/">HdrHistogram</a>. That way it can be plotted very easily using a browser based tool like <a target="_blank" rel="noopener" href="https://hdrhistogram.github.io/HdrHistogram/plotFiles.html">https://hdrhistogram.github.io/HdrHistogram/plotFiles.html</a>. Simply upload the generated file and it will generate a beautiful graph for you. It also allows you to plot two or more histograms on the same surface in order two easily compare latency distributions.</p>
+<h2 id="JVM-Options"><a href="#JVM-Options" class="headerlink" title="JVM Options"></a>JVM Options</h2><p>When running a benchmark it’s often useful to adjust some JVM options to improve performance and to gain some insights into what’s happening. Passing JVM options to the QPS server and client is as easy as setting the <code>JAVA_OPTS</code> environment variables. Below are some options that I find very useful:</p>
+<ul>
+<li><code>-Xms</code> gives a lower bound on the heap to allocate and <code>-Xmx</code> gives an upper bound. If your program uses more than what’s specified in <code>-Xmx</code> the JVM will exit with an <code>OutOfMemoryError</code>. When setting those always set <code>Xms</code> and <code>Xmx</code> to the same value. The reason for this is that the young and old generation are sized according to the total available heap space. So if the total heap gets resized, they will also have to be resized and this will then trigger a full GC.</li>
+<li><code>-verbose:gc</code> prints some basic information about garbage collection. It will log to stdout whenever a GC happend and will tell you about the kind of GC, pause time and memory compaction.</li>
+<li><code>-XX:+PrintGCDetails</code> prints out very detailed GC and heap usage information before the program terminates.</li>
+<li><code>-XX:-HeapDumpOnOutOfMemoryError</code> and <code>-XX:HeapDumpPath=path</code> when you are pushing the JVM hard it sometimes happens that it will crash due to the lack of available heap space. This option will allow you to dive into the details of why it happened. The heap dump can be viewed with e.g. the <a target="_blank" rel="noopener" href="https://eclipse.org/mat/">Eclipse Memory Analyzer</a>.</li>
+<li><code>-XX:+PrintCompilation</code> will give you a detailed overview of what gets compiled, when it gets compiled, by which HotSpot compiler it gets compiled and such. It’s a lot of output. I usually just redirect it to file and look at it with <code>less</code> and <code>grep</code>.</li>
+<li><code>-XX:+PrintInlining</code> will give you a detailed overview of what gets inlined and why some methods didn’t get inlined. The output is very verbose and like <code>-XX:+PrintCompilation</code> and useful to look at after some major changes or when a drop in performance occurs.</li>
+<li>It sometimes happens that a benchmark just doesn’t make any progress, that is no bytes are transferred over the network, there is hardly any CPU utilization and low memory usage but the benchmark is still running. In that case it’s useful to get a thread dump and see what’s going on. HotSpot ships with a tool called <code>jps</code> and <code>jstack</code>. <code>jps</code> tells you the process id of all running JVMs on the machine, which you can then pass to <code>jstack</code> and it will print a thread dump of this JVM.</li>
+<li>Taking a heap dump of a running JVM is similarly straightforward. First get the process id with <code>jps</code> and then use <code>jmap</code> to take the heap dump. You will almost always want to run it with <code>-dump:live</code> in order to only dump live objects. If possible, try to size the heap of your JVM (<code>-Xmx</code>) as small as possible in order to also keep the heap dump small. Large heap dumps are very painful and slow to analyze.</li>
+</ul>
+<h2 id="Profiling"><a href="#Profiling" class="headerlink" title="Profiling"></a>Profiling</h2><p>Newer JVMs come with a built-in profiler called <code>Java Flight Recorder</code>. It’s an excellent profiler and it can be used to start a recording directly on the command line,  from within <code>Java Mission Control</code> or<br>with jcmd.</p>
+<p>A good introduction on how it works and how to use it are <a target="_blank" rel="noopener" href="http://hirt.se/blog/?p=364">http://hirt.se/blog/?p=364</a> and <a target="_blank" rel="noopener" href="http://hirt.se/blog/?p=370">http://hirt.se/blog/?p=370</a>.</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/05/11/%E8%8B%B1%E8%AF%AD%E7%A7%91%E6%8A%80%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/11/%E8%8B%B1%E8%AF%AD%E7%A7%91%E6%8A%80%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" class="post-title-link" itemprop="url">英语科技文献阅读</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-11 10:44:35 / 修改时间：10:51:52" itemprop="dateCreated datePublished" datetime="2022-05-11T10:44:35+08:00">2022-05-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Structure-of-RA"><a href="#Structure-of-RA" class="headerlink" title="Structure of RA"></a>Structure of RA</h2><ul>
+<li>Title</li>
+<li>Authors &amp; Affiliation(单位)</li>
+<li><em>Abstract</em></li>
+<li><strong>Introduction</strong></li>
+<li><strong>Materials &amp; Methods</strong></li>
+<li><strong>Results &amp; Discussion</strong></li>
+<li>Conclusion</li>
+<li>Acknowledgements(致谢)</li>
+<li>Appendix</li>
+<li>Reference(引用)</li>
+<li>Bibliography(参考)</li>
+</ul>
+<h2 id="Title"><a href="#Title" class="headerlink" title="Title"></a>Title</h2><h3 id="Type-of-Title"><a href="#Type-of-Title" class="headerlink" title="Type of Title"></a>Type of Title</h3><ul>
+<li><p>Declaration 声明性</p>
+<p>  整句<strong>话</strong></p>
+</li>
+<li><p>Descriptive&#x2F;neutral 描述性&#x2F;中性标题</p>
+<p>  名<strong>词</strong>短语+定语</p>
+</li>
+<li><p>Interrogative 疑问句式</p>
+<p>  疑问<strong>句</strong></p>
+</li>
+<li><p>Compound 复合型标题</p>
+<p>  由主副两部分构成（冒号或破折号分开）</p>
+</li>
+</ul>
+<h3 id="How-to-read-title"><a href="#How-to-read-title" class="headerlink" title="How to read title"></a>How to read title</h3><p>devide the title into sense group</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Strategies | to re-establish stable granulation | after filamentous outgrowth | : Insignts | from lab-scale</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>名词</li>
+<li>动宾短语</li>
+<li>介词短语</li>
+<li>…</li>
+</ul>
+<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><ul>
+<li>at the beginning (or the end) of a research article, miniature of a research work.</li>
+<li>independent, self-contained, well-structured 独立完整&#x2F;自圆其说&#x2F;结构严谨</li>
+<li>Consist of Five Move(话步,语步)<ul>
+<li>background 是什么</li>
+<li>problem 做了什么 (purpose&#x2F;hypotheses)</li>
+<li>method 怎么做的</li>
+<li>result 有何结果 (major finding&#x2F;important data)</li>
+<li>conclusion 总结展望 (further study&#x2F;future directions)</li>
+</ul>
+</li>
+</ul>
+<h3 id="How-to-read-abstract"><a href="#How-to-read-abstract" class="headerlink" title="How to read abstract"></a>How to read abstract</h3><ul>
+<li><p>focus on subject + verb</p>
+</li>
+<li><p>devide the abstract into five moves</p>
+</li>
+<li><p>focus on clue words:</p>
+<ul>
+<li>“such”, “recently”,”today” that indicates present time can be found in move 1.</li>
+<li>“here”, “this paper” with past tense usually come with move 2 and 3</li>
+<li>method will be described with verbs.</li>
+<li>“showed”“revealed”“indicated” are used to discribe result and “find” for finding</li>
+<li>present and future tenses with subjective mood are used in making conclusion, with words like “could””would”.</li>
+</ul>
+</li>
+</ul>
+<h2 id="keywords"><a href="#keywords" class="headerlink" title="keywords"></a>keywords</h2><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><ul>
+<li><p>context : explains the rationale for undertaking the study and clearly describes the main purpose of conducing it.</p>
+</li>
+<li><p>purpose : to <strong>c</strong>reate <strong>a</strong> <strong>r</strong>esearch <strong>s</strong>pace(CARS)</p>
+</li>
+<li><p>moves</p>
+<ol>
+<li>Establishing a territory<br>现状描述词</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Increasing interest has grown on ...</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>Reviewing previous related research<br> 文献综述词</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Several Studies have ...</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>Establishing a niche(壁炉)<br>转折否定词</li>
+</ol>
+<pre><code>- However/while/but...
+- failed to 
+- ignored/neglected to
+</code></pre>
+<ol start="4">
+<li>Occupying the niche</li>
+</ol>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/04/21/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -174,10 +417,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-04-21 14:42:38 / 修改时间：15:03:11" itemprop="dateCreated datePublished" datetime="2022-04-21T14:42:38+08:00">2022-04-21</time>
+              <time title="创建时间：2022-04-21 14:42:38" itemprop="dateCreated datePublished" datetime="2022-04-21T14:42:38+08:00">2022-04-21</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-23 20:36:07" itemprop="dateModified" datetime="2022-04-23T20:36:07+08:00">2022-04-23</time>
+              </span>
 
           
 
@@ -207,7 +456,26 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tv.setText(String.format(<span class="string">&quot;%s,%d,%s&quot;</span>,</span><br><span class="line">                b.getString(<span class="string">&quot;data&quot;</span>),b.getInt(<span class="string">&quot;emm&quot;</span>),</span><br><span class="line">                b.getString(<span class="string">&quot;ne!&quot;</span>,<span class="string">&quot;abab&quot;</span>)));<span class="comment">//&quot;ne!&quot;对应的值不存在，显示为默认值&quot;abab&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>此外，Bundle也可以直接通过putExtra方法进行传递，这种情况可能适用于有多个Bundle的情况，此时<br>接受时也要使用getBundleExtra方法来进行查找。</p>
-<h3 id="传递值对象"><a href="#传递值对象" class="headerlink" title="传递值对象"></a>传递值对象</h3>
+<h3 id="传递值对象"><a href="#传递值对象" class="headerlink" title="传递值对象"></a>传递值对象</h3><h2 id="Activity的启动模式"><a href="#Activity的启动模式" class="headerlink" title="Activity的启动模式"></a>Activity的启动模式</h2><p>首先来看标准启动模式，也是默认的启动模式。我们来新建一个项目来演示不同的启动模式。首先为MainActivity添加一个TextView，两个Button<br>新建一个活动，叫做AnotherActivity，复制MainActivity的布局文件</p>
+<p>java代码中设置TextView要显示的内容</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tv.setText(format(<span class="string">&quot;Task ID:%d\nCurrent Instance id:%s&quot;</span>,getTaskId(),<span class="keyword">this</span>.toString()));</span><br></pre></td></tr></table></figure>
+
+<p>Task ID是任务栈id，而当前示例ID则是当前对象的地址，可以用来区分activity的示例。</p>
+<p>接下来设置两个按钮，一个启动MainActivity一个启动AnotherActivity，复制上述代码到AnotherActivity.java，注意修改intent中package context为<code>AnotherActivity.this</code>，效果如图</p>
+<div align="center">
+ <img src="Android学习笔记（二）/2022-04-22-22-35-18.png" width="50%">
+</div>
+
+<p>接下来可以点按钮试试，可以观察到TaskId都是一样的，而实例的id是不同的，这就意味着点击按钮会创建新的示例，而且所有的示例都位于一个任务栈中。</p>
+<p>在标准的启动模式中，我们启动一个Activity就会压栈一个新的实例，点击返回键就会弹栈。多次点击app的创建示例按钮，再按返回键，可以观察到他们依次被销毁的过程。</p>
+<p>可以在AndroidManifest.xml文件中的Activity标签下添加Android:launchMode条目来指定启动模式，如果没有这个条目，则默认为Standard。</p>
+<h3 id="SingleTop启动模式"><a href="#SingleTop启动模式" class="headerlink" title="SingleTop启动模式"></a>SingleTop启动模式</h3><p>SingleTop，顾名思义，如果该活动的一个实例位于栈顶，就不能继续创建该活动的新实例。只有当栈顶实例不为该活动时，才能创建该活动的新实例。<br>下面在AndroidManifest.xml文件中配置MainActivity的启动模式为SingleTop.</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> &lt;activity</span><br><span class="line">            android:name=&quot;.MainActivity&quot;</span><br><span class="line">            android:exported=&quot;true&quot;</span><br><span class="line"><span class="addition">+            android:launchMode=&quot;singleTop&quot;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>启动程序，首先点击启动A活动按钮，应用没有反应。此时如果点击返回键会直接退出。<br>如果启动程序后先点击启动B活动按钮，再点击启动A活动按钮，可以发现这次成功的创建了A的新实例。这是因为创建了B活动之后，A活动的上一个实例已经不在栈顶，因此可以创建新的实例。</p>
+<h3 id="SingleTask模式"><a href="#SingleTask模式" class="headerlink" title="SingleTask模式"></a>SingleTask模式</h3><p>在这种情况下，一个任务栈中只能有一个该任务的实例，如果试图创建新实例，将会<strong>弹出</strong>所有位于该实例上的活动实例。<br>修改AndroidManifest文件，将启动模式修改为<code>singleTask</code>,启动应用程序。<br>点击启动A活动按钮，没有反应。点击启动B活动按钮，再点击启动A活动按钮，可以看到B活动退出，而显示的A活动正是第一个示例，如果此时再点击返回键，应用直接退出，说明所有B活动的示例都因为其位于A活动上方而被弹出了。</p>
+<h3 id="SingleInstance模式"><a href="#SingleInstance模式" class="headerlink" title="SingleInstance模式"></a>SingleInstance模式</h3><p>在这种情况下，一个任务栈中只有该活动的一个实例，而其他活动的实例会位于新的任务栈中。这种情况下，试图启动该活动的新实例时，会切换到保存该活动实例的任务栈。其他的任务栈不受影响。</p>
+<h3 id="Single"><a href="#Single" class="headerlink" title="Single"></a>Single</h3>
       
     </div>
 
@@ -1211,7 +1479,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">10</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
