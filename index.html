@@ -151,6 +151,240 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/28/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/28/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89/" class="post-title-link" itemprop="url">Android学习笔记（三）</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-07-28 00:48:49 / 修改时间：20:58:30" itemprop="dateCreated datePublished" datetime="2022-07-28T00:48:49+08:00">2022-07-28</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Intent的概念与使用"><a href="#Intent的概念与使用" class="headerlink" title="Intent的概念与使用"></a>Intent的概念与使用</h2><p>关于Intent，目前只用在启动activity上，通常启动一个activity时需要传递一个intent参数给指定的activity，同时也可以在这个Intent中夹带一些参数进行传递。</p>
+<h3 id="用显示Intent启动Activity"><a href="#用显示Intent启动Activity" class="headerlink" title="用显示Intent启动Activity"></a>用显示Intent启动Activity</h3><p>显示intent就是指定了要启动的activity的类的intent，这种intent通常是用在app内activity之间的交互。接下来就来在一个项目里注册两个activity来看一看如何用intent启动。</p>
+<p>如果不直接新建activity，就要新建一个java类，并令它继承Activity类，还要在res文件夹中新建layout文件定义其ui。之后在java文件中实现Activity的各个方法，通常在onCreate方法中进行layout与activity的绑定：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(<span class="meta">@Nullable</span> Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">    setContentView(R.layout.myaty);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后为了使用这个activity中，我们还需要在AndroidManifest文件中进行注册,注意activity的name会与manifest的package组合起来作为Activity类的名称，所以在这里注册时可以使用简写，也可以在name中写全<code>包名.类名</code></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.study4intent&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">...</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MyAty&quot;</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--           name added to package as the name of an Activity object--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--            use com.example.study4intent.MyAty instead--&gt;</span></span><br><span class="line">            ...</span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>到这里，我们就已经新建了一个activity，并且可以绑定它对应的java和res文件了。如果直接在AS中新建activity的话，ide会自动帮我们完成这些配置工作。</p>
+<p>到这里，我们就可以试着用显示intent启动activity了，这里选择用一个按钮来触发新activity的启动：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.button).setOnClickListener(</span><br><span class="line">    <span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">            Intent intent =</span><br><span class="line">                <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, MyAty.class);</span><br><span class="line">            startActivity(intent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>java允许传new出来的参数，而new抽象类需要实现抽象方法，这种嵌套方式写出来的代码非常紧凑，不过通常我们会把findViewById的结果声明为private变量保存下来方便以后调用。</p>
+<p>查看Intent构造器可知Intent可以用一个Context类型对象和一个class泛型来构造，这就是我们的显示Intent要传递的包名和类名。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Intent</span><span class="params">(Context packageContext, Class&lt;?&gt; cls)</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="隐式Intent"><a href="#隐式Intent" class="headerlink" title="隐式Intent"></a>隐式Intent</h2><p>Intent除了用显式指定的包名和类名构造之外，也可以先通过一个标记构造，之后再寻找标记对应的类。最常见的方法是使用action，也就是一个字符串。如果用action构造了一个intent，那么就可以直接用这个字符串搜索到注册了这个action的类。（小疑惑，如果有两个一样的action会怎样呢？）</p>
+<h3 id="注册action"><a href="#注册action" class="headerlink" title="注册action"></a>注册action</h3><p>在androidmanifest文件中，activity下加入intent-fliter标签：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;qaq&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，新版Android可能会报错，要求指定activity是否exported，直接用快速修复功能设置为true即可。下文会讲到。</p>
+<p>category的name暂时选择default就可以，而action的name则要注册为对应的字符串，标准的action格式是<code>&lt;package_name&gt;.action.start.&lt;class_name&gt;</code>，不过这个格式实在过于复杂，我们也可以把action的名字放在要启动的类中，作为一个常量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAty</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTION = <span class="string">&quot;qaq&quot;</span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样在使用Intent时，就不需要直接输入长长的字符串，使用<code>MyAty.ACTION</code>就可以了</p>
+<h3 id="用隐式Intent启动同一个app内的另一个Activity"><a href="#用隐式Intent启动同一个app内的另一个Activity" class="headerlink" title="用隐式Intent启动同一个app内的另一个Activity"></a>用隐式Intent启动同一个app内的另一个Activity</h3><p>基本的方法和之前都是相同的，区别就是构造intent时调用了另一种构造器：</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.button).setOnClickListener(</span><br><span class="line">    new View.OnClickListener() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void onClick(View view) &#123;</span><br><span class="line">            Intent intent =</span><br><span class="line"><span class="deletion">-                new Intent(MainActivity.this, MyAty.class);</span></span><br><span class="line"><span class="addition">+                new Intent(&quot;qaq&quot;);</span></span><br><span class="line">            startActivity(intent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Intent</span><span class="params">(String action)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>当然，隐式Intent最主要的作用并不是用来启动同一个应用内的activity，因为此时我们是可以直接获得这个activity的类的定义的。而在跨应用通讯时，隐式Intent就有用处了。</p>
+<h3 id="用Intent跨应用启动activity"><a href="#用Intent跨应用启动activity" class="headerlink" title="用Intent跨应用启动activity"></a>用Intent跨应用启动activity</h3><p>还记得之前AS可能会要求我们添加的exported属性吗：</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">        &lt;activity android:name=&quot;.MyAty&quot;</span><br><span class="line"><span class="addition">+            android:exported=&quot;false&quot;&gt;</span></span><br><span class="line">            &lt;intent-filter&gt;</span><br><span class="line">                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;</span><br><span class="line">                &lt;action android:name=&quot;qaq&quot;/&gt;</span><br><span class="line">            &lt;/intent-filter&gt;</span><br><span class="line">        &lt;/activity&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这是安卓权限管理引入的机制：只有设置为exported的activity对其他应用才是可见的，现在我们可以把它改为true，然后在project中新建一个package（app），并且在另一个app中启动这个app的activity</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.btn_start_myaty).setOnClickListener(</span><br><span class="line">        <span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                startActivity(<span class="keyword">new</span> Intent(<span class="string">&quot;qaq&quot;</span>));</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    Toast.makeText(MainActivity.<span class="keyword">this</span>, <span class="string">&quot;无法启动MyAty&quot;</span>,Toast.LENGTH_SHORT).show();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了try结构来捕获可能的异常，如果前面没有正确的设置exported的话，就可能导致异常的出现。捕获到异常之后，用Toast组件打印一条提示信息。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/26/%E5%AE%89%E5%8D%93%E5%9B%9B%E5%A4%A7%E7%BB%84%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/26/%E5%AE%89%E5%8D%93%E5%9B%9B%E5%A4%A7%E7%BB%84%E4%BB%B6/" class="post-title-link" itemprop="url">安卓四大组件</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-07-26 16:14:58 / 修改时间：17:13:52" itemprop="dateCreated datePublished" datetime="2022-07-26T16:14:58+08:00">2022-07-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Activity"><a href="#Activity" class="headerlink" title="Activity"></a>Activity</h2><h3 id="activity的使用"><a href="#activity的使用" class="headerlink" title="activity的使用"></a>activity的使用</h3><ol>
+<li>在Android Menifest文件中注册</li>
+<li>在xml文件中设定layout</li>
+<li>在java文件中绑定activity</li>
+</ol>
+<p>GridView + Adaptor, GridView + Adaptor, ViewPager + Adaptor</p>
+<h3 id="activity生命周期"><a href="#activity生命周期" class="headerlink" title="activity生命周期"></a>activity生命周期</h3><ol>
+<li>onCreate<br>程序创建，进行文件的绑定</li>
+<li>onStart<br>程序不可见，用户不可交互，进行一些</li>
+<li>onResume<br>程序可见，用户可以交互</li>
+<li>onPause<br>程序部分不可见，（比如被弹窗遮挡），在这里是最后一个比较靠谱的数据保存点（Android 5.0-）。<br>之后也可以在onStop中进行数据保存<br>如果之后恢复可见，会调用onResume</li>
+<li>onStop<br>程序被完全遮挡，如果恢复，经由onRestart回到onStart</li>
+<li>onDestroy<br>程序被销毁，注意，很多场景下可能不会走到这一步，而是在停止之后直接被系统回收</li>
+</ol>
+<p>配置变化（字体改变，屏幕旋转，键盘显示隐藏…）时的生命周期：先杀死再重建，杀死时在onPause之前调用onSaveInstanceState，<br>恢复时在onStart之后调用onRestoreInstanceState</p>
+<p>如果不希望重建activity，可以在android_menifest文件中配置，在配置改变时调用onConfigurationChange，而不销毁。</p>
+<blockquote>
+<p>案例：接完电话之后，程序crush！</p>
+</blockquote>
+<ul>
+<li><p>解释：页面被回收导致本地变量被清空</p>
+</li>
+<li><p>解决：添加判空逻辑避免空指针</p>
+<ul>
+<li>利用两个InstanceState保存和恢复现场！</li>
+</ul>
+</li>
+</ul>
+<h3 id="activity启动模式"><a href="#activity启动模式" class="headerlink" title="activity启动模式"></a>activity启动模式</h3><p>对于每个activity，都可以在android：launchMode中配置启动模式来达到消除重复activity的效果</p>
+<ol>
+<li>standard（默认）<br>每次启动页面都会在页面栈中添加一个新实例</li>
+<li>singleTop<br>不允许栈顶有多个相同实例，试图创建新示例时会回调onNewInstance，然后无事发生</li>
+<li>singleTask<br>不允许栈内有多个实例，如果试图创建新示例，将弹出页面之上的所有页面，然后回调onNewInstance</li>
+<li>singleInstance<br>全局只能有一个实例，应用较少（银行登陆界面，通讯录黄页）</li>
+</ol>
+<blockquote>
+<p>应用：返回首页的小按钮</p>
+</blockquote>
+<ul>
+<li>实现：将主页activity设置为singleTask</li>
+</ul>
+<h2 id="Fragment"><a href="#Fragment" class="headerlink" title="Fragment"></a>Fragment</h2><p>安卓设计fragment的初衷是为了解决页面碎片化的问题，不过平时开发中fragment经常用于提高速度（activity之间交互需要进行IPC），<br>以及进行组件的分离（在屏幕的各个区域用不同的fragment承载功能）</p>
+<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><ol>
+<li>创建布局文件</li>
+<li>在java中加载布局文件</li>
+<li>在activity中加载fragment<br>3.1 静态绑定-在布局文件中绑定<br>3.2 通过FragmentManager加载</li>
+</ol>
+<p>一般使用androidx.fragment，而不是android.app.fragment，以确保版本兼容</p>
+<h3 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h3><ol>
+<li>onAttach<br> 使用activity资源时可以在此进行获取</li>
+<li>onCreateView<br> 常用于初始化</li>
+<li>onResume<br> 运行状态</li>
+<li>onDestroyView<br> 资源回收</li>
+</ol>
+<p>此外也可以通过FragmentTranscation.maxLifeCycle设置可到达的最远生命周期</p>
+<h3 id="与activity交互"><a href="#与activity交互" class="headerlink" title="与activity交互"></a>与activity交互</h3><p>组件获取</p>
+<ul>
+<li><code>getActivity.findViewById(R.id.xx)</code></li>
+<li>getFragmentManager.findFragmentById()</li>
+</ul>
+<p>数据传递</p>
+<ol>
+<li>setArguments(Bundle bundle)</li>
+<li>方法调用</li>
+<li>viewmodel，handler，broadcast</li>
+</ol>
+<h2 id="service"><a href="#service" class="headerlink" title="service"></a>service</h2><p>基本用法</p>
+<ol>
+<li>android_menifest注冊</li>
+<li>java中实现类</li>
+<li>加载：需要交互用bindService，不需要交互用startService</li>
+</ol>
+<h3 id="生命周期-1"><a href="#生命周期-1" class="headerlink" title="生命周期"></a>生命周期</h3><p>start， bind， destroy<br>&#x2F;&#x2F;TODO</p>
+<h3 id="通信方式"><a href="#通信方式" class="headerlink" title="通信方式"></a>通信方式</h3><ol>
+<li>定义Binder子类，实现getService方法，返回Service对象</li>
+<li>实现Service类onBind方法，返回Binder对象</li>
+<li>实例化ServiceConnection对象<br>&#x2F;&#x2F;TODO</li>
+</ol>
+<h2 id="broadcast"><a href="#broadcast" class="headerlink" title="broadcast"></a>broadcast</h2><p>静态广播：使用receiver，在java中实现BroadcastReceiver，用onRecieve接收，用Context.sendBroadcast发送<br>动态广播：</p>
+<p>常用广播：网络&#x2F;电量变化，屏幕点亮&#x2F;熄灭，安装卸载升级软件</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/06/%E7%B2%BE%E7%A5%9E%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -600,7 +834,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-23 20:36:07" itemprop="dateModified" datetime="2022-04-23T20:36:07+08:00">2022-04-23</time>
+                <time title="修改时间：2022-07-28 00:47:46" itemprop="dateModified" datetime="2022-07-28T00:47:46+08:00">2022-07-28</time>
               </span>
 
           
@@ -617,8 +851,8 @@
           <h2 id="在Activity间传递参数"><a href="#在Activity间传递参数" class="headerlink" title="在Activity间传递参数"></a>在Activity间传递参数</h2><p>写了个小脚本解决虚拟机频繁锁死的问题:</p>
 <figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">del</span> C:\Users\huiyeruzhou\.android\*.lock</span><br></pre></td></tr></table></figure>
 
-<p>这下一键开锁了(<br>在Activity间传递参数的方法很简单,在Intnet里把参数压进去就可以了:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">    Intent i = <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, TheAty.class);</span><br><span class="line">    i.putExtra(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;qaq!QAQ__&quot;</span>);</span><br><span class="line">    startActivity(i);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这下一键开锁了(<br>在Activity间传递参数的方法很简单,在Intnet里把参数压进去就可以了（此时还没有详细讲解什么是Intent）:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">    Intent i = <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, TheAty.class);</span><br><span class="line">    i.putExtra(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;qaq!QAQ__&quot;</span>);</span><br><span class="line">    startActivity(i);&#125;</span><br></pre></td></tr></table></figure>
 
 <p>intent传递参数的方式是键值对，值可以传很多类型，包括基本类型、数组、字符串等。<br>接收的方法也很简单：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Intent i =getIntent();</span><br><span class="line">tv = findViewById(R.id.viewview);</span><br><span class="line">tv.setText(i.getStringExtra(<span class="string">&quot;data&quot;</span>));</span><br></pre></td></tr></table></figure>
@@ -649,8 +883,8 @@
 
 <p>启动程序，首先点击启动A活动按钮，应用没有反应。此时如果点击返回键会直接退出。<br>如果启动程序后先点击启动B活动按钮，再点击启动A活动按钮，可以发现这次成功的创建了A的新实例。这是因为创建了B活动之后，A活动的上一个实例已经不在栈顶，因此可以创建新的实例。</p>
 <h3 id="SingleTask模式"><a href="#SingleTask模式" class="headerlink" title="SingleTask模式"></a>SingleTask模式</h3><p>在这种情况下，一个任务栈中只能有一个该任务的实例，如果试图创建新实例，将会<strong>弹出</strong>所有位于该实例上的活动实例。<br>修改AndroidManifest文件，将启动模式修改为<code>singleTask</code>,启动应用程序。<br>点击启动A活动按钮，没有反应。点击启动B活动按钮，再点击启动A活动按钮，可以看到B活动退出，而显示的A活动正是第一个示例，如果此时再点击返回键，应用直接退出，说明所有B活动的示例都因为其位于A活动上方而被弹出了。</p>
-<h3 id="SingleInstance模式"><a href="#SingleInstance模式" class="headerlink" title="SingleInstance模式"></a>SingleInstance模式</h3><p>在这种情况下，一个任务栈中只有该活动的一个实例，而其他活动的实例会位于新的任务栈中。这种情况下，试图启动该活动的新实例时，会切换到保存该活动实例的任务栈。其他的任务栈不受影响。</p>
-<h3 id="Single"><a href="#Single" class="headerlink" title="Single"></a>Single</h3>
+<h3 id="SingleInstance模式"><a href="#SingleInstance模式" class="headerlink" title="SingleInstance模式"></a>SingleInstance模式</h3><p>在这种情况下，全局只有该活动的一个实例，第一次创建该活动时会创建一个新的任务栈，并且一个任务栈中只有这一个activity，而其他活动的实例会位于新的任务栈中。这种情况下，试图启动该活动的新实例时，会切换到保存该活动实例的任务栈。其他的任务栈不受影响。</p>
+<h3 id="SingleInstancePerTask"><a href="#SingleInstancePerTask" class="headerlink" title="SingleInstancePerTask"></a>SingleInstancePerTask</h3>
       
     </div>
 
@@ -1099,7 +1333,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-21 14:15:53" itemprop="dateModified" datetime="2022-04-21T14:15:53+08:00">2022-04-21</time>
+                <time title="修改时间：2022-07-12 16:46:20" itemprop="dateModified" datetime="2022-07-12T16:46:20+08:00">2022-07-12</time>
               </span>
 
           
@@ -1118,389 +1352,37 @@
 </blockquote>
 <h2 id="第一个java程序"><a href="#第一个java程序" class="headerlink" title="第一个java程序"></a>第一个java程序</h2><p>java的开发环境基本上还是依赖ide的,因为java有比较复杂的依赖关系（至少对我而言比较复杂）。教学视频使用的是目前最广泛使用的eclipse,官网下载可以直接安装（2022年不再需要提前安装jre）,汉化方式可以自行搜索。  </p>
 <p>java与C语言的第一个区别就在于”类”，和任何编程语言一样，java程序也有自己的执行入口，不过不是主函数，而是主类。我们在主类下编写的方法会被依次调用。一个类就是一个抽象数据类型，包含了数据和对数据的操作。这样的封装使得java和C++等面向对象的编程语言拥有与C语言截然不同的编程风格，会看到大量的标识符和”.”，取成员运算符。java中有许多自带的类，比如马上就会遇到的System类，执行java函数的时候如果跟进是可以直接跟进到System里的方法的，很有趣（另外很想吐槽类名不能自动补全实在是太糟糕了。）  </p>
-<p>同样java中的特色还有字符串类String，以及字符串对加号运算符的重载。所谓运算符的重载就是在一定的作用域内，把运算符替换为某个函数的执行。比如原来的加法可以看成有两个算数类型参数返回一个算数类型的add函数，而java中字符串类对加号的重载可以看成把加号对应的函数替换成了strcat函数，也就是连接两个字符串。这种情况下，如果想要保留算数运算就需要在算数变量被替换为字符串变量之前进行算数运算，最简单的方法就是在算术表达式周围加一个括号。 </p>
+<p>同样java中的特色还有字符串类String，以及字符串对加号运算符的重载。所谓运算符的重载就是在一定的作用域内，把运算符替换为某个函数的执行。比如原来的加法可以看成有两个算数类型参数返回一个算数类型的add函数，而java中字符串类对加号的重载可以看成把加号对应的函数替换成了strcat函数，也就是连接两个字符串。这种情况下，如果想要保留算数运算就需要在算数变量被替换为字符串变量之前进行算数运算，最简单的方法就是在算术表达式周围加一个括号。</p>
 <p>可以看到，类和运算符重载的概念赋予了面向对象语言极大的灵活和自由性。对于类的使用者来说，完全不需要关心类的背后发生了什么。System类背后对输入输出流的复杂处理被掩盖起来，String类进行的字符串连接也被简单的加号替代。这样的封装使得面向对象语言天然的适合用来描述某种问题（我目前并不能很好的概括出是哪种问题）。  </p>
 <p>C语言的函数也有类似的封装，然而，C语言并没有提供<em><strong>作用域</strong></em>层面的封装。我们可以在函数内部进行封装，但函数之间的数据传输必须通过清晰的传参返回来完成。C语言对访问类型（static&#x2F;global）的控制可以说提供了封装的一种方案，也就是以编译单元为单位进行模块化的编程设计。不过，函数之间的数据依靠传参管理降低了函数之间的最大聚合程度，更会在系统框架变更时带来巨大的麻烦，运算符重载这种特技更是无从谈起。不过，C语言同样有其独特的好处:面向过程的控制流是清晰可见且高度解耦的，由于没有层层抽象，它还可以生成效率更高的代码。</p>
 <h2 id="java中的数组"><a href="#java中的数组" class="headerlink" title="java中的数组"></a>java中的数组</h2><p>java拥有美好的内存管理机制，我们可以使用new关键字分配一片地址，并且这片地址的大小是可变的。（不确定，但是new初始化的默认值全为0是很明显的静态存储特点）java中没有指针类型，而是用[]起到和指针类似的效果，于是我们会写出：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] a = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+
 <p>这是一个数组的定义，也就是声明并且分配存储空间。事实上a相当于一个指针。当我们把两个数组类型的变量做比较时，我们实际上在比较他们是否指向同一个地址。如果要比较他们的内容，则要使用数组自带的成员方法equals().<br>数组自带许多的成员，我也不清楚这些成员是哪里来的。一个很有用的成员变量是a.length，它是a的长度，于是我们遍历数组时可以用：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a.length; i++)</span><br><span class="line">&#123;</span><br><span class="line">    System.out.println(a[i]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>这和C语言是完全类似的。这个成员变量被声明为final，类似于C中的const，因此它不能被随意修改，而是在创建数组时就确定了。。Java允许我们对可枚举的类型写出for循环的另外一种形式，被称为for-each循环，是全新的：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i: a)</span><br><span class="line">&#123;</span><br><span class="line">    System.out.println(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>这里的i是a的一个浅拷贝，刚刚给出的例子和一般的for循环的例子是完全等价的。不过需要注意的是，如果要改变数组中的元素的值，那么不能用for-each循环，因为for-each的循环相当于依次把a中元素的值赋给了i，不像a[i]是数组元素自身的标识符。可以想到，改变i的值的效果会在下一次循环时被清空。<br>事实上，for-each循环可以改写为：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*for (var i: a)*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> index = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(i = a[<span class="number">0</span>] ; index &lt; a.length;index++, i = a[index])</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>二维数组的形式和操作与C语言都是类似的，二维数组就是数组的数组。二维数组自身持有一个length成员，它的每一个元素作为一个数组也持有自己的成员。如果要遍历二维数组，可以写：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a.length; i++) &#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; a[i].length; j++) &#123;</span><br><span class="line">        a[i][j] ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<p>更进一步地，如果探究</p>
 <h2 id="java中的字符与字符串"><a href="#java中的字符与字符串" class="headerlink" title="java中的字符与字符串"></a>java中的字符与字符串</h2><p>java中使用Unicode来表示字符，并且转义字符’\uxxxx’表示用十六进制表示的unicode字符码。除此之外关于字符的运算都是和C语言完全类似的。<br>字符串是java中一个很常用的类。创建字符串变量的方法据说有11种…让我们先看看比较常用的两种。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String a;</span><br><span class="line">a = <span class="keyword">new</span> String(<span class="string">&quot;qaq&quot;</span>);</span><br><span class="line">a = <span class="string">&quot;qaq&quot;</span>;</span><br></pre></td></tr></table></figure>
+
 <p>它提供了许多的方法,以及一种运算符重载。当其他类型和String类型进行运算时会被转换成String类型，所以要想避开加号重载就要在转换之前进行运算。常见的C语言函数都可以在java中找到对应的方法：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">strcat -&gt; +</span><br><span class="line">strlen -&gt; string.length();</span><br><span class="line">strcmp -&gt; string.compareto();</span><br><span class="line">strstr -&gt; string.indexOf();</span><br></pre></td></tr></table></figure>
+
 <p>此外还有许多方法。不同方法之间可以配合产生出很惊艳的效果。java提供的修改字符串方法都可以看成持有一个结构体指针，返回一个结构体的函数。这意味着方法本身的返回值是一个全新的对象。对于java中的查找或匹配字符串方法，也就是在C语言中会返回字符指针的那些函数（strstr），现在会返回一个整数下标。因为这更多的是实践性的问题，这里就不再举更多例子，需要时可以查阅手册。</p>
 <h2 id="java中的包裹类型"><a href="#java中的包裹类型" class="headerlink" title="java中的包裹类型"></a>java中的包裹类型</h2><p>基本类型对应的包裹类型，是具有一些常用成员的类。他们之间的对应是这样的：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>     -&gt; Integer</span><br><span class="line"><span class="keyword">boolean</span> -&gt; Boolean</span><br><span class="line"><span class="keyword">double</span>  -&gt; Double</span><br><span class="line"><span class="keyword">char</span>    -&gt; Character</span><br></pre></td></tr></table></figure>
+
 <p>包裹类型会含有一些该类型的信息，比如Integer的成员MAX_VALUE就是C语言中的T_MAX，此外还有一些其他的方法，比如Character具有isdigit，isalpha方法。这些都和c语言是完全类似的。</p>
 <h2 id="java中"><a href="#java中" class="headerlink" title="java中"></a>java中</h2>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/03/23/gRPC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/23/gRPC/" class="post-title-link" itemprop="url">gRPC调研报告</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-03-23 17:53:19" itemprop="dateCreated datePublished" datetime="2022-03-23T17:53:19+08:00">2022-03-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-21 14:15:44" itemprop="dateModified" datetime="2022-04-21T14:15:44+08:00">2022-04-21</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><table>
-<thead>
-<tr>
-<th>框架名称</th>
-<th>开发者</th>
-<th>轻量级</th>
-<th>序列化协议</th>
-<th>传输协议</th>
-<th>支持语言</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>gRPC</td>
-<td>google</td>
-<td>&amp;check;</td>
-<td>protobuf</td>
-<td>http2.0</td>
-<td>多语言</td>
-<td>没有服务治理功能，序列化效率最好</td>
-</tr>
-<tr>
-<td>rpcx</td>
-<td></td>
-<td></td>
-<td>portobuf+多种</td>
-<td></td>
-<td>Go服务+多语言客户</td>
-<td>性能较高，</td>
-</tr>
-<tr>
-<td>Thrift</td>
-<td>facebook</td>
-<td></td>
-<td>bin(compact) json</td>
-<td>tcp:socket http:frame file</td>
-<td>多语言</td>
-<td>性能较高，但缺乏技术文档</td>
-</tr>
-<tr>
-<td>Motan</td>
-<td>Weibo</td>
-<td></td>
-<td>json hessian2</td>
-<td>tcp</td>
-<td>Java</td>
-<td></td>
-</tr>
-<tr>
-<td>sprc</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>brpc</td>
-<td>Baidu</td>
-<td></td>
-<td>protobuf</td>
-<td>?</td>
-<td>C++</td>
-<td></td>
-</tr>
-<tr>
-<td>erpc</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<h2 id="RPC简介，gRPC原理"><a href="#RPC简介，gRPC原理" class="headerlink" title="RPC简介，gRPC原理"></a>RPC简介，gRPC原理</h2><h2 id="gRPC"><a href="#gRPC" class="headerlink" title="gRPC"></a>gRPC</h2><ul>
-<li><p>优点</p>
-</li>
-<li><p>微服务：gRPC 设计用于低延迟和高吞吐量通信。 gRPC 对于效率至关重要的轻量级微服务非常有用。</p>
-</li>
-<li><p>网络带宽要求低：gRPC 消息使用 Protobuf进行序列化。 这种序列化方法的时空效率都要比json，thrift，hessian强</p>
-</li>
-<li><p>多语言环境：gRPC 工具支持所有常用的开发语言(C++，Java，Python，Ruby，Go…)</p>
-</li>
-<li><p>点对点实时通信：gRPC 对双向流式传输提供出色的支持。 gRPC 服务可以实时推送消息而无需轮询。</p>
-</li>
-<li><p>缺点</p>
-</li>
-<li><p>只有少数浏览器支持http2</p>
-</li>
-<li><p>移动端网络可能在wifi及4G频繁切换，无法体现出长连接以及多路复用的优势</p>
-</li>
-<li><p>相较于json，protobuf编码后数据可读性低</p>
-</li>
-</ul>
-<h2 id="rpcx、"><a href="#rpcx、" class="headerlink" title="rpcx、"></a>rpcx、</h2><h2 id="Thrift-vs-gRPC"><a href="#Thrift-vs-gRPC" class="headerlink" title="Thrift vs gRPC"></a>Thrift vs gRPC</h2><ul>
-<li>优点</li>
-</ul>
-<ul>
-<li>高性能，gPRC平均响应延迟差距在2倍左右</li>
-<li>序列化和传输层可拔插，提供了多种方法</li>
-</ul>
-<ul>
-<li>不足</li>
-</ul>
-<ul>
-<li>开发环境生态很差，缺乏说明文档和软件更新</li>
-<li>不擅长提供大量流式数据传输</li>
-</ul>
-<h2 id="Motan-vs-gPRC"><a href="#Motan-vs-gPRC" class="headerlink" title="Motan vs gPRC"></a>Motan vs gPRC</h2><ul>
-<li>优点</li>
-</ul>
-<ul>
-<li>提供了服务治理功能</li>
-<li>极限情况下的最长响应时间很短</li>
-</ul>
-<ul>
-<li>不足</li>
-</ul>
-<ul>
-<li>序列化效率较低</li>
-<li>综合运行效率较低</li>
-<li>只支持Java语言</li>
-</ul>
-<h2 id="erpc"><a href="#erpc" class="headerlink" title="erpc"></a>erpc</h2>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/03/19/myreport/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/19/myreport/" class="post-title-link" itemprop="url">一生一芯 实验报告</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-03-19 21:42:32" itemprop="dateCreated datePublished" datetime="2022-03-19T21:42:32+08:00">2022-03-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-21 18:38:18" itemprop="dateModified" datetime="2022-04-21T18:38:18+08:00">2022-04-21</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>哈尔滨工业大学 于鸿利 22040866</p>
-</blockquote>
-<h1 id="预学习阶段"><a href="#预学习阶段" class="headerlink" title="预学习阶段"></a>预学习阶段</h1><h2 id="如何科学的提问"><a href="#如何科学的提问" class="headerlink" title="如何科学的提问"></a>如何科学的提问</h2><p>见读后感</p>
-<h2 id="Linux系统安装和基本使用"><a href="#Linux系统安装和基本使用" class="headerlink" title="Linux系统安装和基本使用"></a>Linux系统安装和基本使用</h2><ul>
-<li><p>安装一个linux操作系统</p>
-<p>  复用了wsl2-ubantu20.04</p>
-<p>  首先将windows版本更新到build 21362+（win11即可），然后以管理员权限打开命令行</p>
-<p>  输入wsl –update即可将已有的windows subsystem for linux更新到带有图形用户界面的版本</p>
-</li>
-<li><p>获取一生一芯框架代码</p>
-<p>添加ssh密钥</p>
-<p>按照讲义clone一个本地项目即可</p>
-</li>
-</ul>
-<h2 id="复习C语言"><a href="#复习C语言" class="headerlink" title="复习C语言"></a>复习C语言</h2><p>* </p>
-<h2 id="搭建verilator仿真环境"><a href="#搭建verilator仿真环境" class="headerlink" title="搭建verilator仿真环境"></a>搭建verilator仿真环境</h2><ul>
-<li><p>认识verilator</p>
-<p>  开源的数字电路仿真软件</p>
-</li>
-<li><p>安装verilator</p>
-<p> make install编译了十几分钟啧啧啧</p>
-</li>
-<li><p>运行示例</p>
-<p> 按照手册中的说明编写了our.v, sim_main.cpp，编译并运行了程序</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">verilator -Wall --cc --exe --build sim_main.cpp our.v</span><br></pre></td></tr></table></figure>
-<p> 结果是这样的</p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Hello World</span><br><span class="line">our.v:2: Verilog $finish</span><br></pre></td></tr></table></figure></li>
-<li><p>对双控开关模块进行仿真</p>
-<p>  具体而言，需要调整的内容有：</p>
-<ol>
-<li><p>.v文件名要修改为top.v</p>
-</li>
-<li><p>cpp 文件中要引入头文件</p>
-</li>
-<li><p>cpp 文件中</p>
-  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Vour* top = new Vour&#123;contextp&#125;;</span><br></pre></td></tr></table></figure>
-<p>  的类名要改为Vour</p>
-</li>
-<li><p>编译语句中的文件名要做相应的更改</p>
-</li>
-</ol>
-</li>
-</ul>
-<p>结果是这样的<br>  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">a = 1, b = 0, f = 1</span><br><span class="line">a = 0, b = 0, f = 0</span><br><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">^C</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li><p>理解RTL仿真的行为</p>
-</li>
-<li><p>一键仿真</p>
-<figure class="highlight mak"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#生成的可执行文件名称</span></span><br><span class="line">TOPNAME = top</span><br><span class="line"><span class="comment">#在指定文件夹中按扩展名查找所有源文件</span></span><br><span class="line">VSRC = <span class="variable">$(<span class="built_in">shell</span> find $(<span class="built_in">abspath</span> ./vsrc)</span> -name <span class="string">&quot;*.v&quot;</span>)</span><br><span class="line">CSRC = <span class="variable">$(<span class="built_in">shell</span> find $(<span class="built_in">abspath</span> ./csrc)</span> -name <span class="string">&quot;*.c&quot;</span> -or -name <span class="string">&quot;*.cc&quot;</span> -or -name <span class="string">&quot;*.cpp&quot;</span>)</span><br><span class="line"><span class="comment">#nvbroad自动绑定源文件，注意，如果没有$(BUILD_DIR)目录，将无法正确的生成该文件</span></span><br><span class="line">SRC_AUTO_BIND = <span class="variable">$(<span class="built_in">abspath</span> <span class="variable">$(BUILD_DIR)</span>/auto_bind.cpp)</span></span><br><span class="line">CSRC += <span class="variable">$(SRC_AUTO_BIND)</span></span><br><span class="line"><span class="comment">#nvbroad约束文件</span></span><br><span class="line">CONSTR = constr/top.nxdc</span><br><span class="line"></span><br><span class="line"><span class="comment">#构建目录、verilator目标目录、可执行文件存放路径</span></span><br><span class="line">BUILD_DIR = ./build</span><br><span class="line">OBJ_DIR = <span class="variable">$(BUILD_DIR)</span>/obj_dir</span><br><span class="line">BIN = <span class="variable">$(BUILD_DIR)</span>/<span class="variable">$(TOPNAME)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#传递给verilator的参数：以c++形式输出调试信息，并自动依据makefile进行构建</span></span><br><span class="line">VERIARG = -Wall --cc -MMD --build </span><br><span class="line"></span><br><span class="line"><span class="comment">#传递给preproject连接器的信息，添加SDL2库信息</span></span><br><span class="line">LDFLAGS += -lSDL2 -lSDL2_image</span><br><span class="line"></span><br><span class="line"><span class="comment">#包含文件路径，加前缀-I传递给g++，INC_PATH在nvbroad.mk中定义</span></span><br><span class="line">INCFLAGS = <span class="variable">$(<span class="built_in">addprefix</span> -I, <span class="variable">$(INC_PATH)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#传递给g++的编译参数，包括包含路径和TOP_NAME的定义</span></span><br><span class="line">CFLAGS += <span class="variable">$(INCFLAGS)</span>  -DTOP_NAME=<span class="string">&quot;\&quot;V<span class="variable">$(TOPNAME)\&quot;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#包含nvbroad.mk</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(NVBOARD_HOME)</span>/scripts/nvboard.mk</span><br><span class="line"><span class="comment">#新建构建目录，防止出现无法新建autobind.cpp的错误</span></span><br><span class="line"><span class="variable">$(<span class="built_in">shell</span> mkdir -p <span class="variable">$(BUILD_DIR)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#默认的构建对象</span></span><br><span class="line"><span class="section">sim:  <span class="variable">$(CSRC)</span> <span class="variable">$(VSRC)</span> <span class="variable">$(NVBOARD_ARCHIVE)</span></span></span><br><span class="line"><span class="comment">#提交当前存储区，提交信息为sim RTL</span></span><br><span class="line">	<span class="variable">$(<span class="built_in">call</span> git_commit, &quot;sim RTL&quot;)</span> <span class="comment"># DO NOT REMOVE THIS LINE!!!</span></span><br><span class="line">	</span><br><span class="line"><span class="comment">#运行verilator，传递给其编译参数</span></span><br><span class="line"><span class="comment">#指定top模块名称</span></span><br><span class="line"><span class="comment">#添加所有源文件和nvbroad库</span></span><br><span class="line"><span class="comment">#传递所有preproject连接器参数，加前缀</span></span><br><span class="line"><span class="comment">#传递所有编译器参数，加前缀</span></span><br><span class="line"><span class="comment">#指定生成对象目录，生成可执行文件，输出路径为预先指定的可执行文件存储路径</span></span><br><span class="line">	verilator <span class="variable">$(VERIARG)</span> \</span><br><span class="line">		-top <span class="variable">$(TOPNAME)</span> \</span><br><span class="line">		<span class="variable">$^</span> \</span><br><span class="line">		<span class="variable">$(<span class="built_in">addprefix</span> -LDFLAGS , <span class="variable">$(LDFLAGS)</span>)</span> \</span><br><span class="line">		<span class="variable">$(<span class="built_in">addprefix</span> -CFLAGS , <span class="variable">$(CFLAGS)</span>)</span> \</span><br><span class="line">		--Mdir <span class="variable">$(OBJ_DIR)</span>  --exe -o <span class="variable">$(<span class="built_in">abspath</span> <span class="variable">$(BIN)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#自动绑定文件，由于其被可执行文件依赖，会先生成该文件。调用python执行nvbroad自带的.py文件，输入约束文件，输出自动绑定文件</span></span><br><span class="line"><span class="variable">$(SRC_AUTO_BIND)</span>: <span class="variable">$(CONSTR)</span> </span><br><span class="line">	python3 <span class="variable">$(NVBOARD_HOME)</span>/scripts/auto_pin_bind.py  <span class="variable">$^</span> <span class="variable">$@</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-<li><p>运行NVBoard示例</p>
-<p> 看到了一组循环显示数字的数码管，还有南京大学的 “北 大楼”（南大的高中同学告诉我的） </p>
-</li>
-<li><p>在NVBoard上实现双控开关</p>
-<p>  我使用如下的代码来完成引脚绑定:</p>
-</li>
-</ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top=top</span><br><span class="line"></span><br><span class="line">a SW0<span class="comment">//开关0</span></span><br><span class="line">b SW1<span class="comment">//开关1</span></span><br><span class="line">f LD0<span class="comment">//LED0显示输出</span></span><br></pre></td></tr></table></figure>
-<p>配合如下激励代码来连接面板</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">nvboard_bind_all_pins</span>(&amp;dut);</span><br><span class="line"><span class="built_in">nvboard_init</span>();</span><br><span class="line"><span class="comment">/*verilate*/</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">  dut.<span class="built_in">eval</span>();</span><br><span class="line">  <span class="built_in">nvboard_update</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="数字电路基础实验"><a href="#数字电路基础实验" class="headerlink" title="数字电路基础实验"></a>数字电路基础实验</h2><h3 id="实验一-选择器"><a href="#实验一-选择器" class="headerlink" title="实验一 选择器"></a>实验一 选择器</h3><ul>
-<li>上板实验: 二位四选一选择器</li>
-</ul>
-<p>我使用如下的代码来搭建top模块:</p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top(a,s,y);</span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>] a;</span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">1</span>:<span class="number">0</span>] s;</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">1</span>:<span class="number">0</span>] y;</span><br><span class="line">  MuxKeyWithDefault <span class="variable">#(4, 2, 2)</span> i0 (y, s, <span class="number">2&#x27;b00</span>, &#123;</span><br><span class="line">    <span class="number">2&#x27;b00</span>, a[<span class="number">1</span>:<span class="number">0</span>],</span><br><span class="line">    <span class="number">2&#x27;b01</span>, a[<span class="number">3</span>:<span class="number">2</span>],</span><br><span class="line">    <span class="number">2&#x27;b10</span>, a[<span class="number">5</span>:<span class="number">4</span>],</span><br><span class="line">    <span class="number">2&#x27;b11</span>, a[<span class="number">7</span>:<span class="number">6</span>]</span><br><span class="line">  &#125;);<span class="comment">//默认模板，参数分别为：输出端、选择端、默认值、选择-输出键值对</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
-<p>可以看到, 双输出的选择器要改变a和y的位宽,调整模板的参数,并且对default output的位宽和键值对的输出值的位宽做相应的调整<br>我使用如下的代码来完成引脚绑定:</p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top=top     <span class="comment">//设置TOP_NAME为top</span></span><br><span class="line"></span><br><span class="line">s (SW1, SW0)<span class="comment">//这两个开关作为选择端</span></span><br><span class="line">a (SW9, SW8, SW7, SW6, SW5, SW4, SW3, SW2)<span class="comment">//这八个开关作为输入端，每两个开关一组，共四组。</span></span><br><span class="line">y (LD1, LD0)<span class="comment">//用LED显示输出</span></span><br></pre></td></tr></table></figure>
-<p>这里按照实验的建议用开关作为输入,led灯作为输出</p>
-<p>我使用如下的代码来完成激励代码的主体部分:</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> TOP_NAME dut;<span class="comment">//nvbroad接口，宏自动展开为Vtop</span></span><br><span class="line"><span class="built_in">nvboard_bind_all_pins</span>(&amp;dut);<span class="comment">//绑定所有引脚</span></span><br><span class="line"><span class="built_in">nvboard_init</span>();<span class="comment">//初始化面板</span></span><br><span class="line"><span class="comment">/*verilate*/</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">  dut.<span class="built_in">eval</span>();<span class="comment">//获取当前数据</span></span><br><span class="line">  <span class="built_in">nvboard_update</span>();<span class="comment">//重绘面板</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>更新值并且更新版面图像即可,我已经看过了,非常漂亮.:&gt;</p>
-<h3 id="实验二-编码器和译码器"><a href="#实验二-编码器和译码器" class="headerlink" title="实验二 编码器和译码器"></a>实验二 编码器和译码器</h3><p>c源文件无需更改<br>verilog文件包含两个模块，数码管模块和编码器模块：</p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*top.v*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> top(x,en,l,h);</span><br><span class="line"><span class="comment">/*接口定义,x是输入,en是使能,l是编码结果,h是数码管输出结果*/</span></span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]x;</span><br><span class="line">  <span class="keyword">input</span>  en;</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>]l;</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">6</span>:<span class="number">0</span>]h;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*线路声明,用y存放编码结果,sign存放指示位*/</span></span><br><span class="line">  <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]y;</span><br><span class="line">  <span class="keyword">wire</span> sign = en &amp; (|x);<span class="comment">//若x至少有一位为1.且使能为1,结果就为1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*每当x或en发生变化时,都会进行译码,如果有使能,结果是x的为1的位的序号,高位优先,如果没有使能,结果为0*/</span></span><br><span class="line">  <span class="keyword">integer</span> i;</span><br><span class="line">  <span class="keyword">always</span> @(x <span class="keyword">or</span> en) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (en) <span class="keyword">begin</span></span><br><span class="line">      y = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">for</span>( i = <span class="number">0</span>; i &lt;= <span class="number">7</span>; i = i+<span class="number">1</span>)</span><br><span class="line">          <span class="keyword">if</span>(x[i] == <span class="number">1</span>)  y = i[<span class="number">2</span>:<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">else</span>  <span class="keyword">begin</span></span><br><span class="line">      y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="comment">/*l是编码的总结果,包含符号位和数据位,实例化一个数码管*/</span></span><br><span class="line">  <span class="keyword">assign</span> l = &#123;sign,y&#125;;</span><br><span class="line">  seg seg1(</span><br><span class="line">    <span class="variable">.b</span>(l),</span><br><span class="line">    <span class="variable">.h</span>(h)</span><br><span class="line">  );</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*seg.v*/</span></span><br><span class="line"><span class="keyword">module</span> seg(</span><br><span class="line">  <span class="comment">/*输入输出定义,输入4位编码值,输出7位数码管的显示控制*/</span></span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">3</span>:<span class="number">0</span>] b,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">6</span>:<span class="number">0</span>] h</span><br><span class="line">);</span><br><span class="line"><span class="comment">/*每当b发生变化,都会重新更新输出*/</span></span><br><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*首先检验指示位,若指示位为0,默认显示为8(共阳极数码管)*/</span></span><br><span class="line">  <span class="keyword">if</span>(b[<span class="number">3</span>] == <span class="number">0</span>)</span><br><span class="line">    h = <span class="number">7&#x27;b0000000</span>;</span><br><span class="line">  <span class="keyword">else</span>  <span class="keyword">begin</span></span><br><span class="line">  <span class="comment">/*若v指示位不为0,则根据数据位进行译码,默认输出为8,*/</span></span><br><span class="line">  	<span class="keyword">case</span>(b[<span class="number">2</span>:<span class="number">0</span>])</span><br><span class="line">      <span class="number">3&#x27;d0</span> : h = ~<span class="number">7&#x27;b0111111</span>;</span><br><span class="line">      <span class="number">3&#x27;d1</span> : h = ~<span class="number">7&#x27;b0000110</span>;</span><br><span class="line">      <span class="number">3&#x27;d2</span> : h = ~<span class="number">7&#x27;b1011011</span>;</span><br><span class="line">      <span class="number">3&#x27;d3</span> : h = ~<span class="number">7&#x27;b1001111</span>;</span><br><span class="line">      <span class="number">3&#x27;d4</span> : h = ~<span class="number">7&#x27;b1100110</span>;</span><br><span class="line">      <span class="number">3&#x27;d5</span> : h = ~<span class="number">7&#x27;b1101101</span>;</span><br><span class="line">      <span class="number">3&#x27;d6</span> : h = ~<span class="number">7&#x27;b1111101</span>;</span><br><span class="line">      <span class="number">3&#x27;d7</span> : h = ~<span class="number">7&#x27;b0000111</span>;</span><br><span class="line">      <span class="comment">//&#x27;d8 : h = ~7&#x27;b1111111;</span></span><br><span class="line">      <span class="comment">//&#x27;d9 : h = ~7&#x27;b1101111;</span></span><br><span class="line">      <span class="keyword">default</span> : h = ~<span class="number">7&#x27;b1111111</span>;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line">  en</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
-
-<p>约束文件的绑定是这样的:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top=top<span class="comment">//指定top接口名称</span></span><br><span class="line">x (SW7,SW6,SW5,SW4,SW3,SW2,SW1,SW0)<span class="comment">//八个开关作为输入</span></span><br><span class="line">en SW8<span class="comment">//使能</span></span><br><span class="line">l (LD3,LD2,LD1,LD0)<span class="comment">//四个led灯显示编码结果</span></span><br><span class="line">h (SEG0G, SEG0F, SEG0E, SEG0D, SEG0C, SEG0B, SEG0A)<span class="comment">//数码管0输出结果,注意链接顺序要与编码匹配</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="第三章-加法器和ALU"><a href="#第三章-加法器和ALU" class="headerlink" title="第三章 加法器和ALU"></a>第三章 加法器和ALU</h3><p>首先通过约束文件介绍一下整体功能</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">top=top</span><br><span class="line">operand (SW7,SW6,SW5,SW4,SW3,SW2,SW1,SW0)<span class="comment">//八个开关输入操作数</span></span><br><span class="line">button  (BTNC,BTNU,BTND,BTNL,BTNR)<span class="comment">//按钮:上下让指令加减2,左右让指令加减1,上下左右都会让使能归零,中间会让使能取反</span></span><br><span class="line"><span class="comment">//也就是实际使用的时候,每当调整指令,都会看到结果消失,按下中间的按钮结果才会再次出现</span></span><br><span class="line">instr_seg (SEG7G, SEG7F, SEG7E, SEG7D, SEG7C, SEG7B, SEG7A)<span class="comment">//最左端数码管显示指令号</span></span><br><span class="line"><span class="comment">/*为了提升视觉体验,没有用到的数码管全部设成空的*/</span></span><br><span class="line">empty_seg (SEG6G, SEG6F, SEG6E, SEG6D, SEG6C, SEG6B, SEG6A,SEG5G, SEG5F, SEG5E, SEG5D, SEG5C, SEG5B, SEG5A,SEG4G, SEG4F, SEG4E, SEG4D, SEG4C, SEG4B, SEG4A,SEG3G, SEG3F, SEG3E, SEG3D, SEG3C, SEG3B, SEG3A)</span><br><span class="line"><span class="comment">/*四个标识符,对应进位/0/负/溢出*/</span></span><br><span class="line">CF LD3</span><br><span class="line">ZF LD2</span><br><span class="line">SF LD1</span><br><span class="line">OF LD0</span><br><span class="line"><span class="comment">/*右边三个数码管输出结果,如果是负数会显示负号哦~*/</span></span><br><span class="line">value_seg (SEG2G, SEG2F, SEG2E, SEG2D, SEG2C, SEG2B, SEG2A,SEG1G, SEG1F, SEG1E, SEG1D, SEG1C, SEG1B, SEG1A,SEG0G, SEG0F, SEG0E, SEG0D, SEG0C, SEG0B, SEG0A)</span><br><span class="line"><span class="comment">/*左边的几个LED灯显示使能和运算结果的二进制表示,用作调试*/</span></span><br><span class="line">value (LD13,LD12,LD11,LD10)</span><br><span class="line">en LD15</span><br></pre></td></tr></table></figure>
-<p>seg模块复用了之前的模块,但是做了些许调整,以显示9,负号和空:</p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*seg.v*/</span></span><br><span class="line">  	<span class="keyword">case</span>(b[<span class="number">3</span>:<span class="number">0</span>])</span><br><span class="line">      ......</span><br><span class="line">      <span class="number">4&#x27;d9</span> : h = ~<span class="number">7&#x27;b1101111</span>;</span><br><span class="line">      <span class="number">4&#x27;d10</span> : h = <span class="number">7&#x27;b0111111</span>;<span class="comment">//负号</span></span><br><span class="line">      <span class="keyword">default</span> : h = <span class="number">7&#x27;b1111111</span>;<span class="comment">//空</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br></pre></td></tr></table></figure>
-<p>接下来是alu的主体部分:</p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*top.v*/</span></span><br><span class="line"><span class="keyword">module</span> top(</span><br><span class="line"><span class="comment">/*输入输出声明*/</span></span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]operand,</span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">4</span>:<span class="number">0</span>]button,</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">6</span>:<span class="number">0</span>]instr_seg,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> CF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> ZF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> SF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> OF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> en,</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">20</span>:<span class="number">0</span>]value_seg,</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">27</span>:<span class="number">0</span>]empty_seg,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>]value);</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">2</span>:<span class="number">0</span>]instr;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]a;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]b;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>]value_num;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]value_sign;</span><br><span class="line"><span class="comment">/*将不需要使用的数码管置空*/</span></span><br><span class="line">  <span class="keyword">assign</span> empty_seg = &#123;<span class="number">28</span>&#123;<span class="number">1&#x27;b1</span>&#125;&#125;;</span><br><span class="line"><span class="comment">/*实例化:指令数码管,负号数码管,结果数码管,按钮控制器*/</span></span><br><span class="line">  seg seg7(</span><br><span class="line">    <span class="variable">.b</span>(&#123;<span class="number">1&#x27;b0</span>,instr&#125;),</span><br><span class="line">    <span class="variable">.h</span>(instr_seg)</span><br><span class="line">  );</span><br><span class="line">  seg seg0(</span><br><span class="line">    <span class="variable">.b</span>(value_num[<span class="number">3</span>:<span class="number">0</span>]),</span><br><span class="line">    <span class="variable">.h</span>(value_seg[<span class="number">6</span>:<span class="number">0</span>])</span><br><span class="line">  );</span><br><span class="line">  seg seg1(</span><br><span class="line">    <span class="variable">.b</span>(value_num[<span class="number">7</span>:<span class="number">4</span>]),</span><br><span class="line">    <span class="variable">.h</span>(value_seg[<span class="number">13</span>:<span class="number">7</span>])</span><br><span class="line">  );</span><br><span class="line">  seg seg2(</span><br><span class="line">    <span class="variable">.b</span>(value_sign[<span class="number">3</span>:<span class="number">0</span>]),</span><br><span class="line">    <span class="variable">.h</span>(value_seg[<span class="number">20</span>:<span class="number">14</span>])</span><br><span class="line">  );</span><br><span class="line">  button button0(</span><br><span class="line">    <span class="variable">.button</span>(button),</span><br><span class="line">    <span class="variable">.instr</span>(instr),</span><br><span class="line">    <span class="variable">.en</span>(en)</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line"><span class="comment">/*开关输入的操作数*/</span></span><br><span class="line">  <span class="keyword">assign</span> &#123;a,b&#125; = operand;</span><br><span class="line"><span class="comment">/*为减法运算进行的取反,这里不能加一,为了防止Tmin的符号判断错误*/</span> </span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]b_comp = &#123;<span class="number">4</span>&#123;instr[<span class="number">0</span>]&#125;&#125;^b;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/*操作数,使能,指令码之一变化,就重新输出结果*/</span></span><br><span class="line">  <span class="keyword">always</span> @(operand <span class="keyword">or</span> en <span class="keyword">or</span> instr) <span class="keyword">begin</span></span><br><span class="line">  <span class="keyword">if</span> (en) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span> (instr)</span><br><span class="line">    <span class="comment">/*加减法*/</span></span><br><span class="line">    <span class="number">3&#x27;d0</span>, <span class="number">3&#x27;d1</span>: <span class="keyword">begin</span></span><br><span class="line">    <span class="comment">/*不能把a+b_comp+&#123;1&#x27;b0,instr&#125;直接赋给&#123;CF,value&#125;,否则当b=0时,b_comp+1会错误的进位*/</span></span><br><span class="line">    value =  b_comp + &#123;<span class="number">1&#x27;b0</span>,instr&#125;;</span><br><span class="line">    &#123;CF,value&#125; = value +a;</span><br><span class="line">    <span class="comment">/*计算溢出:操作数符号相同,结果与操作数符号不同*/</span></span><br><span class="line">    OF = (a[<span class="number">3</span>] == b_comp[<span class="number">3</span>]) &amp;&amp; (value[<span class="number">3</span>] != a[<span class="number">3</span>]);</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="comment">/*逻辑运算*/</span></span><br><span class="line">    <span class="number">3&#x27;d2</span> : <span class="keyword">begin</span>  value = ~a;    &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d3</span> : <span class="keyword">begin</span>  value = a &amp; b; &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d4</span> : <span class="keyword">begin</span>  value = a | b; &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d5</span> : <span class="keyword">begin</span>  value = a ^ b; &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="comment">/*关系运算*/</span></span><br><span class="line">    <span class="number">3&#x27;d6</span> : <span class="keyword">begin</span>  value = &#123;<span class="number">3&#x27;b000</span>,a&lt;b&#125;; &#123;CF, OF&#125; =<span class="number">2&#x27;d0</span>; <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d7</span> : <span class="keyword">begin</span>  value = &#123;<span class="number">3&#x27;b000</span>,a==b&#125;;&#123;CF, OF&#125; =<span class="number">2&#x27;d0</span>; <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line">    ZF = value==<span class="number">0</span>;</span><br><span class="line">    SF = value[<span class="number">3</span>] == <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*若使能为0,所有结果都为0*/</span></span><br><span class="line">    value = <span class="number">0</span>;</span><br><span class="line">    &#123;CF, ZF, SF, OF&#125; =<span class="number">4&#x27;d0</span>;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">/*value_show是value的绝对值*/</span></span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]value_show;</span><br><span class="line">  <span class="keyword">assign</span> value_show = SF ? (~value+<span class="number">1</span>) : value;</span><br><span class="line">  </span><br><span class="line"><span class="comment">/*value_num高四位是十位数,低四位是个位数,value_sign是负号或空*/</span></span><br><span class="line">  <span class="keyword">assign</span> value_num[<span class="number">7</span>:<span class="number">4</span>] = value_show / <span class="number">10</span>;</span><br><span class="line">  <span class="keyword">assign</span> value_num[<span class="number">3</span>:<span class="number">0</span>] = value_show % <span class="number">10</span>;</span><br><span class="line">  <span class="keyword">assign</span> value_sign[<span class="number">3</span>:<span class="number">0</span>] = <span class="number">4&#x27;d11</span> - &#123;<span class="number">3&#x27;b000</span>, (value[<span class="number">3</span>] == <span class="number">1</span>)&#125;;<span class="comment">//为10,当为负.为11,当为正</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
-<p>接下来是按钮控制模块,相当于有多个触发条件和触发行为的触发器:</p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> button(</span><br><span class="line"><span class="comment">/*输入输出声明:输入中上下左右四个按钮的信号,输出指令编码和使能*/</span></span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">4</span>:<span class="number">0</span>]button,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]instr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> en);</span><br><span class="line"><span class="comment">/*所有的五个按钮的上升沿都会触发指令或使能的改变*/</span></span><br><span class="line"> <span class="keyword">always</span> @(<span class="keyword">posedge</span> button[<span class="number">3</span>]<span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">2</span>] <span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">0</span>] <span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">4</span>]) <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*按一下中间的按钮可以让使能取反*/</span></span><br><span class="line">     <span class="keyword">if</span>(button[<span class="number">4</span>]) <span class="keyword">begin</span></span><br><span class="line">         en &lt;= ~en;</span><br><span class="line">     <span class="keyword">end</span></span><br><span class="line">     <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">     <span class="comment">/*上:指令+2;下:指令-2;左:指令+1;右:指令-1;这四个按钮都会让使能归零*/</span></span><br><span class="line">        <span class="keyword">case</span>(button)</span><br><span class="line">        <span class="number">5&#x27;b01000</span>:  <span class="keyword">begin</span> instr &lt;= instr+<span class="number">2</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="number">5&#x27;b00100</span>:  <span class="keyword">begin</span> instr &lt;= instr-<span class="number">2</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="number">5&#x27;b00010</span>:  <span class="keyword">begin</span> instr &lt;= instr+<span class="number">1</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="number">5&#x27;b00001</span>:  <span class="keyword">begin</span> instr &lt;= instr-<span class="number">1</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>:   en &lt;= <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">     <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span> </span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
-<p>总体而言,按中间的按钮会执行当前指令的运算,然后可以调节开关,观察结果.如果按上下左右四个按钮,会看到指令码变化,结果消失,需要重新按一次中间的按钮才会出现结果(就好像计算器的”等于”键)</p>
-<h3 id="实验五-寄存器组以及存储器"><a href="#实验五-寄存器组以及存储器" class="headerlink" title="实验五 寄存器组以及存储器"></a>实验五 寄存器组以及存储器</h3><ul>
-<li><p>分析三个输出端口的存储器实例  </p>
-<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk)</span><br><span class="line">  <span class="keyword">begin</span></span><br><span class="line">      <span class="keyword">if</span> (we)</span><br><span class="line">          ram[inaddr] &lt;= din;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line"><span class="comment">/*dout0在不进行写入的上升沿读取*/</span></span><br><span class="line">          dout0 &lt;= ram[outaddr];</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">always</span> @(<span class="keyword">negedge</span> clk)</span><br><span class="line">  <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*dout1在没有写使能的下降沿读取*/</span></span><br><span class="line">      <span class="keyword">if</span> (!we)</span><br><span class="line">          dout1 &lt;= ram[outaddr];</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*dout2永远直接读取输出信号*/</span></span><br><span class="line">  <span class="keyword">assign</span>  dout2 = ram[outaddr];</span><br></pre></td></tr></table></figure>
-<h2 id="完成PA1第一阶段"><a href="#完成PA1第一阶段" class="headerlink" title="完成PA1第一阶段"></a>完成PA1第一阶段</h2><h3 id="1-开天辟地的篇章"><a href="#1-开天辟地的篇章" class="headerlink" title="1. 开天辟地的篇章"></a>1. 开天辟地的篇章</h3></li>
-<li><p>尝试理解计算机如何计算</p>
-<p>  取指执行,以跳转实现控制流,以内存和寄存器实现变量</p>
-</li>
-<li><p>从状态机视角理解程序运行</p>
-</li>
-</ul>
-<p>先把程序写出来:</p>
-<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// PC: instruction    | // label: statement</span><br><span class="line"><span class="number">0</span>: mov  r1, <span class="number">0</span>         |  pc0: r1 = <span class="number">0</span>;</span><br><span class="line"><span class="number">1</span>: mov  r2, <span class="number">0</span>         |  pc1: r2 = <span class="number">0</span>;</span><br><span class="line"><span class="number">2</span>: addi r2, r2, <span class="number">1</span>     |  pc2: r2 = r2 + <span class="number">1</span>;</span><br><span class="line"><span class="number">3</span>: add  r1, r1, r2    |  pc3: r1 = r1 + r2;</span><br><span class="line"><span class="number">4</span>: blt  r2, <span class="number">100</span>, <span class="number">2</span>    |  pc4: <span class="keyword">if</span>(r2&lt;<span class="number">100</span>) goto <span class="number">2</span></span><br><span class="line"><span class="number">5</span>: jmp <span class="number">5</span>              |  pc5: goto pc5;</span><br></pre></td></tr></table></figure>
-<p>然后是开头:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>, x, x) -&gt; (<span class="number">1</span>, <span class="number">0</span>, x) -&gt; (<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>) -&gt; (<span class="number">3</span>, <span class="number">0</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<p>接下来的状态是:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">4</span>, <span class="number">1</span>, <span class="number">1</span>) -&gt; (<span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>) -&gt; (<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>) -&gt; (<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>) -&gt; (<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>) -&gt; (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>) -&gt; (<span class="number">4</span>, <span class="number">3</span>, <span class="number">4</span>)-&gt;...</span><br><span class="line">-&gt;(<span class="number">4</span>, <span class="number">4851</span>, <span class="number">98</span>) -&gt; (<span class="number">2</span>, <span class="number">4851</span>, <span class="number">98</span>) -&gt; (<span class="number">3</span>, <span class="number">4851</span>, <span class="number">99</span>) -&gt; (<span class="number">4</span>, <span class="number">4950</span>, <span class="number">99</span>) -&gt; (<span class="number">2</span>, <span class="number">4950</span>, <span class="number">99</span>) -&gt; (<span class="number">3</span>, <span class="number">4950</span>, <span class="number">100</span>) -&gt; (<span class="number">4</span>, <span class="number">5050</span>, <span class="number">100</span>) -&gt; (<span class="number">5</span>, <span class="number">5050</span>, <span class="number">100</span>) &lt;-&gt; (<span class="number">5</span>, <span class="number">5050</span>, <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -1586,12 +1468,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">13</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
