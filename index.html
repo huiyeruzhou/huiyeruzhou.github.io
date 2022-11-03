@@ -151,6 +151,457 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/11/03/RPC%E6%A2%B3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/11/03/RPC%E6%A2%B3%E7%90%86/" class="post-title-link" itemprop="url">RPC梳理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-03 22:37:18 / 修改时间：22:37:44" itemprop="dateCreated datePublished" datetime="2022-11-03T22:37:18+08:00">2022-11-03</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Erpc服务处理过程梳理"><a href="#Erpc服务处理过程梳理" class="headerlink" title="Erpc服务处理过程梳理"></a>Erpc服务处理过程梳理</h1><p>RPC的服务端处理过程从传输层开始。当传输层收到消息，就会根据约定的传输协议接受信息，然后调用序列化层。序列化解析出请求内容，交由代理层处理。代理层通过对Server和Service的抽象，从请求内容中解析要调用的实际方法和参数，并根据有无返回值&#x2F;是否需要写回数据做进一步处理。<br>如果有返回消息的必要，则代理层调用序列化层写入返回内容，调用传输层用协议封装信息并进行发送</p>
+<h2 id="代理层服务器开始服务"><a href="#代理层服务器开始服务" class="headerlink" title="代理层服务器开始服务"></a>代理层服务器开始服务</h2><p>一个典型的服务器启动之后便开始不断监听可能到来的请求：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::run</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="keyword">while</span> ((err == kErpcStatus_Success) &amp;&amp; m_isServerOn)</span><br><span class="line">    &#123;</span><br><span class="line">        err = <span class="built_in">runInternal</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>处理过程大致可以分为两步,一是信息处理,二是请求处理,三是数据写回.在erpc中对应 <code>runInternalBegin</code>和<code>runInternalEnd</code>,前者完成第一步,后者完成后两步.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::runInternal</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    MessageBuffer buff;</span><br><span class="line">    Codec *codec = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">message_type_t</span> msgType;</span><br><span class="line">    <span class="keyword">uint32_t</span> serviceId;</span><br><span class="line">    <span class="keyword">uint32_t</span> methodId;</span><br><span class="line">    <span class="keyword">uint32_t</span> sequence;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = <span class="built_in">runInternalBegin</span>(&amp;codec, buff, msgType, serviceId, methodId, sequence);</span><br><span class="line">    <span class="keyword">if</span> (err == kErpcStatus_Success)</span><br><span class="line">    &#123;</span><br><span class="line">        err = <span class="built_in">runInternalEnd</span>(codec, msgType, serviceId, methodId, sequence);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="信息处理"><a href="#信息处理" class="headerlink" title="信息处理"></a>信息处理</h2><p>Server在处理消息之前,必须获取一些关键的信息用于下一步处理事件.概括来说,一般需要以下几类信息:</p>
+<ul>
+<li>RPC协议相关<ul>
+<li>消息类型: 是单向请求信息,双向请求信息还是响应信息或系统通知等</li>
+<li>RPC协议版本: 用于正确解析信息</li>
+<li>序列化方法: 用于正确配置序列化层</li>
+<li>请求序列号: 用于异步响应时区分多个请求</li>
+</ul>
+</li>
+<li>代理相关<ul>
+<li>请求的Service: 请求的包名&#x2F;类名&#x2F;服务名等</li>
+<li>请求的Method: 请求的具体方法</li>
+<li>请求的arguments: 实参</li>
+<li>请求的参数类型: 用于重载解析</li>
+</ul>
+</li>
+</ul>
+<p>这些信息有的在解析完之后立刻使用;有的存放起来作为参数在调用栈中传递;有的暂时不解析,而是配置一个codec,到时按需取用.</p>
+<p>从代码中可以看到,信息解析的过程主要包括传输层接收,序列化层读取两个过程</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::runInternalBegin</span><span class="params">(Codec **codec, MessageBuffer &amp;buff, <span class="keyword">message_type_t</span> &amp;msgType,</span></span></span><br><span class="line"><span class="params"><span class="function">                                             <span class="keyword">uint32_t</span> &amp;serviceId, <span class="keyword">uint32_t</span> &amp;methodId, <span class="keyword">uint32_t</span> &amp;sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="comment">// buffer创建</span></span><br><span class="line">    <span class="keyword">if</span> (m_messageFactory-&gt;<span class="built_in">createServerBuffer</span>() == <span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        buff = m_messageFactory-&gt;<span class="built_in">create</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 传输层接收</span></span><br><span class="line">    err = m_transport-&gt;<span class="built_in">receive</span>(&amp;buff);</span><br><span class="line">    <span class="comment">// 序列化层初始化及读取</span></span><br><span class="line">    *codec = m_codecFactory-&gt;<span class="built_in">create</span>();</span><br><span class="line">    (*codec)-&gt;<span class="built_in">setBuffer</span>(buff);</span><br><span class="line">    err = <span class="built_in">readHeadOfMessage</span>(*codec, msgType, serviceId, methodId, sequence);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="传输层接收"><a href="#传输层接收" class="headerlink" title="传输层接收"></a>传输层接收</h3><p>传输层接受的部分就一句话,简而言之就是将信息读取到buffer中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 传输层接收</span></span><br><span class="line"> err = m_transport-&gt;<span class="built_in">receive</span>(&amp;buff);</span><br></pre></td></tr></table></figure>
+
+<p>erpc在这里为所有按帧传输的传输层准备了接受一帧的函数,先接受请求头,读出请求帧的长度,再接受请求体.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">FramedTransport::receive</span><span class="params">(MessageBuffer *message)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Header h;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> retVal;</span><br><span class="line">    <span class="keyword">uint16_t</span> computedCrc;</span><br><span class="line">    &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> !ERPC_THREADS_IS(NONE)</span></span><br><span class="line">        <span class="function">Mutex::Guard <span class="title">lock</span><span class="params">(m_receiveLock)</span></span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">        <span class="comment">// Receive header first.</span></span><br><span class="line">        retVal = <span class="built_in">underlyingReceive</span>((<span class="keyword">uint8_t</span> *)&amp;h, <span class="built_in"><span class="keyword">sizeof</span></span>(h));</span><br><span class="line">         <span class="comment">// Receive rest of the message now we know its size.</span></span><br><span class="line">        retVal = <span class="built_in">underlyingReceive</span>(message-&gt;<span class="built_in">get</span>(), h.m_messageSize);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Verify CRC.</span></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    message-&gt;<span class="built_in">setUsed</span>(h.m_messageSize);</span><br><span class="line">    <span class="keyword">return</span> retVal;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其底层实现为<code>TCPTransport::underlyingReceive</code>,本质上就是对read进行了封装.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">TCPTransport::underlyingReceive</span><span class="params">(<span class="keyword">uint8_t</span> *data, <span class="keyword">uint32_t</span> size)</span></span>&#123;</span><br><span class="line">    <span class="keyword">ssize_t</span> length;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> status = kErpcStatus_Success;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Block until we have a valid connection.</span></span><br><span class="line">    <span class="keyword">while</span> (m_socket &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        Thread::<span class="built_in">sleep</span>(<span class="number">10000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Loop until all requested data is received.</span></span><br><span class="line">    <span class="keyword">while</span> (size &gt; <span class="number">0U</span>)&#123;</span><br><span class="line">        length = <span class="built_in">read</span>(m_socket, data, size);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Length will be zero if the connection is closed.</span></span><br><span class="line">        <span class="keyword">if</span> (length &gt; <span class="number">0</span>)&#123;</span><br><span class="line">            size -= length;</span><br><span class="line">            data += length;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (length == <span class="number">0</span>)&#123;</span><br><span class="line">                <span class="comment">// close socket, not server</span></span><br><span class="line">                <span class="built_in">close</span>(<span class="literal">false</span>);</span><br><span class="line">                status = kErpcStatus_ConnectionClosed;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                status = kErpcStatus_ReceiveFailed;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过这个过程,我们将socket中的信息成功的接收到了buf中</p>
+<h3 id="序列化层解析"><a href="#序列化层解析" class="headerlink" title="序列化层解析"></a>序列化层解析</h3><p>在erpc中,codec是对一次序列化的封装,一个codec不仅有读写各种数据类型的方法,还持有目前正在处理的buffer和buffer上的cursor,这纯粹是为了语法上的方便,不必在调用每个读写函数时都额外传递一个buffer参数,只需要在开始时设置即可.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Codec</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    MessageBuffer m_buffer;         <span class="comment">/*!&lt; Message buffer object */</span></span><br><span class="line">    MessageBuffer::Cursor m_cursor; <span class="comment">/*!&lt; Copy data to message buffers. */</span></span><br><span class="line">    <span class="keyword">erpc_status_t</span> m_status;         <span class="comment">/*!&lt; Status of serialized data. */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>因此,codec处理的部分先是创建一个codec并绑定buffer,然后再调用内部处理函数读取请求头</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 序列化层初始化及读取</span></span><br><span class="line">*codec = m_codecFactory-&gt;<span class="built_in">create</span>();</span><br><span class="line">(*codec)-&gt;<span class="built_in">setBuffer</span>(buff);</span><br><span class="line">err = <span class="built_in">readHeadOfMessage</span>(*codec, msgType, serviceId, methodId, sequence);</span><br></pre></td></tr></table></figure>
+
+<p>这里我们就不详细探究codec的底层实现了,可以想到对字节流做处理的大概方法就是针对数据类型的长度,读取一定的字节,填入到对象指针指向的内存中,并移动buffer上的cursor.</p>
+<p>总体来说,在这里值得注意的地方时codec兼具序列化层和RPC传输协议约定的功能,codec的<code>readHeadOfMessage</code>的实现方法其实就对应了协议头如何组织信息.</p>
+<p>在默认的codec中,请求头是一个四字节头加上一个int32序列号,四个字节分别表示codecVersion, serviceId, methodId, requestType(不过很明显,先构建codec再读取头信息已经太迟了,所以当他检测到不匹配的codecversion时没法处理,只能直接报错)</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BasicCodec::startReadMessage</span><span class="params">(<span class="keyword">message_type_t</span> *type, <span class="keyword">uint32_t</span> *service, <span class="keyword">uint32_t</span> *request, <span class="keyword">uint32_t</span> *sequence)</span></span>&#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> header;</span><br><span class="line">    <span class="built_in">read</span>(&amp;header);</span><br><span class="line">    <span class="keyword">if</span> (((header &gt;&gt; <span class="number">24</span>) &amp; <span class="number">0xff</span>U) != kBasicCodecVersion)&#123;</span><br><span class="line">        <span class="built_in">updateStatus</span>(kErpcStatus_InvalidMessageVersion);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">isStatusOk</span>())&#123;</span><br><span class="line">        *service = ((header &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span>U);</span><br><span class="line">        *request = ((header &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>U);</span><br><span class="line">        *type = <span class="keyword">static_cast</span>&lt;<span class="keyword">message_type_t</span>&gt;(header &amp; <span class="number">0xff</span>U);</span><br><span class="line">        <span class="built_in">read</span>(sequence);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="请求处理"><a href="#请求处理" class="headerlink" title="请求处理"></a>请求处理</h2><p>在经过了信息处理之后,我们已经成功的将传输层中的一帧请求接收到buffer中,获得了这个请求的rpc协议参数,接下来要做的就是调用合适的处理程序来完成实际的处理工作.erpc中,这个函数正是<code>Server::processMessage</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::runInternalEnd</span><span class="params">(Codec *codec, <span class="keyword">message_type_t</span> msgType, <span class="keyword">uint32_t</span> serviceId, <span class="keyword">uint32_t</span> methodId,</span></span></span><br><span class="line"><span class="params"><span class="function">                                           <span class="keyword">uint32_t</span> sequence)</span></span>&#123;</span><br><span class="line">    <span class="comment">//请求处理</span></span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = <span class="built_in">processMessage</span>(codec, msgType, serviceId, methodId, sequence);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//消息写回</span></span><br><span class="line">    <span class="keyword">if</span> (err == kErpcStatus_Success)&#123;</span><br><span class="line">        <span class="keyword">if</span> (msgType != kOnewayMessage)&#123;</span><br><span class="line">                err = m_transport-&gt;<span class="built_in">send</span>(codec-&gt;<span class="built_in">getBuffer</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Dispose of buffers and codecs.</span></span><br><span class="line">    <span class="built_in">disposeBufferAndCodec</span>(codec);</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过阅读源码,我们看到请求处理分为两个阶段:服务发现和方法调用</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">Server::processMessage</span><span class="params">(Codec *codec, <span class="keyword">message_type_t</span> msgType, <span class="keyword">uint32_t</span> serviceId, <span class="keyword">uint32_t</span> methodId,</span></span></span><br><span class="line"><span class="params"><span class="function">                                     <span class="keyword">uint32_t</span> sequence)</span></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    Service *service;</span><br><span class="line">    <span class="comment">//服务发现</span></span><br><span class="line">    service = <span class="built_in">findServiceWithId</span>(serviceId);</span><br><span class="line">    <span class="comment">//方法调用</span></span><br><span class="line">    err = service-&gt;<span class="built_in">handleInvocation</span>(methodId, sequence, codec, m_messageFactory);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h3><p>服务发现的过程就是在服务器已注册的服务中寻找能响应请求的那个,一些语言会使用map来完成这个事情,而在erpc中直接使用了serviceId+methodId, 如果idl确定的话,对于S&#x2F;C端而言,这个id号是可以唯一确定有效服务的.</p>
+<p>在服务端,服务用链表存储:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Service</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">uint32_t</span> <span class="title">getServiceId</span><span class="params">(<span class="keyword">void</span>)</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> m_serviceId; &#125;</span><br><span class="line">    <span class="function">Service *<span class="title">getNext</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123; <span class="keyword">return</span> m_next; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setNext</span><span class="params">(Service *next)</span> </span>&#123; m_next = next; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">erpc_status_t</span> <span class="title">handleInvocation</span><span class="params">(<span class="keyword">uint32_t</span> methodId, <span class="keyword">uint32_t</span> sequence, Codec *codec,</span></span></span><br><span class="line"><span class="params"><span class="function">                                           MessageBufferFactory *messageFactory)</span> </span>= <span class="number">0</span>;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="keyword">uint32_t</span> m_serviceId; <span class="comment">/*!&lt; Service unique id. */</span></span><br><span class="line">    Service *m_next;      <span class="comment">/*!&lt; Pointer to next service. */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>服务器在解析信息时通过遍历链表查找id对应的服务,然后调用对应的处理函数:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">Server::processMessage</span><span class="params">(Codec *codec, <span class="keyword">message_type_t</span> msgType, <span class="keyword">uint32_t</span> serviceId, <span class="keyword">uint32_t</span> methodId,</span></span></span><br><span class="line"><span class="params"><span class="function">                                     <span class="keyword">uint32_t</span> sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    Service *service;</span><br><span class="line">    service = <span class="built_in">findServiceWithId</span>(serviceId);</span><br><span class="line">    err = service-&gt;<span class="built_in">handleInvocation</span>(methodId, sequence, codec, m_messageFactory);</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h3><p><code>Server::processMessage</code>调用的<code>Service::handleInvocation</code>是由erpcgen工具根据我们定义的IDL自动生成的.<br>在.erpc中声明service及其方法, 其中interface关键字后跟服务名, 花括号内可以有若干个方法.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> MatrixMultiplyService <span class="comment">// cover functions for same topic</span></span><br><span class="line">&#123;</span><br><span class="line">    erpcMatrixMultiply(in Matrix matrix1, in Matrix matrix2, out Matrix result_matrix) -&gt; void</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行下列命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">erpcgen idl.erpc -g c</span><br></pre></td></tr></table></figure>
+
+<p>即可得到生成的文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">erpc_matrix_multiply_client.c++</span><br><span class="line">erpc_matrix_multiply_server.c++</span><br><span class="line">erpc_matrix_multiply_server.h</span><br><span class="line">erpc_matrix_multiply.h</span><br></pre></td></tr></table></figure>
+
+<p>其中,<code>erpc_matrix_multiply_server.c++</code>就有服务处理函数的定义.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">MatrixMultiplyService_service::handleInvocation</span><span class="params">(<span class="keyword">uint32_t</span> methodId, <span class="keyword">uint32_t</span> sequence, Codec * codec, MessageBufferFactory *messageFactory)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> erpcStatus;</span><br><span class="line">    <span class="built_in"><span class="keyword">switch</span></span> (methodId)&#123;</span><br><span class="line">        <span class="keyword">case</span> kMatrixMultiplyService_erpcMatrixMultiply_id:</span><br><span class="line">            erpcStatus = <span class="built_in">erpcMatrixMultiply_shim</span>(codec, messageFactory, sequence);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            erpcStatus = kErpcStatus_InvalidArgument;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> erpcStatus;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到, 处理函数进一步通过methodId判断该调用Service中的哪个方法的shim, 这个shim就是方法对应的代理.<br>代理完成的内容就是组织codec进行反序列化, 获取入参,然后对out类型的数据进行序列化写回, 返回值也一并写回</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">MatrixMultiplyService_service::erpcMatrixMultiply_shim</span><span class="params">(Codec * codec, MessageBufferFactory *messageFactory, <span class="keyword">uint32_t</span> sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line"></span><br><span class="line">    Matrix matrix1;</span><br><span class="line">    Matrix matrix2;</span><br><span class="line">    Matrix result_matrix;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)&#123;</span><br><span class="line">            codec-&gt;<span class="built_in">read</span>(&amp;matrix1[arrayCount0][arrayCount1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)&#123;</span><br><span class="line">            codec-&gt;<span class="built_in">read</span>(&amp;matrix2[arrayCount0][arrayCount1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// preparing codec for serializing data</span></span><br><span class="line">    codec-&gt;<span class="built_in">reset</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//调用实际方法</span></span><br><span class="line">    <span class="built_in">erpcMatrixMultiply</span>(matrix1, matrix2, result_matrix);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Build response message.</span></span><br><span class="line">    codec-&gt;<span class="built_in">startWriteMessage</span>(kReplyMessage, kMatrixMultiplyService_service_id, kMatrixMultiplyService_erpcMatrixMultiply_id, sequence);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)&#123;</span><br><span class="line">                codec-&gt;<span class="built_in">write</span>(result_matrix[arrayCount0][arrayCount1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="数据写回"><a href="#数据写回" class="headerlink" title="数据写回"></a>数据写回</h3><p>首先需要注意的是,在调用实际方法之前,对codec进行了重置:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">// preparing codec for serializing data</span></span><br><span class="line">    codec-&gt;<span class="built_in">reset</span>();</span><br></pre></td></tr></table></figure>
+
+<p>这个重置函数将内部的buffer和cursor恢复到使用之前的状态,相当于将这个读缓冲区又作为写缓冲区复用.在写回过程中，序列化首先调用codec的startWriteMessage方法写回响应头.和我们之前谈到的一样,这一步也是和RPC协议相关的,即codec写入头消息的方式就是rpc协议的方式.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BasicCodec::startWriteMessage</span><span class="params">(<span class="keyword">message_type_t</span> type, <span class="keyword">uint32_t</span> service, <span class="keyword">uint32_t</span> request, <span class="keyword">uint32_t</span> sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> header =</span><br><span class="line">        (kBasicCodecVersion &lt;&lt; <span class="number">24u</span>) | ((service &amp; <span class="number">0xff</span>u) &lt;&lt; <span class="number">16u</span>) | ((request &amp; <span class="number">0xff</span>u) &lt;&lt; <span class="number">8u</span>) | ((<span class="keyword">uint32_t</span>)type &amp; <span class="number">0xff</span>u);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">write</span>(header);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">write</span>(sequence);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后, 调用Codec的write方法.在这里,对于数组,erpcgen将会自动生成对应的循环结构来写入.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    ...    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)</span><br><span class="line">            &#123;</span><br><span class="line">                codec-&gt;<span class="built_in">write</span>(result_matrix[arrayCount0][arrayCount1]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>Codec对c++的所有数据类型重载一个write方法, 这个方法是对writeData的封装, 后者将按照数据的值和长度传递写入数据</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BasicCodec::writeData</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *value, <span class="keyword">uint32_t</span> length)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">isStatusOk</span>())&#123;</span><br><span class="line">        m_status = m_cursor.<span class="built_in">write</span>(value, length);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>cursor将作为buffer的内部类完成信息的写入，就是将信息复制到缓冲区里</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">erpc_status_t</span> MessageBuffer::Cursor::<span class="built_in">write</span>(<span class="keyword">const</span> <span class="keyword">void</span> *data, <span class="keyword">uint32_t</span> length)&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="keyword">if</span> (length &gt; <span class="number">0U</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (data == <span class="literal">NULL</span>)&#123;</span><br><span class="line">            err = kErpcStatus_MemoryError;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (length &gt; <span class="built_in">getRemaining</span>())&#123;</span><br><span class="line">            err = kErpcStatus_BufferOverrun;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            (<span class="keyword">void</span>)<span class="built_in">memcpy</span>(m_pos, data, length);</span><br><span class="line">            m_pos += length;</span><br><span class="line">            m_buffer-&gt;<span class="built_in">setUsed</span>(m_buffer-&gt;<span class="built_in">getUsed</span>() + length);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成write之后shim就会直接返回,之后可以直接利用send发送,因为我们在生成的shim函数中已经完成了需要写回的数据的序列化</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//数据发送</span></span><br><span class="line"><span class="keyword">if</span> (err == kErpcStatus_Success)&#123;</span><br><span class="line">    <span class="keyword">if</span> (msgType != kOnewayMessage)&#123;</span><br><span class="line">            err = m_transport-&gt;<span class="built_in">send</span>(codec-&gt;<span class="built_in">getBuffer</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/" class="post-title-link" itemprop="url">RPC框架设计侧重点-特色和架构调研2.md</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-02 16:26:48" itemprop="dateCreated datePublished" datetime="2022-10-02T16:26:48+08:00">2022-10-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-10-03 20:35:34" itemprop="dateModified" datetime="2022-10-03T20:35:34+08:00">2022-10-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Thrift"><a href="#Thrift" class="headerlink" title="Thrift"></a><a target="_blank" rel="noopener" href="https://github.com/apache/thrift">Thrift</a></h2><p>Thrift 是用于点对点 RPC 实现的轻量级、跨语言的软件栈。Thrift，为传输、序列化、应用级逻辑都提供了实现，同时具有从idl生成代码的功能。</p>
+<p>Thrift将架构分为6层，每层都可以自由组合，以适应不同的需求。<br><img src="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/thrift%E6%8A%80%E6%9C%AF%E6%A0%88.png" alt="1"></p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">├── ...(一些构建相关)</span><br><span class="line">├── compiler</span><br><span class="line">│   └── cpp</span><br><span class="line">├── debian</span><br><span class="line">├── lib             #代码实现</span><br><span class="line">│   ├── c_glib/src/thrift</span><br><span class="line">|       ├── processor                               #处理请求</span><br><span class="line">|       │   ├── thrift_dispatch_processor.c         #实现,使用glib-object完成面向对象</span><br><span class="line">|       │   ├── thrift_dispatch_processor.h</span><br><span class="line">|       │   ├── thrift_multiplexed_processor.c      #提供多个处理器</span><br><span class="line">|       │   ├── thrift_multiplexed_processor.h</span><br><span class="line">|       │   ├── thrift_processor.c                  #接口</span><br><span class="line">|       │   └── thrift_processor.h</span><br><span class="line">|       ├── protocol</span><br><span class="line">|       │   ├── thrift_binary_protocol.c            #二进制协议的实现,把数据转化为合适的形式(bool转化为uint8, double转化为IEEE int64等)</span><br><span class="line">|       │   ├── thrift_binary_protocol.h</span><br><span class="line">|       │   ├── thrift_binary_protocol_factory.c</span><br><span class="line">|       │   ├── thrift_binary_protocol_factory.h</span><br><span class="line">|       │   ├── thrift_compact_protocol.c</span><br><span class="line">|       │   ├── thrift_compact_protocol.h</span><br><span class="line">|       │   ├── thrift_compact_protocol_factory.c</span><br><span class="line">|       │   ├── thrift_compact_protocol_factory.h</span><br><span class="line">|       │   ├── thrift_multiplexed_protocol.c</span><br><span class="line">|       │   ├── thrift_multiplexed_protocol.h</span><br><span class="line">|       │   ├── thrift_protocol.c                   #写入数据,`THRIFT_PROTOCOL_GET_CLASS (protocol)-&gt;write`</span><br><span class="line">|       │   ├── thrift_protocol.h</span><br><span class="line">|       │   ├── thrift_protocol_decorator.c         #用decorator模式提供了多协议`THRIFT_PROTOCOL_GET_CLASS (self-&gt;concrete_protocol)-&gt;write_struct_begin (self-&gt;concrete_protocol,name, error)`</span><br><span class="line">|       │   ├── thrift_protocol_decorator.h</span><br><span class="line">|       │   ├── thrift_protocol_factory.c</span><br><span class="line">|       │   ├── thrift_protocol_factory.h</span><br><span class="line">|       │   ├── thrift_stored_message_protocol.c</span><br><span class="line">|       │   └── thrift_stored_message_protocol.h</span><br><span class="line">|       ├── server</span><br><span class="line">|       │   ├── thrift_server.c                 #服务器抽象类</span><br><span class="line">|       │   ├── thrift_server.h                 </span><br><span class="line">|       │   ├── thrift_simple_server.c          #简单实现</span><br><span class="line">|       │   └── thrift_simple_server.h</span><br><span class="line">|       ├── thrift.c</span><br><span class="line">|       ├── thrift.h</span><br><span class="line">|       ├── thrift_application_exception.c</span><br><span class="line">|       ├── thrift_application_exception.h</span><br><span class="line">|       ├── thrift_configuration.c</span><br><span class="line">|       ├── thrift_configuration.h</span><br><span class="line">|       ├── thrift_struct.c</span><br><span class="line">|       ├── thrift_struct.h</span><br><span class="line">|       └── transport</span><br><span class="line">|           ├── thrift_buffered_transport.c</span><br><span class="line">|           ├── thrift_buffered_transport.h</span><br><span class="line">|           ├── thrift_buffered_transport_factory.c</span><br><span class="line">|           ├── thrift_buffered_transport_factory.h</span><br><span class="line">|           ├── thrift_fd_transport.c</span><br><span class="line">|           ├── thrift_fd_transport.h</span><br><span class="line">|           ├── thrift_framed_transport.c</span><br><span class="line">|           ├── thrift_framed_transport.h</span><br><span class="line">|           ├── thrift_framed_transport_factory.c</span><br><span class="line">|           ├── thrift_framed_transport_factory.h</span><br><span class="line">|           ├── thrift_memory_buffer.c</span><br><span class="line">|           ├── thrift_memory_buffer.h</span><br><span class="line">|           ├── thrift_platform_socket.h</span><br><span class="line">|           ├── thrift_server_socket.c</span><br><span class="line">|           ├── thrift_server_socket.h          </span><br><span class="line">|           ├── thrift_server_transport.c</span><br><span class="line">|           ├── thrift_server_transport.h</span><br><span class="line">|           ├── thrift_socket.c</span><br><span class="line">|           ├── thrift_socket.h</span><br><span class="line">|           ├── thrift_ssl_socket.c</span><br><span class="line">|           ├── thrift_ssl_socket.h</span><br><span class="line">|           ├── thrift_transport.c</span><br><span class="line">|           ├── thrift_transport.h</span><br><span class="line">|           ├── thrift_transport_factory.c</span><br><span class="line">|           ├── thrift_transport_factory.h</span><br><span class="line">|           ├── thrift_zlib_transport.c</span><br><span class="line">|           ├── thrift_zlib_transport.h</span><br><span class="line">|           ├── thrift_zlib_transport_factory.c</span><br><span class="line">|           └── thrift_zlib_transport_factory.h</span><br><span class="line">|   ...</span><br><span class="line">|</span><br><span class="line">├── contrib         #一些实例,但不是官方测试用例</span><br><span class="line">├── test            #测试用例</span><br><span class="line">├── doc</span><br><span class="line">│   ├── specs       #一些格式信息</span><br><span class="line">|       ├── HeaderFormat.md                 #请求头格式</span><br><span class="line">|       ├── SequenceNumbers.md              #序列号(用于在一个链接中异步处理多个请求)</span><br><span class="line">|       ├── idl.md                          #接口定义语言</span><br><span class="line">|       ├── thrift-binary-protocol.md       #二进制协议, TLV格式</span><br><span class="line">|       ├── thrift-compact-protocol.md      #压缩方式 zigzag压缩整数, 其他的似乎编码没有太大不同?</span><br><span class="line">|       ├── thrift-parameter-validation-proposal.md     #参数验证,也就是通过某些方式限定参数的取值范围.比如int32类型必须取1,2,4,或者限定某个字符串长度必须大于4</span><br><span class="line">|       ├── thrift-protocol-spec.md         #BNF</span><br><span class="line">|       ├── thrift-rpc.md                   #框架整体简介</span><br><span class="line">|       ├── thrift-sasl-spec.txt            #(Simple Authentication and Security Layer)</span><br><span class="line">|       ├── thrift-tconfiguration.md        #一些设置</span><br><span class="line">|       └── thrift.tex</span><br><span class="line">│       └── ...         #没啥用</span><br><span class="line">└── tutorial        #教程</span><br><span class="line">    ├── c_glib</span><br><span class="line">    ...</span><br><span class="line">    └── swift</span><br></pre></td></tr></table></figure>
+
+<h3 id="特色"><a href="#特色" class="headerlink" title="特色"></a>特色</h3><p>Thrift 专门设计用于支持跨客户端和服务器代码的非原子版本更改。这使您可以升级服务器，同时仍然能够为旧客户端提供服务；或让较新的客户端向较旧的服务器发出请求。</p>
+<h2 id="Motan"><a href="#Motan" class="headerlink" title="Motan"></a><a target="_blank" rel="noopener" href="https://github.com/weibocom/motan/wiki/zh_overview">Motan</a></h2><p>Motan是一套基于java开发的RPC框架，除了常规的点对点调用外，Motan还提供服务治理功能，包括服务节点的自动发现、摘除、高可用和负载均衡等。</p>
+<p>Motan具有良好的扩展性，主要模块都提供了多种不同的实现，例如支持多种注册中心，支持多种rpc协议等。</p>
+<h3 id="架构概述"><a href="#架构概述" class="headerlink" title="架构概述"></a><a target="_blank" rel="noopener" href="https://github.com/weibocom/motan/wiki/zh_userguide#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0">架构概述</a></h3><p><img src="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0.png" alt="2"><br>默认序列化: Hessian2, 默认传输层: Netty NIO TCP长连接</p>
+<ul>
+<li><p>register:<br>用来和注册中心进行交互，包括注册服务、订阅服务、服务变更通知、服务心跳发送等功能；Server端会在系统初始化时通过register模块注册服务，Client端在系统初始化时会通过register模块订阅到具体提供服务的Server列表，当Server 列表发生变更时也由register模块通知Client。</p>
+</li>
+<li><p>Cluster:<br>cluster是一组可用的Server在逻辑上的封装，包含若干可以提供RPC服务的Server，实际请求时会根据不同的高可用与负载均衡策略选择一个可用的Server发起远程调用。</p>
+<p>在进行RPC请求时，Client通过代理机制调用cluster模块，cluster根据配置的HA和LoadBalance选出一个可用的Server，通过serialize模块把RPC请求转换为字节流，然后通过transport模块发送到Server端。</p>
+</li>
+</ul>
+<h3 id="代码结构"><a href="#代码结构" class="headerlink" title="代码结构"></a>代码结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">├── closable</span><br><span class="line">├── cluster</span><br><span class="line">│   ├── ha</span><br><span class="line">│   ├── loadbalance</span><br><span class="line">│   └── support</span><br><span class="line">├── codec</span><br><span class="line">├── common</span><br><span class="line">├── config</span><br><span class="line">│   ├── annotation</span><br><span class="line">│   └── handler</span><br><span class="line">├── core</span><br><span class="line">│   └── extension</span><br><span class="line">├── exception</span><br><span class="line">├── filter</span><br><span class="line">├── log</span><br><span class="line">├── protocol</span><br><span class="line">│   ├── injvm</span><br><span class="line">│   ├── mock</span><br><span class="line">│   ├── rpc</span><br><span class="line">│   ├── support</span><br><span class="line">│   └── v2motan</span><br><span class="line">├── proxy</span><br><span class="line">│   └── spi</span><br><span class="line">├── registry    #服务注册:发现注册/变更通知/流量配置/失败返回</span><br><span class="line">│   └── support</span><br><span class="line">│       └── command</span><br><span class="line">├── rpc         #奇怪的工具类 Callbackable/Future/Node/Refer/Request/...Response</span><br><span class="line">│   └── init</span><br><span class="line">├── serialize   #FastJson, Hessian2, Breeze, Simple</span><br><span class="line">├── switcher</span><br><span class="line">├── transport   #Channel/Transport/Server绑定/Clent心跳/..</span><br><span class="line">│   ├── async</span><br><span class="line">│   └── support</span><br><span class="line">└── util        #Math/Net/Stats/Reflect/....</span><br></pre></td></tr></table></figure>
+
+<h2 id="Dubbo"><a href="#Dubbo" class="headerlink" title="Dubbo"></a><a target="_blank" rel="noopener" href="https://github.com/apache/dubbo">Dubbo</a></h2><ul>
+<li>基于透明接口的 RPC</li>
+<li>智能负载均衡</li>
+<li>自动服务注册和发现</li>
+<li>高扩展性</li>
+<li>运行时流量路由</li>
+<li>可视化服务治理</li>
+</ul>
+<h3 id="架构-1"><a href="#架构-1" class="headerlink" title="架构"></a>架构</h3><p><img src="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/Dubbo%E6%9E%B6%E6%9E%84.png" alt="3"></p>
+<p><a target="_blank" rel="noopener" href="https://dubbo.apache.org/docs/v2.7/dev/design/">代码架构和设计内容像详解</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/09/25/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/09/25/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%94/" class="post-title-link" itemprop="url">RPC框架设计侧重点, 特色和架构调研</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-09-25 16:53:30" itemprop="dateCreated datePublished" datetime="2022-09-25T16:53:30+08:00">2022-09-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-10-24 21:19:12" itemprop="dateModified" datetime="2022-10-24T21:19:12+08:00">2022-10-24</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Volo调研"><a href="#Volo调研" class="headerlink" title="Volo调研"></a>Volo调研</h2><p>Volo 是字节跳动服务框架团队研发的轻量级、高性能、可扩展性强、易用性好的 Rust RPC 框架，使用了 Rust 最新的 GAT 特性。</p>
+<h3 id="特色-易用性"><a href="#特色-易用性" class="headerlink" title="特色-易用性"></a>特色-易用性</h3><p>具体来说，这个框架使用了<a target="_blank" rel="noopener" href="https://github.com/cloudwego/motore">motore</a>中间件, 而其使用GAT语法完成了<a target="_blank" rel="noopener" href="https://github.com/cloudwego/motore">高效的异步接口</a></p>
+<p>Rust不支持一个<code>async trait</code>, 一般的解决方法是使用Box(类似智能指针)来完成这件事情, <a target="_blank" rel="noopener" href="https://www.cloudwego.io/zh/docs/motore/faq/q1_gat/">但这会</a>带来额外的开销并且降低代码可读性. 有一个使用宏完成用Box实现异步接口的<a target="_blank" rel="noopener" href="https://docs.rs/async-trait/latest/async_trait/">Crate</a></p>
+<p>具体细节可能需要进一步理解一些Rust的语言特性</p>
+<h3 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">├─volo          RPC框架的通用组件</span><br><span class="line">│  └─src  </span><br><span class="line">│      ├─discovery      #服务发现:一些接口,一种简单实现(返回静态单链表)</span><br><span class="line">│      ├─loadbalance    #负载均衡:同上(加权随机)</span><br><span class="line">│      ├─net            #网络链接: probe创建套接字,dial建立连接,incomming进行监听,conn进行读写 </span><br><span class="line">│      └─util           #工具: buf_reader</span><br><span class="line">|                       #</span><br><span class="line">├─volo-build    #编译用</span><br><span class="line">│  └─src</span><br><span class="line">├─volo-cli      #用户界面</span><br><span class="line">│  └─...</span><br><span class="line">├─volo-grpc     #grpc框架</span><br><span class="line">│  └─src</span><br><span class="line">│      ├─client         #客户端底层组件</span><br><span class="line">│      ├─codec          #编解码器</span><br><span class="line">│      ├─layer          #待调研,类似某种封装tonic/src/metadata</span><br><span class="line">│      │  └─loadbalance</span><br><span class="line">│      ├─metadata</span><br><span class="line">│      ├─server         #服务端底层组件</span><br><span class="line">│      └─transport</span><br><span class="line">    ...                 #从tonic/src/中copy并修改了一些文件,完成rpc的请求响应相关工作</span><br><span class="line">├─volo-macros   #宏</span><br><span class="line">│  └─src</span><br><span class="line">└─volo-thrift   #thrift框架</span><br><span class="line">    └─src</span><br><span class="line">        ├─client</span><br><span class="line">        │  └─layer</span><br><span class="line">        ├─codec</span><br><span class="line">        ├─protocol</span><br><span class="line">        └─transport</span><br><span class="line">            ├─pingpong</span><br><span class="line">            └─pool</span><br></pre></td></tr></table></figure>
+
+<p><strong>如何用Volo的特色实现grpc</strong><br><img src="/2022/09/25/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%94/2022-09-25-16-54-19.png" alt="架构图"></p>
+<h3 id="erpc"><a href="#erpc" class="headerlink" title="erpc"></a>erpc</h3><p><strong>传输层(串口),嵌入式,代码生成(结合nanopb)</strong></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/EmbeddedRPC/erpc">erpc项目地址</a>及其<a target="_blank" rel="noopener" href="https://embeddedrpc.github.io/eRPC">详细文档</a></p>
+<h3 id="侧重点"><a href="#侧重点" class="headerlink" title="侧重点"></a>侧重点</h3><p>嵌入式,轻量化</p>
+<h3 id="框架图"><a href="#框架图" class="headerlink" title="框架图"></a>框架图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">├─erpcgen           #代码生成工具</span><br><span class="line">├─erpcsniffer</span><br><span class="line">│  └─src</span><br><span class="line">├─erpc_c            #基础架构</span><br><span class="line">│  ├─config         #config.h配置文件 </span><br><span class="line">│  └─infra</span><br><span class="line">|     ├─ erpc_arbitrated_client_manager.cpp</span><br><span class="line">|     ├─ erpc_arbitrated_client_manager.hpp</span><br><span class="line">|     ├─ erpc_basic_codec.cpp      #基础编解码器</span><br><span class="line">|     ├─ erpc_basic_codec.hpp</span><br><span class="line">|     ├─ erpc_client_manager.cpp</span><br><span class="line">|     ├─ erpc_client_manager.h</span><br><span class="line">|     ├─ erpc_client_server_common.hpp</span><br><span class="line">|     ├─ erpc_codec.hpp             #编解码器抽象定义</span><br><span class="line">|     ├─ erpc_common.h              #状态码枚举类型的定义</span><br><span class="line">|     ├─ erpc_crc16.cpp</span><br><span class="line">|     ├─ erpc_crc16.hpp</span><br><span class="line">|     ├─ erpc_framed_transport.cpp</span><br><span class="line">|     ├─ erpc_framed_transport.hpp</span><br><span class="line">|     ├─ erpc_manually_constructed.hpp</span><br><span class="line">|     ├─ erpc_message_buffer.cpp</span><br><span class="line">|     ├─ erpc_message_buffer.hpp</span><br><span class="line">|     ├─ erpc_message_loggers.cpp</span><br><span class="line">|     ├─ erpc_message_loggers.hpp</span><br><span class="line">|     ├─ erpc_pre_post_action.cpp</span><br><span class="line">|     ├─ erpc_pre_post_action.h</span><br><span class="line">|     ├─ erpc_server.cpp            </span><br><span class="line">|     ├─ erpc_server.hpp            #Service和Server的抽象接口,注册移除服务,处理信息等</span><br><span class="line">|     ├─ erpc_simple_server.cpp     #</span><br><span class="line">|     ├─ erpc_simple_server.hpp</span><br><span class="line">|     ├─ erpc_static_queue.hpp      #数组实现的队列</span><br><span class="line">|     ├─ erpc_transport.hpp         #Transport</span><br><span class="line">|     ├─ erpc_transport_arbitrator.cpp</span><br><span class="line">|     ├─ erpc_transport_arbitrator.hpp</span><br><span class="line">|     ├─ erpc_version.h</span><br><span class="line">|     ├─ infra.dox     </span><br><span class="line">│  ├─port           #便于移植</span><br><span class="line">│  ├─setup          #C语言接口</span><br><span class="line">│  └─transports     #支持不同通信方法的工具类</span><br><span class="line">├─erpc_python</span><br><span class="line">│  └─erpc</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>rtos上的 protobuf-c</li>
+<li>erpc 传输层 nanopb</li>
+<li>volo 语法特性</li>
+<li>motan dubbo 事件逻辑</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/09/04/grpc-go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/09/04/grpc-go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-1/" class="post-title-link" itemprop="url">grpc-go源码分析(1)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-09-04 14:43:36" itemprop="dateCreated datePublished" datetime="2022-09-04T14:43:36+08:00">2022-09-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-09-13 14:03:01" itemprop="dateModified" datetime="2022-09-13T14:03:01+08:00">2022-09-13</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>这篇文章主要分析了grpc-go服务端的启动过程，重点考察了服务端的建立、注册、监听<br>等关键的生命周期对应的代码实现。<br>目前阶段主要考察普通的rpc调用，暂时没有研究流式传输。</p>
+<p>首先来看服务端<code>examples/helloworld/greeter_server/main.go</code>的代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 解析命令行参数,主要是port</span></span><br><span class="line">    flag.Parse()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 新建一个对本地端口的监听</span></span><br><span class="line">    lis, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, fmt.Sprintf(<span class="string">&quot;:%d&quot;</span>, *port))</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatalf(<span class="string">&quot;failed to listen: %v&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 新建grpc服务器</span></span><br><span class="line">    s := grpc.NewServer()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册protobuf中的服务</span></span><br><span class="line">    pb.RegisterGreeterServer(s, &amp;server&#123;&#125;)</span><br><span class="line">    log.Printf(<span class="string">&quot;server listening at %v&quot;</span>, lis.Addr())</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动监听</span></span><br><span class="line">    <span class="keyword">if</span> err := s.Serve(lis); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatalf(<span class="string">&quot;failed to serve: %v&quot;</span>, err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到, main函数中和server相关的操作主要有三步:<br>（1）创建 server<br>（2）server 的注册<br>（3）调用 Serve 监听端口并处理请求</p>
+<h2 id="Server的创建"><a href="#Server的创建" class="headerlink" title="Server的创建"></a>Server的创建</h2><p>这里调用的函数就是<code>\server.go#NewServer</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewServer</span><span class="params">(opt ...ServerOption)</span> *<span class="title">Server</span></span> &#123;</span><br><span class="line">    <span class="comment">//用option模式指定各个服务器选项</span></span><br><span class="line">    opts := defaultServerOptions</span><br><span class="line">    <span class="keyword">for</span> _, o := <span class="keyword">range</span> extraServerOptions &#123;</span><br><span class="line">        o.apply(&amp;opts)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, o := <span class="keyword">range</span> opt &#123;</span><br><span class="line">        o.apply(&amp;opts)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//构建服务器</span></span><br><span class="line">    s := &amp;Server&#123;</span><br><span class="line">        lis:      <span class="built_in">make</span>(<span class="keyword">map</span>[net.Listener]<span class="keyword">bool</span>),</span><br><span class="line">        opts:     opts,</span><br><span class="line">        conns:    <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">map</span>[transport.ServerTransport]<span class="keyword">bool</span>),</span><br><span class="line">        services: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*serviceInfo),</span><br><span class="line">        quit:     grpcsync.NewEvent(),</span><br><span class="line">        done:     grpcsync.NewEvent(),</span><br><span class="line">        czData:   <span class="built_in">new</span>(channelzData),</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 配置拦截器</span></span><br><span class="line">    chainUnaryServerInterceptors(s)</span><br><span class="line">    chainStreamServerInterceptors(s)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同步相关(优雅退出时发送信号)</span></span><br><span class="line">    s.cv = sync.NewCond(&amp;s.mu)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 调试相关 打印调用信息</span></span><br><span class="line">    <span class="keyword">if</span> EnableTracing &#123;</span><br><span class="line">        _, file, line, _ := runtime.Caller(<span class="number">1</span>)</span><br><span class="line">        s.events = trace.NewEventLog(<span class="string">&quot;grpc.Server&quot;</span>, fmt.Sprintf(<span class="string">&quot;%s:%d&quot;</span>, file, line))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 并发相关</span></span><br><span class="line">    <span class="keyword">if</span> s.opts.numServerWorkers &gt; <span class="number">0</span> &#123;</span><br><span class="line">        s.initServerWorkers()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// channelz(一个调试工具)相关</span></span><br><span class="line">    s.channelzID = channelz.RegisterServer(&amp;channelzServer&#123;s&#125;, <span class="string">&quot;&quot;</span>)</span><br><span class="line">    channelz.Info(logger, s.channelzID, <span class="string">&quot;Server created&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一个Server结构体包括了一系列网络通讯和同步相关的内容，通常是使用了sync包中的功能或利用通道完成各种同步操作。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Server is a gRPC server to serve RPC requests.</span></span><br><span class="line"><span class="keyword">type</span> Server <span class="keyword">struct</span> &#123;</span><br><span class="line">    opts serverOptions</span><br><span class="line"></span><br><span class="line">    mu  sync.Mutex <span class="comment">// guards following</span></span><br><span class="line"></span><br><span class="line">    lis <span class="keyword">map</span>[net.Listener]<span class="keyword">bool</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 监听地址到 transports的映射</span></span><br><span class="line">    conns    <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">map</span>[transport.ServerTransport]<span class="keyword">bool</span></span><br><span class="line">    <span class="comment">// 是否在服务</span></span><br><span class="line">    serve    <span class="keyword">bool</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    drain    <span class="keyword">bool</span></span><br><span class="line">    <span class="comment">// 优雅退出时进行广播</span></span><br><span class="line">    cv       *sync.Cond          </span><br><span class="line">    <span class="comment">// 核心:服务名到服务信息的映射</span></span><br><span class="line">    services <span class="keyword">map</span>[<span class="keyword">string</span>]*serviceInfo</span><br><span class="line">    <span class="comment">// 日志 </span></span><br><span class="line">    events   trace.EventLog</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同步相关</span></span><br><span class="line">    quit               *grpcsync.Event</span><br><span class="line">    done               *grpcsync.Event</span><br><span class="line">    channelzRemoveOnce sync.Once</span><br><span class="line">    serveWG            sync.WaitGroup <span class="comment">// counts active Serve goroutines for GracefulStop</span></span><br><span class="line"></span><br><span class="line">    channelzID *channelz.Identifier</span><br><span class="line">    czData     *channelzData</span><br><span class="line"></span><br><span class="line">    serverWorkerChannels []<span class="keyword">chan</span> *serverWorkerData</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="用于同步的grpc-Event"><a href="#用于同步的grpc-Event" class="headerlink" title="用于同步的grpc.Event"></a>用于同步的grpc.Event</h3><p>对于Event类型的quit和done，这里简单的分析一下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Event represents a one-time event that may occur in the future.</span></span><br><span class="line"><span class="keyword">type</span> Event <span class="keyword">struct</span> &#123;</span><br><span class="line">    fired <span class="keyword">int32</span></span><br><span class="line">    c     <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    o     sync.Once</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Event可以被并发地多次触发。一旦被触发，e.c将被关闭，从而所有试图从e.c中接受一个值的协程将从阻塞中恢复，这起到了一对多通知的效果。o是为了防止e.c被多次关闭而引发panic。</p>
+<h3 id="核心部分：map-string"><a href="#核心部分：map-string" class="headerlink" title="核心部分：map[string]"></a>核心部分：<code>map[string]</code></h3><p>而这一部分代码中的核心还是</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">services <span class="keyword">map</span>[<span class="keyword">string</span>]*serviceInfo</span><br></pre></td></tr></table></figure>
+
+<p>通过服务名，我们可以直接获取服务相关的信息，主要也是两个map，通过名称可以分别获取stream和method的描述（Desc）。每个描述都包含了name和handler</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// serviceInfo wraps information about a service. It is very similar to</span></span><br><span class="line"><span class="comment">// ServiceDesc and is constructed from it for internal purposes.</span></span><br><span class="line"><span class="keyword">type</span> serviceInfo <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// Contains the implementation for the methods in this service.</span></span><br><span class="line">    serviceImpl <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    methods     <span class="keyword">map</span>[<span class="keyword">string</span>]*MethodDesc</span><br><span class="line">    streams     <span class="keyword">map</span>[<span class="keyword">string</span>]*StreamDesc</span><br><span class="line">    mdata       <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总体来说，在调用过程中Server的关键结构是这样的：</p>
+<p><img src="/2022/09/04/grpc-go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-1/2022-09-04-16-04-53.png" alt="grpc-go源码分析"></p>
+<h2 id="Server注册"><a href="#Server注册" class="headerlink" title="Server注册"></a>Server注册</h2><p>main函数中的代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册protobuf中的服务</span></span><br><span class="line">pb.RegisterGreeterServer(s, &amp;server&#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>需要先考察一下server是一个什么样的结构</p>
+<h3 id="自定义的服务器实现：Server类型"><a href="#自定义的服务器实现：Server类型" class="headerlink" title="自定义的服务器实现：Server类型"></a>自定义的服务器实现：Server类型</h3><p>在<code>examples/helloworld/greeter_server/main.go</code>中：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server is used to implement helloworld.GreeterServer.</span></span><br><span class="line"><span class="keyword">type</span> server <span class="keyword">struct</span> &#123;</span><br><span class="line">    pb.UnimplementedGreeterServer</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SayHello implements helloworld.GreeterServer</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *server)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloReply, error)</span></span> &#123;</span><br><span class="line">    log.Printf(<span class="string">&quot;Received: %v&quot;</span>, in.GetName())</span><br><span class="line">    <span class="keyword">return</span> &amp;pb.HelloReply&#123;Message: <span class="string">&quot;Hello &quot;</span> + in.GetName()&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它实际上就是对proto中定义的服务端的一个实现, 注意接口中要求的方法<code>mustEmbedUnimplementedGreeterServer()</code>是在protobuf的生成文件pb中的<code>pb.UnimplementedGreeterServer</code>中实现的，这是为了从语法上要求server的实现中必须包含<code>pb.UnimplementedGreeterServer</code>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// GreeterServer is the server API for Greeter service.</span></span><br><span class="line"><span class="comment">// All implementations must embed UnimplementedGreeterServer</span></span><br><span class="line"><span class="comment">// for forward compatibility</span></span><br><span class="line"><span class="keyword">type</span> GreeterServer <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// Sends a greeting</span></span><br><span class="line">    SayHello(context.Context, *HelloRequest) (*HelloReply, error)</span><br><span class="line">    mustEmbedUnimplementedGreeterServer()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至于为什么必须包含这个奇怪的结构体，可能是因为这个结构体中包含了一个默认的SayHello方法，这样即使我们忘了实现SayHello方法，也能让server实现<code>GreeterServer</code>接口。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(UnimplementedGreeterServer)</span> <span class="title">SayHello</span><span class="params">(context.Context, *HelloRequest)</span> <span class="params">(*HelloReply, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, status.Errorf(codes.Unimplemented, <span class="string">&quot;method SayHello not implemented&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(UnimplementedGreeterServer)</span> <span class="title">mustEmbedUnimplementedGreeterServer</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>总而言之，Server就是一个我们自己实现的服务器。包含了我们在proto中声明的方法。</p>
+<h3 id="Register调用分析"><a href="#Register调用分析" class="headerlink" title="Register调用分析"></a>Register调用分析</h3><p>main函数中直接调用的方法是：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册protobuf中的服务</span></span><br><span class="line">pb.RegisterGreeterServer(s, &amp;server&#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>server 的注册调用了 RegisterGreeterServer 方法，这个方法是<code>examples/helloworld/helloworld/helloworld_grpc.pb.go</code>中的：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RegisterGreeterServer</span><span class="params">(s *grpc.Server, srv GreeterServer)</span></span> &#123;</span><br><span class="line">    s.RegisterService(&amp;Greeter_serviceDesc, srv)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法调用了 server 的 RegisterService 方法，然后传入了一个 ServiceDesc 的数据结构，如下 ：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Greeter_ServiceDesc = grpc.ServiceDesc&#123;</span><br><span class="line">    ServiceName: <span class="string">&quot;helloworld.Greeter&quot;</span>,</span><br><span class="line">    HandlerType: (*GreeterServer)(<span class="literal">nil</span>),</span><br><span class="line">    Methods: []grpc.MethodDesc&#123;</span><br><span class="line">        &#123;</span><br><span class="line">            MethodName: <span class="string">&quot;SayHello&quot;</span>,</span><br><span class="line">            Handler:    _Greeter_SayHello_Handler,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">    Streams:  []grpc.StreamDesc&#123;&#125;,</span><br><span class="line">    Metadata: <span class="string">&quot;examples/helloworld/helloworld/helloworld.proto&quot;</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这个结构体的结构serviceInfo的结构是吻合的：<br><img src="/2022/09/04/grpc-go%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90-1/2022-09-04-16-04-53.png" alt="grpc"></p>
+<p>下面来看RegisterService函数的实现，核心的内容在就是检查完类型之后调用register将sd中的信息注入到seviceinfo结构体中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// RegisterService registers a service and its implementation to the gRPC</span></span><br><span class="line"><span class="comment">// server. It is called from the IDL generated code. This must be called before</span></span><br><span class="line"><span class="comment">// invoking Serve. If ss is non-nil (for legacy code), its type is checked to</span></span><br><span class="line"><span class="comment">// ensure it implements sd.HandlerType.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">RegisterService</span><span class="params">(sd*ServiceDesc, ss <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 检查类型</span></span><br><span class="line">    <span class="keyword">if</span> ss != <span class="literal">nil</span> &#123;</span><br><span class="line">        ht := reflect.TypeOf(sd.HandlerType).Elem()</span><br><span class="line">        st := reflect.TypeOf(ss)</span><br><span class="line">        <span class="keyword">if</span> !st.Implements(ht) &#123;</span><br><span class="line">            logger.Fatalf(<span class="string">&quot;grpc: Server.RegisterService found the handler of type %v that does not satisfy %v&quot;</span>, st, ht)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    s.register(sd, ss)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">register</span><span class="params">(sd *ServiceDesc, ss <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 加锁</span></span><br><span class="line">    s.mu.Lock()</span><br><span class="line">    <span class="keyword">defer</span> s.mu.Unlock()</span><br><span class="line">    <span class="comment">// 打印日志</span></span><br><span class="line">    s.printf(<span class="string">&quot;RegisterService(%q)&quot;</span>, sd.ServiceName)</span><br><span class="line">    <span class="comment">// 检查异常</span></span><br><span class="line">    <span class="keyword">if</span> s.serve &#123;</span><br><span class="line">        logger.Fatalf(<span class="string">&quot;grpc: Server.RegisterService after Server.Serve for %q&quot;</span>, sd.ServiceName)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> _, ok := s.services[sd.ServiceName]; ok &#123;</span><br><span class="line">        logger.Fatalf(<span class="string">&quot;grpc: Server.RegisterService found duplicate service registration for %q&quot;</span>, sd.ServiceName)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将sd中的内容注入到serviceinfo中，并将ss类型保存为serviceImpl</span></span><br><span class="line">    info := &amp;serviceInfo&#123;</span><br><span class="line">        serviceImpl: ss,</span><br><span class="line">        methods:     <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*MethodDesc),</span><br><span class="line">        streams:     <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*StreamDesc),</span><br><span class="line">        mdata:       sd.Metadata,</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> sd.Methods &#123;</span><br><span class="line">        d := &amp;sd.Methods[i]</span><br><span class="line">        info.methods[d.MethodName] = d</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> sd.Streams &#123;</span><br><span class="line">        d := &amp;sd.Streams[i]</span><br><span class="line">        info.streams[d.StreamName] = d</span><br><span class="line">    &#125;</span><br><span class="line">    s.services[sd.ServiceName] = info</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>server 对不同 rpc 请求的处理，也是根据 service 中不同的 serviceName 去 service map 中取出不同的 handler 进行处理，这样相当于完成了grpc的代理操作，把字符串传递给代理，代理就能调用对应的实际方法去处理。</p>
+<h3 id="Sever服务过程"><a href="#Sever服务过程" class="headerlink" title="Sever服务过程"></a>Sever服务过程</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">Serve</span><span class="params">(lis net.Listener)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">//加锁</span></span><br><span class="line">    s.mu.Lock()</span><br><span class="line">    <span class="comment">//打印日志</span></span><br><span class="line">    s.printf(<span class="string">&quot;serving&quot;</span>)</span><br><span class="line">    <span class="comment">//更新状态</span></span><br><span class="line">    s.serve = <span class="literal">true</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//检查是否已经关闭</span></span><br><span class="line">    <span class="keyword">if</span> s.lis == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// Serve called after Stop or GracefulStop.</span></span><br><span class="line">        s.mu.Unlock()</span><br><span class="line">        lis.Close()</span><br><span class="line">        <span class="keyword">return</span> ErrServerStopped</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 并发相关</span></span><br><span class="line">    s.serveWG.Add(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        s.serveWG.Done()</span><br><span class="line">        <span class="keyword">if</span> s.quit.HasFired() &#123;</span><br><span class="line">            <span class="comment">// Stop or GracefulStop called; block until done and return nil.</span></span><br><span class="line">            &lt;-s.done.Done()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 注册端口监听</span></span><br><span class="line"><span class="comment">    type listenSocket struct &#123;</span></span><br><span class="line"><span class="comment">        net.Listener</span></span><br><span class="line"><span class="comment">        channelzID *channelz.Identifier</span></span><br><span class="line"><span class="comment">    &#125;   </span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    ls := &amp;listenSocket&#123;Listener: lis&#125;</span><br><span class="line">    s.lis[ls] = <span class="literal">true</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">//（在退出时）注销端口监听</span></span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        s.mu.Lock()</span><br><span class="line">        <span class="keyword">if</span> s.lis != <span class="literal">nil</span> &amp;&amp; s.lis[ls] &#123;</span><br><span class="line">            ls.Close()</span><br><span class="line">            <span class="built_in">delete</span>(s.lis, ls)</span><br><span class="line">        &#125;</span><br><span class="line">        s.mu.Unlock()</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="comment">//channelz相关</span></span><br><span class="line">    <span class="keyword">var</span> err error</span><br><span class="line">    ls.channelzID, err = channelz.RegisterListenSocket(ls, s.channelzID, lis.Addr().String())</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        s.mu.Unlock()</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//解锁，并发操作完成</span></span><br><span class="line">    s.mu.Unlock()</span><br><span class="line">    channelz.Info(logger, ls.channelzID, <span class="string">&quot;ListenSocket created&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> tempDelay time.Duration <span class="comment">// how long to sleep on accept failure</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 死循环，用accept监听</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        rawConn, err := lis.Accept()</span><br><span class="line">        <span class="comment">//错误检查</span></span><br><span class="line">        <span class="comment">//https://openskill.cn/article/1792</span></span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">//判断是否是临时错误</span></span><br><span class="line">            <span class="keyword">if</span> ne, ok := err.(<span class="keyword">interface</span> &#123;</span><br><span class="line">                Temporary() <span class="keyword">bool</span></span><br><span class="line">            &#125;); </span><br><span class="line">            <span class="comment">/*类型断言，利用短逻辑避免调用不存在的方法*/</span></span><br><span class="line">                ok &amp;&amp; ne.Temporary() &#123;</span><br><span class="line">                <span class="comment">// 试图恢复，等待一段时间</span></span><br><span class="line">                <span class="keyword">if</span> tempDelay == <span class="number">0</span> &#123;</span><br><span class="line">                    tempDelay = <span class="number">5</span> * time.Millisecond</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    tempDelay *= <span class="number">2</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> max := <span class="number">1</span> * time.Second; tempDelay &gt; max &#123;</span><br><span class="line">                    tempDelay = max</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 打印日志</span></span><br><span class="line">                s.mu.Lock()</span><br><span class="line">                s.printf(<span class="string">&quot;Accept error: %v; retrying in %v&quot;</span>, err, tempDelay)</span><br><span class="line">                s.mu.Unlock()</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 等待，如果此时服务退出就不再等待直接返回</span></span><br><span class="line">                timer := time.NewTimer(tempDelay)</span><br><span class="line">                <span class="keyword">select</span> &#123;</span><br><span class="line">                <span class="keyword">case</span> &lt;-timer.C:</span><br><span class="line">                <span class="keyword">case</span> &lt;-s.quit.Done():</span><br><span class="line">                    timer.Stop()</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//等待多次之后仍有错误，打印日志</span></span><br><span class="line">            s.mu.Lock()</span><br><span class="line">            s.printf(<span class="string">&quot;done serving; Accept = %v&quot;</span>, err)</span><br><span class="line">            s.mu.Unlock()</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 检查是否退出</span></span><br><span class="line">            <span class="keyword">if</span> s.quit.HasFired() &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 返回错误信息</span></span><br><span class="line">            <span class="keyword">return</span> err</span><br><span class="line">        &#125;</span><br><span class="line">        tempDelay = <span class="number">0</span></span><br><span class="line">        <span class="comment">// Start a new goroutine to deal with rawConn so we don&#x27;t stall this Accept</span></span><br><span class="line">        <span class="comment">// loop goroutine.</span></span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">        <span class="comment">// Make sure we account for the goroutine so GracefulStop doesn&#x27;t nil out</span></span><br><span class="line">        <span class="comment">// s.conns before this conn can be added.</span></span><br><span class="line">        s.serveWG.Add(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            s.handleRawConn(lis.Addr().String(), rawConn)</span><br><span class="line">            s.serveWG.Done()</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终这个函数会把端口地址和通过Accept得到的连接传递给handle函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// handleRawConn forks a goroutine to handle a just-accepted connection that</span></span><br><span class="line"><span class="comment">// has not had any I/O performed on it yet.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">handleRawConn</span><span class="params">(lisAddr <span class="keyword">string</span>, rawConn net.Conn)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 检查是否退出</span></span><br><span class="line">    <span class="keyword">if</span> s.quit.HasFired() &#123;</span><br><span class="line">        rawConn.Close()</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 设置一次IO操作的最大时间，如果超过直接失败</span></span><br><span class="line">    <span class="comment">// 这里是用来限制连接时间的</span></span><br><span class="line">    rawConn.SetDeadline(time.Now().Add(s.opts. connectionTimeout))</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Finish handshaking (HTTP2)</span></span><br><span class="line">    st := s.newHTTP2Transport(rawConn)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 完成连接之后取消时长限制</span></span><br><span class="line">    rawConn.SetDeadline(time.Time&#123;&#125;)</span><br><span class="line">    <span class="keyword">if</span> st == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !s.addConn(lisAddr, st) &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        s.serveStreams(st)</span><br><span class="line">        s.removeConn(lisAddr, st)</span><br><span class="line">    &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Http2握手"><a href="#Http2握手" class="headerlink" title="Http2握手"></a>Http2握手</h3><p>handle函数处理连接的第一步就是完成HTTP2的握手</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// newHTTP2Transport sets up a http/2 transport (using the</span></span><br><span class="line"><span class="comment">// gRPC http2 server transport in transport/http2_server.go).</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">newHTTP2Transport</span><span class="params">(c net.Conn)</span> <span class="title">transport</span>.<span class="title">ServerTransport</span></span> &#123;</span><br><span class="line">    config := &amp;transport.ServerConfig&#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    st, err := transport.NewServerTransport(c, config)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> st</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心代码如下：<code>internal/transport/http2_server.go</code></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/08/06/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%94%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -174,10 +625,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-08-06 20:10:06 / 修改时间：20:42:28" itemprop="dateCreated datePublished" datetime="2022-08-06T20:10:06+08:00">2022-08-06</time>
+              <time title="创建时间：2022-08-06 20:10:06" itemprop="dateCreated datePublished" datetime="2022-08-06T20:10:06+08:00">2022-08-06</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-09-05 21:07:28" itemprop="dateModified" datetime="2022-09-05T21:07:28+08:00">2022-09-05</time>
+              </span>
 
           
 
@@ -208,7 +665,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">textView.setText(<span class="string">&quot;资源字符串的内容是: &quot;</span> + getApp().getString(R.string.qaq));</span><br></pre></td></tr></table></figure>
 
 <p>另一种方法是利用应用程序只有一个application，并且每个activity都可以通过调用<code>getApplicationContext()</code>获得application的特性，在App类中添加字段。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String textData = <span class="string">&quot;default&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getTextData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> textData;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTextData</span><span class="params">(String textData)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.textData = textData;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String textData = <span class="string">&quot;default&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getTextData</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> textData;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setTextData</span><span class="params">(String textData)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.textData = textData;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>上述代码添加了字段textData和它的访问器与修改器，可以在IDEA或AS中通过code-&gt;generate-&gt;getter and setter来自动生成，<strong>注意鼠标光标必须位于类定义的大括号内，否则generate可能只有copyright选项</strong></p>
 <p>接下来，可以编写两个activity，在一个activity中设置，启动另一个activity，再在另一个activity中显示。这部分内容就是之前讲过的了：<br>在MainActivity.java中：</p>
@@ -462,10 +919,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-07-31 19:37:07 / 修改时间：20:28:21" itemprop="dateCreated datePublished" datetime="2022-07-31T19:37:07+08:00">2022-07-31</time>
+              <time title="创建时间：2022-07-31 19:37:07" itemprop="dateCreated datePublished" datetime="2022-07-31T19:37:07+08:00">2022-07-31</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-03 22:56:14" itemprop="dateModified" datetime="2022-08-03T22:56:14+08:00">2022-08-03</time>
+              </span>
 
           
 
@@ -722,10 +1185,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-07-29 14:43:46 / 修改时间：19:38:51" itemprop="dateCreated datePublished" datetime="2022-07-29T14:43:46+08:00">2022-07-29</time>
+              <time title="创建时间：2022-07-29 14:43:46" itemprop="dateCreated datePublished" datetime="2022-07-29T14:43:46+08:00">2022-07-29</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-06 18:09:08" itemprop="dateModified" datetime="2022-08-06T18:09:08+08:00">2022-08-06</time>
+              </span>
 
           
 
@@ -997,502 +1466,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/28/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/28/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%89%EF%BC%89/" class="post-title-link" itemprop="url">Android学习笔记（三）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-07-28 00:48:49 / 修改时间：20:58:30" itemprop="dateCreated datePublished" datetime="2022-07-28T00:48:49+08:00">2022-07-28</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Intent的概念与使用"><a href="#Intent的概念与使用" class="headerlink" title="Intent的概念与使用"></a>Intent的概念与使用</h2><p>关于Intent，目前只用在启动activity上，通常启动一个activity时需要传递一个intent参数给指定的activity，同时也可以在这个Intent中夹带一些参数进行传递。</p>
-<h3 id="用显示Intent启动Activity"><a href="#用显示Intent启动Activity" class="headerlink" title="用显示Intent启动Activity"></a>用显示Intent启动Activity</h3><p>显示intent就是指定了要启动的activity的类的intent，这种intent通常是用在app内activity之间的交互。接下来就来在一个项目里注册两个activity来看一看如何用intent启动。</p>
-<p>如果不直接新建activity，就要新建一个java类，并令它继承Activity类，还要在res文件夹中新建layout文件定义其ui。之后在java文件中实现Activity的各个方法，通常在onCreate方法中进行layout与activity的绑定：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(<span class="meta">@Nullable</span> Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">    setContentView(R.layout.myaty);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>之后为了使用这个activity中，我们还需要在AndroidManifest文件中进行注册,注意activity的name会与manifest的package组合起来作为Activity类的名称，所以在这里注册时可以使用简写，也可以在name中写全<code>包名.类名</code></p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span></span></span><br><span class="line"><span class="tag">    <span class="attr">package</span>=<span class="string">&quot;com.example.study4intent&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">...</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.MyAty&quot;</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--           name added to package as the name of an Activity object--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--            use com.example.study4intent.MyAty instead--&gt;</span></span><br><span class="line">            ...</span><br><span class="line">        <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>到这里，我们就已经新建了一个activity，并且可以绑定它对应的java和res文件了。如果直接在AS中新建activity的话，ide会自动帮我们完成这些配置工作。</p>
-<p>到这里，我们就可以试着用显示intent启动activity了，这里选择用一个按钮来触发新activity的启动：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.button).setOnClickListener(</span><br><span class="line">    <span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">            Intent intent =</span><br><span class="line">                <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, MyAty.class);</span><br><span class="line">            startActivity(intent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<p>java允许传new出来的参数，而new抽象类需要实现抽象方法，这种嵌套方式写出来的代码非常紧凑，不过通常我们会把findViewById的结果声明为private变量保存下来方便以后调用。</p>
-<p>查看Intent构造器可知Intent可以用一个Context类型对象和一个class泛型来构造，这就是我们的显示Intent要传递的包名和类名。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Intent</span><span class="params">(Context packageContext, Class&lt;?&gt; cls)</span></span></span><br></pre></td></tr></table></figure>
-
-<h2 id="隐式Intent"><a href="#隐式Intent" class="headerlink" title="隐式Intent"></a>隐式Intent</h2><p>Intent除了用显式指定的包名和类名构造之外，也可以先通过一个标记构造，之后再寻找标记对应的类。最常见的方法是使用action，也就是一个字符串。如果用action构造了一个intent，那么就可以直接用这个字符串搜索到注册了这个action的类。（小疑惑，如果有两个一样的action会怎样呢？）</p>
-<h3 id="注册action"><a href="#注册action" class="headerlink" title="注册action"></a>注册action</h3><p>在androidmanifest文件中，activity下加入intent-fliter标签：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;qaq&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>注意，新版Android可能会报错，要求指定activity是否exported，直接用快速修复功能设置为true即可。下文会讲到。</p>
-<p>category的name暂时选择default就可以，而action的name则要注册为对应的字符串，标准的action格式是<code>&lt;package_name&gt;.action.start.&lt;class_name&gt;</code>，不过这个格式实在过于复杂，我们也可以把action的名字放在要启动的类中，作为一个常量</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAty</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACTION = <span class="string">&quot;qaq&quot;</span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样在使用Intent时，就不需要直接输入长长的字符串，使用<code>MyAty.ACTION</code>就可以了</p>
-<h3 id="用隐式Intent启动同一个app内的另一个Activity"><a href="#用隐式Intent启动同一个app内的另一个Activity" class="headerlink" title="用隐式Intent启动同一个app内的另一个Activity"></a>用隐式Intent启动同一个app内的另一个Activity</h3><p>基本的方法和之前都是相同的，区别就是构造intent时调用了另一种构造器：</p>
-<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.button).setOnClickListener(</span><br><span class="line">    new View.OnClickListener() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void onClick(View view) &#123;</span><br><span class="line">            Intent intent =</span><br><span class="line"><span class="deletion">-                new Intent(MainActivity.this, MyAty.class);</span></span><br><span class="line"><span class="addition">+                new Intent(&quot;qaq&quot;);</span></span><br><span class="line">            startActivity(intent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Intent</span><span class="params">(String action)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>当然，隐式Intent最主要的作用并不是用来启动同一个应用内的activity，因为此时我们是可以直接获得这个activity的类的定义的。而在跨应用通讯时，隐式Intent就有用处了。</p>
-<h3 id="用Intent跨应用启动activity"><a href="#用Intent跨应用启动activity" class="headerlink" title="用Intent跨应用启动activity"></a>用Intent跨应用启动activity</h3><p>还记得之前AS可能会要求我们添加的exported属性吗：</p>
-<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">        &lt;activity android:name=&quot;.MyAty&quot;</span><br><span class="line"><span class="addition">+            android:exported=&quot;false&quot;&gt;</span></span><br><span class="line">            &lt;intent-filter&gt;</span><br><span class="line">                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot;/&gt;</span><br><span class="line">                &lt;action android:name=&quot;qaq&quot;/&gt;</span><br><span class="line">            &lt;/intent-filter&gt;</span><br><span class="line">        &lt;/activity&gt;</span><br></pre></td></tr></table></figure>
-
-<p>这是安卓权限管理引入的机制：只有设置为exported的activity对其他应用才是可见的，现在我们可以把它改为true，然后在project中新建一个package（app），并且在另一个app中启动这个app的activity</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.btn_start_myaty).setOnClickListener(</span><br><span class="line">        <span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                startActivity(<span class="keyword">new</span> Intent(<span class="string">&quot;qaq&quot;</span>));</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    Toast.makeText(MainActivity.<span class="keyword">this</span>, <span class="string">&quot;无法启动MyAty&quot;</span>,Toast.LENGTH_SHORT).show();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<p>这里使用了try结构来捕获可能的异常，如果前面没有正确的设置exported的话，就可能导致异常的出现。捕获到异常之后，用Toast组件打印一条提示信息。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/26/%E5%AE%89%E5%8D%93%E5%9B%9B%E5%A4%A7%E7%BB%84%E4%BB%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/26/%E5%AE%89%E5%8D%93%E5%9B%9B%E5%A4%A7%E7%BB%84%E4%BB%B6/" class="post-title-link" itemprop="url">安卓四大组件</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-07-26 16:14:58 / 修改时间：17:13:52" itemprop="dateCreated datePublished" datetime="2022-07-26T16:14:58+08:00">2022-07-26</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Activity"><a href="#Activity" class="headerlink" title="Activity"></a>Activity</h2><h3 id="activity的使用"><a href="#activity的使用" class="headerlink" title="activity的使用"></a>activity的使用</h3><ol>
-<li>在Android Menifest文件中注册</li>
-<li>在xml文件中设定layout</li>
-<li>在java文件中绑定activity</li>
-</ol>
-<p>GridView + Adaptor, GridView + Adaptor, ViewPager + Adaptor</p>
-<h3 id="activity生命周期"><a href="#activity生命周期" class="headerlink" title="activity生命周期"></a>activity生命周期</h3><ol>
-<li>onCreate<br>程序创建，进行文件的绑定</li>
-<li>onStart<br>程序不可见，用户不可交互，进行一些</li>
-<li>onResume<br>程序可见，用户可以交互</li>
-<li>onPause<br>程序部分不可见，（比如被弹窗遮挡），在这里是最后一个比较靠谱的数据保存点（Android 5.0-）。<br>之后也可以在onStop中进行数据保存<br>如果之后恢复可见，会调用onResume</li>
-<li>onStop<br>程序被完全遮挡，如果恢复，经由onRestart回到onStart</li>
-<li>onDestroy<br>程序被销毁，注意，很多场景下可能不会走到这一步，而是在停止之后直接被系统回收</li>
-</ol>
-<p>配置变化（字体改变，屏幕旋转，键盘显示隐藏…）时的生命周期：先杀死再重建，杀死时在onPause之前调用onSaveInstanceState，<br>恢复时在onStart之后调用onRestoreInstanceState</p>
-<p>如果不希望重建activity，可以在android_menifest文件中配置，在配置改变时调用onConfigurationChange，而不销毁。</p>
-<blockquote>
-<p>案例：接完电话之后，程序crush！</p>
-</blockquote>
-<ul>
-<li><p>解释：页面被回收导致本地变量被清空</p>
-</li>
-<li><p>解决：添加判空逻辑避免空指针</p>
-<ul>
-<li>利用两个InstanceState保存和恢复现场！</li>
-</ul>
-</li>
-</ul>
-<h3 id="activity启动模式"><a href="#activity启动模式" class="headerlink" title="activity启动模式"></a>activity启动模式</h3><p>对于每个activity，都可以在android：launchMode中配置启动模式来达到消除重复activity的效果</p>
-<ol>
-<li>standard（默认）<br>每次启动页面都会在页面栈中添加一个新实例</li>
-<li>singleTop<br>不允许栈顶有多个相同实例，试图创建新示例时会回调onNewInstance，然后无事发生</li>
-<li>singleTask<br>不允许栈内有多个实例，如果试图创建新示例，将弹出页面之上的所有页面，然后回调onNewInstance</li>
-<li>singleInstance<br>全局只能有一个实例，应用较少（银行登陆界面，通讯录黄页）</li>
-</ol>
-<blockquote>
-<p>应用：返回首页的小按钮</p>
-</blockquote>
-<ul>
-<li>实现：将主页activity设置为singleTask</li>
-</ul>
-<h2 id="Fragment"><a href="#Fragment" class="headerlink" title="Fragment"></a>Fragment</h2><p>安卓设计fragment的初衷是为了解决页面碎片化的问题，不过平时开发中fragment经常用于提高速度（activity之间交互需要进行IPC），<br>以及进行组件的分离（在屏幕的各个区域用不同的fragment承载功能）</p>
-<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><ol>
-<li>创建布局文件</li>
-<li>在java中加载布局文件</li>
-<li>在activity中加载fragment<br>3.1 静态绑定-在布局文件中绑定<br>3.2 通过FragmentManager加载</li>
-</ol>
-<p>一般使用androidx.fragment，而不是android.app.fragment，以确保版本兼容</p>
-<h3 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h3><ol>
-<li>onAttach<br> 使用activity资源时可以在此进行获取</li>
-<li>onCreateView<br> 常用于初始化</li>
-<li>onResume<br> 运行状态</li>
-<li>onDestroyView<br> 资源回收</li>
-</ol>
-<p>此外也可以通过FragmentTranscation.maxLifeCycle设置可到达的最远生命周期</p>
-<h3 id="与activity交互"><a href="#与activity交互" class="headerlink" title="与activity交互"></a>与activity交互</h3><p>组件获取</p>
-<ul>
-<li><code>getActivity.findViewById(R.id.xx)</code></li>
-<li>getFragmentManager.findFragmentById()</li>
-</ul>
-<p>数据传递</p>
-<ol>
-<li>setArguments(Bundle bundle)</li>
-<li>方法调用</li>
-<li>viewmodel，handler，broadcast</li>
-</ol>
-<h2 id="service"><a href="#service" class="headerlink" title="service"></a>service</h2><p>基本用法</p>
-<ol>
-<li>android_menifest注冊</li>
-<li>java中实现类</li>
-<li>加载：需要交互用bindService，不需要交互用startService</li>
-</ol>
-<h3 id="生命周期-1"><a href="#生命周期-1" class="headerlink" title="生命周期"></a>生命周期</h3><p>start， bind， destroy<br>&#x2F;&#x2F;TODO</p>
-<h3 id="通信方式"><a href="#通信方式" class="headerlink" title="通信方式"></a>通信方式</h3><ol>
-<li>定义Binder子类，实现getService方法，返回Service对象</li>
-<li>实现Service类onBind方法，返回Binder对象</li>
-<li>实例化ServiceConnection对象<br>&#x2F;&#x2F;TODO</li>
-</ol>
-<h2 id="broadcast"><a href="#broadcast" class="headerlink" title="broadcast"></a>broadcast</h2><p>静态广播：使用receiver，在java中实现BroadcastReceiver，用onRecieve接收，用Context.sendBroadcast发送<br>动态广播：</p>
-<p>常用广播：网络&#x2F;电量变化，屏幕点亮&#x2F;熄灭，安装卸载升级软件</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/12/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%B1%BB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/12/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%B1%BB/" class="post-title-link" itemprop="url">Java学习笔记2-对象和类</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-07-12 16:51:47" itemprop="dateCreated datePublished" datetime="2022-07-12T16:51:47+08:00">2022-07-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-24 23:29:56" itemprop="dateModified" datetime="2022-08-24T23:29:56+08:00">2022-08-24</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>适当的提醒自己学习的目的是有必要的。笔记的作者和理想中的读者应当是具有C语言编程的基础，对指针的概念有清晰理解，<br>正在学习面向对象编程并且希望理解类、对象的概念，特性和其大致实现原理。<br>本文的参考教材是java核心技术卷一</p>
-</blockquote>
-<h2 id="面向对象的编程"><a href="#面向对象的编程" class="headerlink" title="面向对象的编程"></a>面向对象的编程</h2><p>我很喜欢书中的一句话：对于面向过程而言，首先决定如何操作数据，然后再觉得如何组织数据的结构。而OOP却调换了这个次序，将数据放在第一位，然后再考虑组织数据的算法。<br>书中进一步提到，Web浏览器可能需要两千个过程对一组全局数据进行操作，而OOP只需要一百个含有20个方法的类，我对此存疑，但这不是重点。</p>
-<h2 id="一、类和对象"><a href="#一、类和对象" class="headerlink" title="一、类和对象"></a>一、类和对象</h2><h3 id="1-1-基本概念"><a href="#1-1-基本概念" class="headerlink" title="1.1 基本概念"></a>1.1 基本概念</h3><p><strong>类</strong>是构造对象的模板或蓝图。由类构造<strong>对象</strong>的过程称为创建类的<strong>实例</strong>。<br>对象中的数据称为<em>实例字段</em>，这些字段的值构成了对象的当前<em>状态</em>。<br>操作数据的过程称之为<em>方法</em>，程序只能通过一个类的方法来与该类的数据交互，这实现了类的<strong>封装</strong>。<br>可以通过<em>保留</em>一个类的全部属性和方法并<em>扩展</em>一些新的方法和数据字段的过程来创建一个新的类，这个过程称为<strong>继承</strong>。<br>对象的方法集合构成了对象的<strong>行为</strong>，示例字段值得集合构成了对象的当前<em>状态</em>同一个类的不同对象具有不同的<strong>标识</strong>。</p>
-<h3 id="1-2-编写OOP程序的原则"><a href="#1-2-编写OOP程序的原则" class="headerlink" title="1.2 编写OOP程序的原则"></a>1.2 编写OOP程序的原则</h3><p>先识别类，再为类添加方法。重要的名词可能是类，重要的动词可能是类的方法。</p>
-<h3 id="1-3-类之间的关系"><a href="#1-3-类之间的关系" class="headerlink" title="1.3 类之间的关系"></a>1.3 类之间的关系</h3><ol>
-<li><p>依赖关系<br> 一个类的方法操作或使用另一个类的对象，就称为这个类<strong>依赖</strong>于另一个类</p>
-</li>
-<li><p>聚合关系<br>一个类的对象包含另一个类的对象</p>
-</li>
-<li><p>继承关系<br>一个类继承并扩展了另一个类的功能</p>
-</li>
-</ol>
-<h2 id="二、使用类的方法"><a href="#二、使用类的方法" class="headerlink" title="二、使用类的方法"></a>二、使用类的方法</h2><p>使用对象要先<strong>构造</strong>对象，然后<strong>初始化</strong>对象，之后<strong>调用</strong>对象的方法。</p>
-<h3 id="2-1-构造对象"><a href="#2-1-构造对象" class="headerlink" title="2.1 构造对象"></a>2.1 构造对象</h3><p>构造对象使用<code>new</code>运算符，这意味着为该对象分配存储空间。单独声明一个对象变量只是声明了一个指针（仔细思考一下，这意味着如果两个对象变量持有同一个对象的引用，通过任何一个对象变量调用方法都会影响另一个对象变量获得的数据）：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Date birthday;          <span class="comment">//unavailable</span></span><br><span class="line">birthday = <span class="keyword">new</span> Date();  <span class="comment">//available</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*other usage*/</span></span><br><span class="line">qaq(<span class="keyword">new</span> Q());   <span class="comment">//use constructed object as argument</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/06/%E7%B2%BE%E7%A5%9E%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/06/%E7%B2%BE%E7%A5%9E%E5%88%86%E6%9E%90%E7%AC%94%E8%AE%B0-2/" class="post-title-link" itemprop="url">精神分析笔记(2)</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-07-06 23:58:43" itemprop="dateCreated datePublished" datetime="2022-07-06T23:58:43+08:00">2022-07-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-07-07 00:01:09" itemprop="dateModified" datetime="2022-07-07T00:01:09+08:00">2022-07-07</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>接下来的几讲介绍修通，修通是精神分析疗法中的一个重要概念。同之前的课程一样，我们还是从大背景讲起。</p>
-<h2 id="精神分析治疗的理论路线"><a href="#精神分析治疗的理论路线" class="headerlink" title="精神分析治疗的理论路线"></a>精神分析治疗的理论路线</h2><p>精神分析疗法的最终目的应该是让病人产生持久性的改变。弗洛伊德的精神分析讨论的是：压抑导致心理冲突。心理冲突是神经症的心理机制，那么就来解决冲突。心理冲突最尖锐的时候是三到五岁，神经症对应心理发展阶段3~5岁，此时的压抑最为强烈，主要是对性的压抑，这就是弗洛伊德的理论。</p>
-<p>客体关系理论指出，三岁以前两岁以内的时期，孩子不具有自己反抗自己、自己管理自己的能力，压抑比较弱。两岁以内，不完全受本能的推动，而很可能是受人际关系这个动力的推动。<br>弗洛伊德注意到本能似乎是很正确的，但那时很少有人注意到人际关系的重要。客体关系理论强调孩子除了吃的本能之外，还对养育者有着建立关系的需要，这种需要直接推动心理的发展。</p>
-<ul>
-<li>实验：布猴与铁猴</li>
-<li>小猴依偎在布猴妈妈身边蹭， 并不理会铁猴的奶水。</li>
-</ul>
-<p>人和妈妈建立感情的需求，推动人心理的形成，这就是重要的依恋理论。4~6个月开始，孩子就能区分妈妈和陌生人。而四个月之前的孩子有没有人际交往作为生活动力的可能呢？孩子被抱起来之后会转头做吸吮动作，这是否是纯粹的条件反射呢？</p>
-<ul>
-<li>实验：妈妈在喂奶之后给孩子做鬼脸，从出生之后开始每天重复</li>
-<li>到9~12天，孩子一看看到妈妈看他，没等妈妈做鬼脸，孩子先做鬼脸</li>
-</ul>
-<p>可见，这个实验一下子拜托了本能决定论，人为了和妈妈交流，天然的有建立亲情的需要和动力。到四个月之后，安全、情感交流、亲密感的需要更明显的体现了出来。<br>在两岁之前，孩子都有对人际关系的需要，如果此时没有得到母爱，那么孩子的发展就会受到影响。四个月时，孩子面对陌生人的表现有以下几种：</p>
-<ul>
-<li>眼睛追踪陌生人，露出微笑</li>
-<li>眼睛追踪陌生人，面无表情</li>
-<li>眼睛并不转动，毫无反应</li>
-</ul>
-<p>这三种反应出依次降低的心理功能，因为孩子的反应就体现出妈妈的养育方式。这又会进一步影响孩子两岁以后各种心理功能的发展。</p>
-<p>这就是客体关系理论的基本理念：两岁以内的母爱缺乏导致心理功能的缺损。可以说，弗洛伊德的学说是压抑的学说，客体关系理论是功能缺损的学说。<br>心理功能缺损有许多表现，最终都成为人格障碍。这都是因为两岁关系母婴关系出了问题。</p>
-<p>弗洛伊德的学说就像是种子的概念，客体关系理论则像是土壤的学说，一个是本能决定论的角度，一个是环境（母婴关系）的学说。这两个学说同时正确，相互补充。我们现在做精神分析必须把两套理论结合起来才是完整的，全面的。</p>
-<h3 id="精神分析治疗的工作"><a href="#精神分析治疗的工作" class="headerlink" title="精神分析治疗的工作"></a>精神分析治疗的工作</h3><p><code>把潜意识意识化</code>，这就是经典精神分析（弗洛伊德）的任务。而现代精神分析需要做的事还有<code>修补人格的功能缺损</code>。</p>
-<ul>
-<li>比喻：精神分析的治疗与修自行车<br> 先补气，再休整，再换零件。支持疗法、人格重整</li>
-</ul>
-<p>精神分析有这样那样的方法，甚至于不同流派也有各种各样的方法，不过最终最重要的是心理咨询师如何<strong>组装内心的知识结构</strong>，并且<strong>灵活的将其运用于治疗中</strong>。</p>
-<h3 id="精神分析的技术路线"><a href="#精神分析的技术路线" class="headerlink" title="精神分析的技术路线"></a>精神分析的技术路线</h3><p>潜意识的催眠术：提出歇斯底里的机制，找到了<code>把潜意识意识化</code><br>自由联想：扩大适应症，疗效更持久。<br>梦的分析：<code>通过梦理解与解释潜意识</code><br>会谈-对峙、澄清、解释、修通 ：稳定而持久的效果</p>
-<p>从经典精神分析挖创伤解决症结到修补心理功能的现代精神分析，心理治疗从治疗导向逐渐转变为发展导向。<strong>发展是心理治疗的最终目标</strong>（这句话并不容易真正做到）</p>
-<ul>
-<li>Tip：修通的地位<br>在会谈成为主要治疗技术时的一个重要手段。</li>
-</ul>
-<h3 id="治疗关系的发展"><a href="#治疗关系的发展" class="headerlink" title="治疗关系的发展"></a>治疗关系的发展</h3><p>治疗师作为：屏幕、解释者、容器、内化客体</p>
-<h3 id="精神分析治疗手段"><a href="#精神分析治疗手段" class="headerlink" title="精神分析治疗手段"></a>精神分析治疗手段</h3><p>建立工作联盟，分析处理移情和阻抗（处理治疗关系），自由联想变形使用（倾听、沉默、打断），偶尔使用梦的分析，更多的则是理解、解释、？？、修通</p>
-<p>我们对病人施加影响，根本上决定于病人。但治疗师也要对病人的心理施加影响，在施加影响的时候，精神分析又有何独到之处呢？<br>催眠、暗示、情感宣泄，这都属于非特异性的方法。而自由联想、梦的分析、语言干预中的对峙澄清解释修通则带有特异性。<br>人本主义等也用对峙澄清，而精神分析式的解释由于涉及到阻抗的处理，是精神分析干预中最独特的，也是精神分析干预中最重要的手段。</p>
-<h2 id="理解与解释"><a href="#理解与解释" class="headerlink" title="理解与解释"></a>理解与解释</h2><h3 id="什么是理解与解释"><a href="#什么是理解与解释" class="headerlink" title="什么是理解与解释"></a>什么是理解与解释</h3><p>理解就是理解症状的含义，即<strong>症状和心理需要之间的关系</strong></p>
-<ul>
-<li>案例：失女的父亲<br>地震时，教学楼倒塌，女儿遇难。父亲拿着手机，不吃不睡，不开口。</li>
-</ul>
-<p>解释：</p>
-<ul>
-<li>应激反应，急性期的情感休克，麻木 —— 这是理解与解释吗？</li>
-</ul>
-<p>说明因果关系不是理解：这是站在旁观者的角度进行的理论上的因果阐释，而没有<strong>共情</strong></p>
-<ul>
-<li>你很<em>愤怒</em>，联系别的家长追查，想上诉，这是因为你<em>心疼</em>女儿。</li>
-</ul>
-<p>说到这里，闭上的双眼留出泪水。</p>
-<ul>
-<li>追查上诉，可能得到赔款，但你真正想要的是<strong>给女儿一个交代</strong></li>
-</ul>
-<p>说到这里，激动的来握手。这时候就可以建立治疗关系了。</p>
-<p>可见，对“心疼”的<em>共情</em>是不够的，没有真正表达出他的愿望，<strong>理解他的心理需要</strong>。</p>
-<ul>
-<li>后续，引着他的动力解决当前的问题：先吃饭看病，做父亲的自己活得好才能给女儿一个交代等等。。。</li>
-</ul>
-<p>解释就意味着让<strong>潜意识的内容</strong>进入意识，或者说让<strong>精神创伤的原因</strong>进入到意识。透过谈话帮助病人自己也没有意识到的内容进入病人和医生的意识，这样的一个工作就是揭示。解释属于语言干预的范畴。</p>
-<p>理解与解释，经常是阐述一些因果关系，弗洛伊德的潜意识决定论会解释精神症与潜意识的关系，揭示内在的需要和动机。许多精神症都是通过象征化的手段来表达心中的欲望，如果通过直接的方式满足了欲望，这个象征化的手段就不需要了。</p>
-<ul>
-<li><p>例：让男生帮自己拧水瓶盖，间接的表达欲望。</p>
-</li>
-<li><p>tip：神经症用变通、拐弯的方式表达了自己心理的欲望，而不能拐弯也无法表达的欲望的就成为人格障碍。</p>
-</li>
-</ul>
-<h3 id="理解的功能与形式"><a href="#理解的功能与形式" class="headerlink" title="理解的功能与形式"></a>理解的功能与形式</h3><ol>
-<li>与以往的经验保持一致，获得<strong>一致性</strong>的感受，是一种理解。</li>
-</ol>
-<p>把当前的认知与过往的经验联系起来，建立逻辑联系，这就是理解的形式之一（普通心理学）。一旦理解了，就获得前后一致的内在感受，一旦不理解，就出现经验和认知的矛盾，无法获得一致性的内在感受。<br>比如遇到违背常识的事情，很希望获得背后的原理解释，要不然就感觉很疑惑。</p>
-<ol start="2">
-<li>完成未完成的事情完成，这也是一种理解</li>
-</ol>
-<ul>
-<li>例：没看完的鬼故事<br>  只有看完了才能获得心理上的一致感！</li>
-</ul>
-<ol start="3">
-<li>把两个事情联系起来获得<strong>整体感</strong>，也是一种理解</li>
-</ol>
-<p>比如常见的谐音的“寓意”，常见的“兆头”，把自然现象和事物与平安、美好等期盼联系起来。首先给自己一个解释：吃了苹果可以得到好兆头，然后再去削苹果。两个无关的事物通过心理上的理解连接在一起，从而获得了一个整体感，这个整体的两个部分具有心里意义上的联系：吃苹果表达平安。</p>
-<h3 id="理解的心理机制"><a href="#理解的心理机制" class="headerlink" title="理解的心理机制"></a>理解的心理机制</h3><p>借着这种连接，心里的愿望也得以实现。这种连接事实上是任意的。</p>
-<ul>
-<li>例：“预言梦”<br>做了一个梦，梦见一个人推铅球。二十年后看到一个人推铅球，说“我的梦有预言作用”</li>
-</ul>
-<p>不管“预言”在多久之后实现，都可以在心理上建立联系。梦的记忆和推铅球的认知在当事人的感受中联系起来，这就说出一句话“我的梦具有预言作用”。两个无关的事情一链接，就得到了新的东西。而这东西背后表达的情感是什么呢——获得自主感、自信心、特殊感。</p>
-<p>链接的是认知的是记忆，推动链接的是背后的心理需要，让人<em>宁愿</em>把这两个事情做链接。</p>
-<ul>
-<li>例：孩子看世界<br>太阳升起，因为我起床。太阳落下，因为我睡觉<br>妈妈高兴，因为我乖。妈妈生气，因为我不乖<br>妈妈去世了？ 因为我把妈妈气死了<br>妈妈离开了？ 因为我把妈妈气走了</li>
-<li>例：养猫不能留小猫<br>人们说：小猫把老猫气走了。人们大多真的这么认为。<br>其实是老猫宁愿离开家，把家留给小猫，老猫感情上还是想念女儿的，只是宁可离开这个家</li>
-</ul>
-<p>这也是一种心理意义上的理解，所以有亲人去世的时候，每个活着的人都会感到内疚，检阅自己的过错，恨意消失，想着那个人的好，变成自责。这其实都是心理内部加工过的东西，通过把无关的事情建立联系，借以表达内在的心理情感和心理需要。<br>理解的思维活动，和潜意识的愿望与需要的关系就是这样。我们必须说清楚这个阶段，才能理解病人为何存在着非理性的认知观念。</p>
-<h3 id="理解的意义"><a href="#理解的意义" class="headerlink" title="理解的意义"></a>理解的意义</h3><p>非理性的认知观念重点在于<strong>非理性</strong>，重点并非他到底想的是<em>怎样的怀念头</em>，而是他<em>为什么</em>宁愿想坏的念头。认知疗法无法解决，只有精神分析才能回答这个问题：出于内在的需要。</p>
-<ul>
-<li>例：走不出的失恋<br>充满理想化的回忆，温习爱的痛苦，这才能保持自我的同一性，因此宁愿那么想。</li>
-</ul>
-<p>“理解”的心理机制可以帮助我们理解一些临床现象。</p>
-<p>其次，理解还可以帮助我们在病人心理内部建立新的连接，表达原来无法表达的情感与愿望。<br>我们经常能够在悲剧作品中看到这样的表达，比如传统中国悲剧中总是有一个浪漫式的结尾，通过一种纯粹心理上的理解来获得故事的完整性，并且表达我们内心对于美好故事的愿望。</p>
-<p>每个人的心中都会有未完成的故事情节，如同鲁迅写的《风筝》故事，（这里老师记错了结局）,鲁迅并没有释然，而是因为弟弟不冷不热的回应更深刻的感受到了未完成事件的痛苦。</p>
-<p>对于未完成事件，如果能找到从前的那个情景，可以完成。如果不能找到，只能通过自己的想象去完成。</p>
-<ul>
-<li>例：交通事故之后的小伙<br>汽车时刹车不及下坡时撞车，女友惨死。<br>治疗过程中，要帮助他完成这个恋爱故事</li>
-</ul>
-<p>未完成的事件会导致心理发展的停滞。</p>
-<ul>
-<li>例：地震中的灾民<br>地震中一个尸体头滚落，卫生局长用砖头把头和尸体接起来，久久难以忘怀。</li>
-</ul>
-<p>要不要继续讲地震的故事呢？要的，如果不讲，那种惨状就一直停留在头脑里，停滞不前。这个时候就需要我们在内心帮助他完成这个故事。想象家人看到尸体的悲伤，想象家人对好心人的举动，想象你的回应。<br>慢慢的，回忆的内容从血肉模糊的变成家里人，最后淡化，没有了。<br>通过整体性的连接、理解之后，能够表达更多的情感，在心理治疗上具有积极的作用。人看到灾后的一系列事情，时间上进行了动态的发展。<br>在讲地震的这个完整故事的过程中，我们可能从“人的生命真脆弱”，来到看到救灾时的“人类的勇气与善良值得歌颂”，这种情况下，人的心理因为新的解释得到了发展。</p>
-<ul>
-<li>例：忘不掉的初恋<br>解释：人们总是以为第一次的体验就是正确的，就好比第一次爱人敲了一个窗户，其他人敲了另外的窗户，你就以为那些都不是爱人<br>问题：我只想等着那一类人来敲我的窗<br>解释2：爱人敲了一扇窗你以为是爱情，爱人敲了另一扇窗，你却不去听了<br>问题：没人来敲窗（守株待兔式的爱）<br>解释3：我们不再被动的等待一个爱人，而是主动的创造一个爱人。<br>问题：没人来敲窗总是感觉很寂寞？<br>解释4：主动走出去，去敲别人家的窗</li>
-</ul>
-<p>这是很好的例子！不同的解释要尽量的贴近内在的想法，建立和他内心的联系，才能一步步的把他带出来，<strong>用贴近内心的解释来推动行为</strong>。通过这种解释，内心多出了新的想法，以新的视角推动人去行动，改变了他行为的方式。</p>
-<p>这就是对理解是什么的基本的认识。</p>
-<h3 id="解释"><a href="#解释" class="headerlink" title="解释"></a>解释</h3><p>治疗师先对自己进行理解，然后<em>将心比心</em>的去理解病人，就叫做对病人的理解。看到别人流眼泪勾起了自己流眼泪时的感受，<em>投射</em>给病人，就是理解（认同性的投射）。<br>理解了而不表达，只是理解。<strong>把理解说给病人听，就是解释</strong>。将心比心地用自我理解理解病人，又把对病人的理解说给病人听，这样的临床操作就叫解释。解释的前提和基础就是理解，也就是理解对方的<strong>动机、需要、行动背后的心理含义</strong><br>病人借助我们的解释，最终不是要理解我们的说法，而是要<strong>加深对自我的理解</strong>。通过自我理解，病人内心的不一致、未完成得以解决，内心的愿望得以表达，也丰富了他内心的想法。自我理解整理散乱的记忆，接续未完成的事件，可以修补心理功能的缺损，让心理更有整体性，更符合现实发展的逻辑。丰富心理功能是解释的客观效果，而达成病人的愿望是解释的主观动力：借着自我理解，病人表达了自己压抑的东西——把潜意识的东西意识化。<br>自由联想回忆起内在的感受，而借助医生的解释，潜意识的愿望能够在意识层面得以觉察和表达，这是解释最重要的功能。<em><strong>精神分析的解释是精神分析治疗的眼珠子</strong></em>。移情和阻抗的处理都需要理解。</p>
-<p>人总是希望“解释世界”，要赋予事物意义，要完成未完成的事件（例：没想通的压轴题）。对外界的认知和观念要想成为我们相信的内容，即加入了情感、信念的坚定认同，是需要有一个过程的。这句话为修通埋下伏笔。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1560,12 +1537,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">24</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>

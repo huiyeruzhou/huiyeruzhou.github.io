@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"huiyeruzhou.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Erpc服务处理过程梳理RPC的服务端处理过程从传输层开始。当传输层收到消息，就会根据约定的传输协议接受信息，然后调用序列化层。序列化解析出请求内容，交由代理层处理。代理层通过对Server和Service的抽象，从请求内容中解析要调用的实际方法和参数，并根据有无返回值&#x2F;是否需要写回数据做进一步处理。如果有返回消息的必要，则代理层调用序列化层写入返回内容，调用传输层用协议封装信息并进行发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RPC梳理">
+<meta property="og:url" content="http://huiyeruzhou.github.io/2022/11/03/RPC%E6%A2%B3%E7%90%86/index.html">
+<meta property="og:site_name" content="辉夜的博客">
+<meta property="og:description" content="Erpc服务处理过程梳理RPC的服务端处理过程从传输层开始。当传输层收到消息，就会根据约定的传输协议接受信息，然后调用序列化层。序列化解析出请求内容，交由代理层处理。代理层通过对Server和Service的抽象，从请求内容中解析要调用的实际方法和参数，并根据有无返回值&#x2F;是否需要写回数据做进一步处理。如果有返回消息的必要，则代理层调用序列化层写入返回内容，调用传输层用协议封装信息并进行发">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-03T14:37:18.000Z">
+<meta property="article:modified_time" content="2022-11-03T14:37:44.472Z">
+<meta property="article:author" content="辉夜">
+<meta property="article:tag" content="CS">
+<meta property="article:tag" content="RPC">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://huiyeruzhou.github.io/2022/11/03/RPC%E6%A2%B3%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>RPC梳理 | 辉夜的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">辉夜的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">繁花似锦，辉夜如昼</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>Links</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/11/03/RPC%E6%A2%B3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RPC梳理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-11-03 22:37:18 / 修改时间：22:37:44" itemprop="dateCreated datePublished" datetime="2022-11-03T22:37:18+08:00">2022-11-03</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Erpc服务处理过程梳理"><a href="#Erpc服务处理过程梳理" class="headerlink" title="Erpc服务处理过程梳理"></a>Erpc服务处理过程梳理</h1><p>RPC的服务端处理过程从传输层开始。当传输层收到消息，就会根据约定的传输协议接受信息，然后调用序列化层。序列化解析出请求内容，交由代理层处理。代理层通过对Server和Service的抽象，从请求内容中解析要调用的实际方法和参数，并根据有无返回值&#x2F;是否需要写回数据做进一步处理。<br>如果有返回消息的必要，则代理层调用序列化层写入返回内容，调用传输层用协议封装信息并进行发送</p>
+<h2 id="代理层服务器开始服务"><a href="#代理层服务器开始服务" class="headerlink" title="代理层服务器开始服务"></a>代理层服务器开始服务</h2><p>一个典型的服务器启动之后便开始不断监听可能到来的请求：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::run</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="keyword">while</span> ((err == kErpcStatus_Success) &amp;&amp; m_isServerOn)</span><br><span class="line">    &#123;</span><br><span class="line">        err = <span class="built_in">runInternal</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>处理过程大致可以分为两步,一是信息处理,二是请求处理,三是数据写回.在erpc中对应 <code>runInternalBegin</code>和<code>runInternalEnd</code>,前者完成第一步,后者完成后两步.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::runInternal</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    MessageBuffer buff;</span><br><span class="line">    Codec *codec = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">message_type_t</span> msgType;</span><br><span class="line">    <span class="keyword">uint32_t</span> serviceId;</span><br><span class="line">    <span class="keyword">uint32_t</span> methodId;</span><br><span class="line">    <span class="keyword">uint32_t</span> sequence;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = <span class="built_in">runInternalBegin</span>(&amp;codec, buff, msgType, serviceId, methodId, sequence);</span><br><span class="line">    <span class="keyword">if</span> (err == kErpcStatus_Success)</span><br><span class="line">    &#123;</span><br><span class="line">        err = <span class="built_in">runInternalEnd</span>(codec, msgType, serviceId, methodId, sequence);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="信息处理"><a href="#信息处理" class="headerlink" title="信息处理"></a>信息处理</h2><p>Server在处理消息之前,必须获取一些关键的信息用于下一步处理事件.概括来说,一般需要以下几类信息:</p>
+<ul>
+<li>RPC协议相关<ul>
+<li>消息类型: 是单向请求信息,双向请求信息还是响应信息或系统通知等</li>
+<li>RPC协议版本: 用于正确解析信息</li>
+<li>序列化方法: 用于正确配置序列化层</li>
+<li>请求序列号: 用于异步响应时区分多个请求</li>
+</ul>
+</li>
+<li>代理相关<ul>
+<li>请求的Service: 请求的包名&#x2F;类名&#x2F;服务名等</li>
+<li>请求的Method: 请求的具体方法</li>
+<li>请求的arguments: 实参</li>
+<li>请求的参数类型: 用于重载解析</li>
+</ul>
+</li>
+</ul>
+<p>这些信息有的在解析完之后立刻使用;有的存放起来作为参数在调用栈中传递;有的暂时不解析,而是配置一个codec,到时按需取用.</p>
+<p>从代码中可以看到,信息解析的过程主要包括传输层接收,序列化层读取两个过程</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::runInternalBegin</span><span class="params">(Codec **codec, MessageBuffer &amp;buff, <span class="keyword">message_type_t</span> &amp;msgType,</span></span></span><br><span class="line"><span class="params"><span class="function">                                             <span class="keyword">uint32_t</span> &amp;serviceId, <span class="keyword">uint32_t</span> &amp;methodId, <span class="keyword">uint32_t</span> &amp;sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="comment">// buffer创建</span></span><br><span class="line">    <span class="keyword">if</span> (m_messageFactory-&gt;<span class="built_in">createServerBuffer</span>() == <span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        buff = m_messageFactory-&gt;<span class="built_in">create</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 传输层接收</span></span><br><span class="line">    err = m_transport-&gt;<span class="built_in">receive</span>(&amp;buff);</span><br><span class="line">    <span class="comment">// 序列化层初始化及读取</span></span><br><span class="line">    *codec = m_codecFactory-&gt;<span class="built_in">create</span>();</span><br><span class="line">    (*codec)-&gt;<span class="built_in">setBuffer</span>(buff);</span><br><span class="line">    err = <span class="built_in">readHeadOfMessage</span>(*codec, msgType, serviceId, methodId, sequence);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="传输层接收"><a href="#传输层接收" class="headerlink" title="传输层接收"></a>传输层接收</h3><p>传输层接受的部分就一句话,简而言之就是将信息读取到buffer中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 传输层接收</span></span><br><span class="line"> err = m_transport-&gt;<span class="built_in">receive</span>(&amp;buff);</span><br></pre></td></tr></table></figure>
+
+<p>erpc在这里为所有按帧传输的传输层准备了接受一帧的函数,先接受请求头,读出请求帧的长度,再接受请求体.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">FramedTransport::receive</span><span class="params">(MessageBuffer *message)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Header h;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> retVal;</span><br><span class="line">    <span class="keyword">uint16_t</span> computedCrc;</span><br><span class="line">    &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> !ERPC_THREADS_IS(NONE)</span></span><br><span class="line">        <span class="function">Mutex::Guard <span class="title">lock</span><span class="params">(m_receiveLock)</span></span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">        <span class="comment">// Receive header first.</span></span><br><span class="line">        retVal = <span class="built_in">underlyingReceive</span>((<span class="keyword">uint8_t</span> *)&amp;h, <span class="built_in"><span class="keyword">sizeof</span></span>(h));</span><br><span class="line">         <span class="comment">// Receive rest of the message now we know its size.</span></span><br><span class="line">        retVal = <span class="built_in">underlyingReceive</span>(message-&gt;<span class="built_in">get</span>(), h.m_messageSize);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Verify CRC.</span></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    message-&gt;<span class="built_in">setUsed</span>(h.m_messageSize);</span><br><span class="line">    <span class="keyword">return</span> retVal;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其底层实现为<code>TCPTransport::underlyingReceive</code>,本质上就是对read进行了封装.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">TCPTransport::underlyingReceive</span><span class="params">(<span class="keyword">uint8_t</span> *data, <span class="keyword">uint32_t</span> size)</span></span>&#123;</span><br><span class="line">    <span class="keyword">ssize_t</span> length;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> status = kErpcStatus_Success;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Block until we have a valid connection.</span></span><br><span class="line">    <span class="keyword">while</span> (m_socket &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        Thread::<span class="built_in">sleep</span>(<span class="number">10000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Loop until all requested data is received.</span></span><br><span class="line">    <span class="keyword">while</span> (size &gt; <span class="number">0U</span>)&#123;</span><br><span class="line">        length = <span class="built_in">read</span>(m_socket, data, size);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Length will be zero if the connection is closed.</span></span><br><span class="line">        <span class="keyword">if</span> (length &gt; <span class="number">0</span>)&#123;</span><br><span class="line">            size -= length;</span><br><span class="line">            data += length;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (length == <span class="number">0</span>)&#123;</span><br><span class="line">                <span class="comment">// close socket, not server</span></span><br><span class="line">                <span class="built_in">close</span>(<span class="literal">false</span>);</span><br><span class="line">                status = kErpcStatus_ConnectionClosed;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                status = kErpcStatus_ReceiveFailed;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过这个过程,我们将socket中的信息成功的接收到了buf中</p>
+<h3 id="序列化层解析"><a href="#序列化层解析" class="headerlink" title="序列化层解析"></a>序列化层解析</h3><p>在erpc中,codec是对一次序列化的封装,一个codec不仅有读写各种数据类型的方法,还持有目前正在处理的buffer和buffer上的cursor,这纯粹是为了语法上的方便,不必在调用每个读写函数时都额外传递一个buffer参数,只需要在开始时设置即可.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Codec</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    MessageBuffer m_buffer;         <span class="comment">/*!&lt; Message buffer object */</span></span><br><span class="line">    MessageBuffer::Cursor m_cursor; <span class="comment">/*!&lt; Copy data to message buffers. */</span></span><br><span class="line">    <span class="keyword">erpc_status_t</span> m_status;         <span class="comment">/*!&lt; Status of serialized data. */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>因此,codec处理的部分先是创建一个codec并绑定buffer,然后再调用内部处理函数读取请求头</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 序列化层初始化及读取</span></span><br><span class="line">*codec = m_codecFactory-&gt;<span class="built_in">create</span>();</span><br><span class="line">(*codec)-&gt;<span class="built_in">setBuffer</span>(buff);</span><br><span class="line">err = <span class="built_in">readHeadOfMessage</span>(*codec, msgType, serviceId, methodId, sequence);</span><br></pre></td></tr></table></figure>
+
+<p>这里我们就不详细探究codec的底层实现了,可以想到对字节流做处理的大概方法就是针对数据类型的长度,读取一定的字节,填入到对象指针指向的内存中,并移动buffer上的cursor.</p>
+<p>总体来说,在这里值得注意的地方时codec兼具序列化层和RPC传输协议约定的功能,codec的<code>readHeadOfMessage</code>的实现方法其实就对应了协议头如何组织信息.</p>
+<p>在默认的codec中,请求头是一个四字节头加上一个int32序列号,四个字节分别表示codecVersion, serviceId, methodId, requestType(不过很明显,先构建codec再读取头信息已经太迟了,所以当他检测到不匹配的codecversion时没法处理,只能直接报错)</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BasicCodec::startReadMessage</span><span class="params">(<span class="keyword">message_type_t</span> *type, <span class="keyword">uint32_t</span> *service, <span class="keyword">uint32_t</span> *request, <span class="keyword">uint32_t</span> *sequence)</span></span>&#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> header;</span><br><span class="line">    <span class="built_in">read</span>(&amp;header);</span><br><span class="line">    <span class="keyword">if</span> (((header &gt;&gt; <span class="number">24</span>) &amp; <span class="number">0xff</span>U) != kBasicCodecVersion)&#123;</span><br><span class="line">        <span class="built_in">updateStatus</span>(kErpcStatus_InvalidMessageVersion);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">isStatusOk</span>())&#123;</span><br><span class="line">        *service = ((header &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xff</span>U);</span><br><span class="line">        *request = ((header &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>U);</span><br><span class="line">        *type = <span class="keyword">static_cast</span>&lt;<span class="keyword">message_type_t</span>&gt;(header &amp; <span class="number">0xff</span>U);</span><br><span class="line">        <span class="built_in">read</span>(sequence);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="请求处理"><a href="#请求处理" class="headerlink" title="请求处理"></a>请求处理</h2><p>在经过了信息处理之后,我们已经成功的将传输层中的一帧请求接收到buffer中,获得了这个请求的rpc协议参数,接下来要做的就是调用合适的处理程序来完成实际的处理工作.erpc中,这个函数正是<code>Server::processMessage</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::runInternalEnd</span><span class="params">(Codec *codec, <span class="keyword">message_type_t</span> msgType, <span class="keyword">uint32_t</span> serviceId, <span class="keyword">uint32_t</span> methodId,</span></span></span><br><span class="line"><span class="params"><span class="function">                                           <span class="keyword">uint32_t</span> sequence)</span></span>&#123;</span><br><span class="line">    <span class="comment">//请求处理</span></span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = <span class="built_in">processMessage</span>(codec, msgType, serviceId, methodId, sequence);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//消息写回</span></span><br><span class="line">    <span class="keyword">if</span> (err == kErpcStatus_Success)&#123;</span><br><span class="line">        <span class="keyword">if</span> (msgType != kOnewayMessage)&#123;</span><br><span class="line">                err = m_transport-&gt;<span class="built_in">send</span>(codec-&gt;<span class="built_in">getBuffer</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Dispose of buffers and codecs.</span></span><br><span class="line">    <span class="built_in">disposeBufferAndCodec</span>(codec);</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过阅读源码,我们看到请求处理分为两个阶段:服务发现和方法调用</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">Server::processMessage</span><span class="params">(Codec *codec, <span class="keyword">message_type_t</span> msgType, <span class="keyword">uint32_t</span> serviceId, <span class="keyword">uint32_t</span> methodId,</span></span></span><br><span class="line"><span class="params"><span class="function">                                     <span class="keyword">uint32_t</span> sequence)</span></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    Service *service;</span><br><span class="line">    <span class="comment">//服务发现</span></span><br><span class="line">    service = <span class="built_in">findServiceWithId</span>(serviceId);</span><br><span class="line">    <span class="comment">//方法调用</span></span><br><span class="line">    err = service-&gt;<span class="built_in">handleInvocation</span>(methodId, sequence, codec, m_messageFactory);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h3><p>服务发现的过程就是在服务器已注册的服务中寻找能响应请求的那个,一些语言会使用map来完成这个事情,而在erpc中直接使用了serviceId+methodId, 如果idl确定的话,对于S&#x2F;C端而言,这个id号是可以唯一确定有效服务的.</p>
+<p>在服务端,服务用链表存储:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Service</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">uint32_t</span> <span class="title">getServiceId</span><span class="params">(<span class="keyword">void</span>)</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> m_serviceId; &#125;</span><br><span class="line">    <span class="function">Service *<span class="title">getNext</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123; <span class="keyword">return</span> m_next; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setNext</span><span class="params">(Service *next)</span> </span>&#123; m_next = next; &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">erpc_status_t</span> <span class="title">handleInvocation</span><span class="params">(<span class="keyword">uint32_t</span> methodId, <span class="keyword">uint32_t</span> sequence, Codec *codec,</span></span></span><br><span class="line"><span class="params"><span class="function">                                           MessageBufferFactory *messageFactory)</span> </span>= <span class="number">0</span>;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="keyword">uint32_t</span> m_serviceId; <span class="comment">/*!&lt; Service unique id. */</span></span><br><span class="line">    Service *m_next;      <span class="comment">/*!&lt; Pointer to next service. */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>服务器在解析信息时通过遍历链表查找id对应的服务,然后调用对应的处理函数:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">Server::processMessage</span><span class="params">(Codec *codec, <span class="keyword">message_type_t</span> msgType, <span class="keyword">uint32_t</span> serviceId, <span class="keyword">uint32_t</span> methodId,</span></span></span><br><span class="line"><span class="params"><span class="function">                                     <span class="keyword">uint32_t</span> sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    Service *service;</span><br><span class="line">    service = <span class="built_in">findServiceWithId</span>(serviceId);</span><br><span class="line">    err = service-&gt;<span class="built_in">handleInvocation</span>(methodId, sequence, codec, m_messageFactory);</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h3><p><code>Server::processMessage</code>调用的<code>Service::handleInvocation</code>是由erpcgen工具根据我们定义的IDL自动生成的.<br>在.erpc中声明service及其方法, 其中interface关键字后跟服务名, 花括号内可以有若干个方法.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> MatrixMultiplyService <span class="comment">// cover functions for same topic</span></span><br><span class="line">&#123;</span><br><span class="line">    erpcMatrixMultiply(in Matrix matrix1, in Matrix matrix2, out Matrix result_matrix) -&gt; void</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行下列命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">erpcgen idl.erpc -g c</span><br></pre></td></tr></table></figure>
+
+<p>即可得到生成的文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">erpc_matrix_multiply_client.c++</span><br><span class="line">erpc_matrix_multiply_server.c++</span><br><span class="line">erpc_matrix_multiply_server.h</span><br><span class="line">erpc_matrix_multiply.h</span><br></pre></td></tr></table></figure>
+
+<p>其中,<code>erpc_matrix_multiply_server.c++</code>就有服务处理函数的定义.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">MatrixMultiplyService_service::handleInvocation</span><span class="params">(<span class="keyword">uint32_t</span> methodId, <span class="keyword">uint32_t</span> sequence, Codec * codec, MessageBufferFactory *messageFactory)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> erpcStatus;</span><br><span class="line">    <span class="built_in"><span class="keyword">switch</span></span> (methodId)&#123;</span><br><span class="line">        <span class="keyword">case</span> kMatrixMultiplyService_erpcMatrixMultiply_id:</span><br><span class="line">            erpcStatus = <span class="built_in">erpcMatrixMultiply_shim</span>(codec, messageFactory, sequence);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            erpcStatus = kErpcStatus_InvalidArgument;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> erpcStatus;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到, 处理函数进一步通过methodId判断该调用Service中的哪个方法的shim, 这个shim就是方法对应的代理.<br>代理完成的内容就是组织codec进行反序列化, 获取入参,然后对out类型的数据进行序列化写回, 返回值也一并写回</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">MatrixMultiplyService_service::erpcMatrixMultiply_shim</span><span class="params">(Codec * codec, MessageBufferFactory *messageFactory, <span class="keyword">uint32_t</span> sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line"></span><br><span class="line">    Matrix matrix1;</span><br><span class="line">    Matrix matrix2;</span><br><span class="line">    Matrix result_matrix;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)&#123;</span><br><span class="line">            codec-&gt;<span class="built_in">read</span>(&amp;matrix1[arrayCount0][arrayCount1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)&#123;</span><br><span class="line">            codec-&gt;<span class="built_in">read</span>(&amp;matrix2[arrayCount0][arrayCount1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// preparing codec for serializing data</span></span><br><span class="line">    codec-&gt;<span class="built_in">reset</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//调用实际方法</span></span><br><span class="line">    <span class="built_in">erpcMatrixMultiply</span>(matrix1, matrix2, result_matrix);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Build response message.</span></span><br><span class="line">    codec-&gt;<span class="built_in">startWriteMessage</span>(kReplyMessage, kMatrixMultiplyService_service_id, kMatrixMultiplyService_erpcMatrixMultiply_id, sequence);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)&#123;</span><br><span class="line">                codec-&gt;<span class="built_in">write</span>(result_matrix[arrayCount0][arrayCount1]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="数据写回"><a href="#数据写回" class="headerlink" title="数据写回"></a>数据写回</h3><p>首先需要注意的是,在调用实际方法之前,对codec进行了重置:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">// preparing codec for serializing data</span></span><br><span class="line">    codec-&gt;<span class="built_in">reset</span>();</span><br></pre></td></tr></table></figure>
+
+<p>这个重置函数将内部的buffer和cursor恢复到使用之前的状态,相当于将这个读缓冲区又作为写缓冲区复用.在写回过程中，序列化首先调用codec的startWriteMessage方法写回响应头.和我们之前谈到的一样,这一步也是和RPC协议相关的,即codec写入头消息的方式就是rpc协议的方式.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BasicCodec::startWriteMessage</span><span class="params">(<span class="keyword">message_type_t</span> type, <span class="keyword">uint32_t</span> service, <span class="keyword">uint32_t</span> request, <span class="keyword">uint32_t</span> sequence)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> header =</span><br><span class="line">        (kBasicCodecVersion &lt;&lt; <span class="number">24u</span>) | ((service &amp; <span class="number">0xff</span>u) &lt;&lt; <span class="number">16u</span>) | ((request &amp; <span class="number">0xff</span>u) &lt;&lt; <span class="number">8u</span>) | ((<span class="keyword">uint32_t</span>)type &amp; <span class="number">0xff</span>u);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">write</span>(header);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">write</span>(sequence);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后, 调用Codec的write方法.在这里,对于数组,erpcgen将会自动生成对应的循环结构来写入.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">    ...    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount0 = <span class="number">0U</span>; arrayCount0 &lt; <span class="number">2U</span>; ++arrayCount0)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">uint32_t</span> arrayCount1 = <span class="number">0U</span>; arrayCount1 &lt; <span class="number">2U</span>; ++arrayCount1)</span><br><span class="line">            &#123;</span><br><span class="line">                codec-&gt;<span class="built_in">write</span>(result_matrix[arrayCount0][arrayCount1]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>Codec对c++的所有数据类型重载一个write方法, 这个方法是对writeData的封装, 后者将按照数据的值和长度传递写入数据</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">BasicCodec::writeData</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *value, <span class="keyword">uint32_t</span> length)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">isStatusOk</span>())&#123;</span><br><span class="line">        m_status = m_cursor.<span class="built_in">write</span>(value, length);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>cursor将作为buffer的内部类完成信息的写入，就是将信息复制到缓冲区里</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">erpc_status_t</span> MessageBuffer::Cursor::<span class="built_in">write</span>(<span class="keyword">const</span> <span class="keyword">void</span> *data, <span class="keyword">uint32_t</span> length)&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="keyword">if</span> (length &gt; <span class="number">0U</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span> (data == <span class="literal">NULL</span>)&#123;</span><br><span class="line">            err = kErpcStatus_MemoryError;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (length &gt; <span class="built_in">getRemaining</span>())&#123;</span><br><span class="line">            err = kErpcStatus_BufferOverrun;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            (<span class="keyword">void</span>)<span class="built_in">memcpy</span>(m_pos, data, length);</span><br><span class="line">            m_pos += length;</span><br><span class="line">            m_buffer-&gt;<span class="built_in">setUsed</span>(m_buffer-&gt;<span class="built_in">getUsed</span>() + length);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成write之后shim就会直接返回,之后可以直接利用send发送,因为我们在生成的shim函数中已经完成了需要写回的数据的序列化</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//数据发送</span></span><br><span class="line"><span class="keyword">if</span> (err == kErpcStatus_Success)&#123;</span><br><span class="line">    <span class="keyword">if</span> (msgType != kOnewayMessage)&#123;</span><br><span class="line">            err = m_transport-&gt;<span class="built_in">send</span>(codec-&gt;<span class="built_in">getBuffer</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CS/" rel="tag"># CS</a>
+              <a href="/tags/RPC/" rel="tag"># RPC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/" rel="prev" title="RPC框架设计侧重点-特色和架构调研2.md">
+      <i class="fa fa-chevron-left"></i> RPC框架设计侧重点-特色和架构调研2.md
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Erpc%E6%9C%8D%E5%8A%A1%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">Erpc服务处理过程梳理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E5%B1%82%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E5%A7%8B%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">代理层服务器开始服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">信息处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E5%B1%82%E6%8E%A5%E6%94%B6"><span class="nav-number">1.2.1.</span> <span class="nav-text">传输层接收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96%E5%B1%82%E8%A7%A3%E6%9E%90"><span class="nav-number">1.2.2.</span> <span class="nav-text">序列化层解析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">请求处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="nav-number">1.3.1.</span> <span class="nav-text">服务发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="nav-number">1.3.2.</span> <span class="nav-text">方法调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%86%99%E5%9B%9E"><span class="nav-number">1.3.3.</span> <span class="nav-text">数据写回</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="辉夜"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">辉夜</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">辉夜</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
