@@ -151,6 +151,99 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%881%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%881%EF%BC%89/" class="post-title-link" itemprop="url">软件构造-Java学习笔记（1）</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-03-08 22:12:17 / 修改时间：22:13:10" itemprop="dateCreated datePublished" datetime="2023-03-08T22:12:17+08:00">2023-03-08</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>主要介绍java和c语言的一些区别,参考课程浙江大学翁恺b站java语言基础</p>
+</blockquote>
+<h2 id="第一个java程序"><a href="#第一个java程序" class="headerlink" title="第一个java程序"></a>第一个java程序</h2><p>java的开发环境基本上还是依赖ide的,因为java有比较复杂的依赖关系（至少对我而言比较复杂）。教学视频使用的是目前最广泛使用的eclipse,官网下载可以直接安装（2022年不再需要提前安装jre）,汉化方式可以自行搜索。  </p>
+<p>java与C语言的第一个区别就在于”类”，和任何编程语言一样，java程序也有自己的执行入口，不过不是主函数，而是主类。我们在主类下编写的方法会被依次调用。一个类就是一个抽象数据类型，包含了数据和对数据的操作。这样的封装使得java和C++等面向对象的编程语言拥有与C语言截然不同的编程风格，会看到大量的标识符和”.”，取成员运算符。java中有许多自带的类，比如马上就会遇到的System类，执行java函数的时候如果跟进是可以直接跟进到System里的方法的，很有趣（另外很想吐槽类名不能自动补全实在是太糟糕了。）  </p>
+<p>同样java中的特色还有字符串类String，以及字符串对加号运算符的重载。所谓运算符的重载就是在一定的作用域内，把运算符替换为某个函数的执行。比如原来的加法可以看成有两个算数类型参数返回一个算数类型的add函数，而java中字符串类对加号的重载可以看成把加号对应的函数替换成了strcat函数，也就是连接两个字符串。这种情况下，如果想要保留算数运算就需要在算数变量被替换为字符串变量之前进行算数运算，最简单的方法就是在算术表达式周围加一个括号。</p>
+<p>可以看到，类和运算符重载的概念赋予了面向对象语言极大的灵活和自由性。对于类的使用者来说，完全不需要关心类的背后发生了什么。System类背后对输入输出流的复杂处理被掩盖起来，String类进行的字符串连接也被简单的加号替代。这样的封装使得面向对象语言天然的适合用来描述某种问题（我目前并不能很好的概括出是哪种问题）。  </p>
+<p>C语言的函数也有类似的封装，然而，C语言并没有提供<em><strong>作用域</strong></em>层面的封装。我们可以在函数内部进行封装，但函数之间的数据传输必须通过清晰的传参返回来完成。C语言对访问类型（static&#x2F;global）的控制可以说提供了封装的一种方案，也就是以编译单元为单位进行模块化的编程设计。不过，函数之间的数据依靠传参管理降低了函数之间的最大聚合程度，更会在系统框架变更时带来巨大的麻烦，运算符重载这种特技更是无从谈起。不过，C语言同样有其独特的好处:面向过程的控制流是清晰可见且高度解耦的，由于没有层层抽象，它还可以生成效率更高的代码。</p>
+<h2 id="java中的数组"><a href="#java中的数组" class="headerlink" title="java中的数组"></a>java中的数组</h2><p>java拥有美好的内存管理机制，我们可以使用new关键字分配一片地址，并且这片地址的大小是可变的。（不确定，但是new初始化的默认值全为0是很明显的静态存储特点）java中没有指针类型，而是用[]起到和指针类似的效果，于是我们会写出：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] a = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">3</span>];</span><br></pre></td></tr></table></figure>
+
+<p>这是一个数组的定义，也就是声明并且分配存储空间。事实上a相当于一个指针。当我们把两个数组类型的变量做比较时，我们实际上在比较他们是否指向同一个地址。如果要比较他们的内容，则要使用数组自带的成员方法equals().<br>数组自带许多的成员，我也不清楚这些成员是哪里来的。一个很有用的成员变量是a.length，它是a的长度，于是我们遍历数组时可以用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a.length; i++)</span><br><span class="line">&#123;</span><br><span class="line">    System.out.println(a[i]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这和C语言是完全类似的。这个成员变量被声明为final，类似于C中的const，因此它不能被随意修改，而是在创建数组时就确定了。。Java允许我们对可枚举的类型写出for循环的另外一种形式，被称为for-each循环，是全新的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i: a)</span><br><span class="line">&#123;</span><br><span class="line">    System.out.println(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的i是a的一个浅拷贝，刚刚给出的例子和一般的for循环的例子是完全等价的。不过需要注意的是，如果要改变数组中的元素的值，那么不能用for-each循环，因为for-each的循环相当于依次把a中元素的值赋给了i，不像a[i]是数组元素自身的标识符。可以想到，改变i的值的效果会在下一次循环时被清空。<br>事实上，for-each循环可以改写为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*for (var i: a)*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> index = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(i = a[<span class="number">0</span>] ; index &lt; a.length;index++, i = a[index])</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>二维数组的形式和操作与C语言都是类似的，二维数组就是数组的数组。二维数组自身持有一个length成员，它的每一个元素作为一个数组也持有自己的成员。如果要遍历二维数组，可以写：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; a.length; i++) &#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; a[i].length; j++) &#123;</span><br><span class="line">        a[i][j] ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>更进一步地，如果探究</p>
+<h2 id="java中的字符与字符串"><a href="#java中的字符与字符串" class="headerlink" title="java中的字符与字符串"></a>java中的字符与字符串</h2><p>java中使用Unicode来表示字符，并且转义字符’\uxxxx’表示用十六进制表示的unicode字符码。除此之外关于字符的运算都是和C语言完全类似的。<br>字符串是java中一个很常用的类。创建字符串变量的方法据说有11种…让我们先看看比较常用的两种。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String a;</span><br><span class="line">a = <span class="keyword">new</span> String(<span class="string">&quot;qaq&quot;</span>);</span><br><span class="line">a = <span class="string">&quot;qaq&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>它提供了许多的方法,以及一种运算符重载。当其他类型和String类型进行运算时会被转换成String类型，所以要想避开加号重载就要在转换之前进行运算。常见的C语言函数都可以在java中找到对应的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">strcat -&gt; +</span><br><span class="line">strlen -&gt; string.length();</span><br><span class="line">strcmp -&gt; string.compareto();</span><br><span class="line">strstr -&gt; string.indexOf();</span><br></pre></td></tr></table></figure>
+
+<p>此外还有许多方法。不同方法之间可以配合产生出很惊艳的效果。java提供的修改字符串方法都可以看成持有一个结构体指针，返回一个结构体的函数。这意味着方法本身的返回值是一个全新的对象。对于java中的查找或匹配字符串方法，也就是在C语言中会返回字符指针的那些函数（strstr），现在会返回一个整数下标。因为这更多的是实践性的问题，这里就不再举更多例子，需要时可以查阅手册。</p>
+<h2 id="java中的包裹类型"><a href="#java中的包裹类型" class="headerlink" title="java中的包裹类型"></a>java中的包裹类型</h2><p>基本类型对应的包裹类型，是具有一些常用成员的类。他们之间的对应是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>     -&gt; Integer</span><br><span class="line"><span class="keyword">boolean</span> -&gt; Boolean</span><br><span class="line"><span class="keyword">double</span>  -&gt; Double</span><br><span class="line"><span class="keyword">char</span>    -&gt; Character</span><br></pre></td></tr></table></figure>
+
+<p>包裹类型会含有一些该类型的信息，比如Integer的成员MAX_VALUE就是C语言中的T_MAX，此外还有一些其他的方法，比如Character具有isdigit，isalpha方法。这些都和c语言是完全类似的。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/11/03/RPC%E6%A2%B3%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -176,7 +269,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-11-03 22:37:18 / 修改时间：22:37:44" itemprop="dateCreated datePublished" datetime="2022-11-03T22:37:18+08:00">2022-11-03</time>
+              <time title="创建时间：2022-11-03 22:37:18 / 修改时间：23:44:20" itemprop="dateCreated datePublished" datetime="2022-11-03T22:37:18+08:00">2022-11-03</time>
             </span>
 
           
@@ -190,7 +283,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="Erpc服务处理过程梳理"><a href="#Erpc服务处理过程梳理" class="headerlink" title="Erpc服务处理过程梳理"></a>Erpc服务处理过程梳理</h1><p>RPC的服务端处理过程从传输层开始。当传输层收到消息，就会根据约定的传输协议接受信息，然后调用序列化层。序列化解析出请求内容，交由代理层处理。代理层通过对Server和Service的抽象，从请求内容中解析要调用的实际方法和参数，并根据有无返回值&#x2F;是否需要写回数据做进一步处理。<br>如果有返回消息的必要，则代理层调用序列化层写入返回内容，调用传输层用协议封装信息并进行发送</p>
+          <h1 id="Erpc服务处理过程梳理"><a href="#Erpc服务处理过程梳理" class="headerlink" title="Erpc服务处理过程梳理"></a>Erpc服务处理过程梳理</h1><p>RPC的服务端处理过程从传输层开始。传输层收到消息，就会根据约定的传输协议接受信息，然后调用序列化层。序列化解析出请求内容，交由代理层处理。代理层通过对Server和Service的抽象，从请求内容中解析要调用的实际方法和参数，并根据有无返回值&#x2F;是否需要写回数据做进一步处理。<br>如果有返回消息的必要，则代理层调用序列化层写入返回内容，调用传输层用协议封装信息并进行发送</p>
 <h2 id="代理层服务器开始服务"><a href="#代理层服务器开始服务" class="headerlink" title="代理层服务器开始服务"></a>代理层服务器开始服务</h2><p>一个典型的服务器启动之后便开始不断监听可能到来的请求：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">erpc_status_t</span> <span class="title">SimpleServer::run</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">erpc_status_t</span> err = kErpcStatus_Success;</span><br><span class="line">    <span class="keyword">while</span> ((err == kErpcStatus_Success) &amp;&amp; m_isServerOn)</span><br><span class="line">    &#123;</span><br><span class="line">        err = <span class="built_in">runInternal</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1158,314 +1251,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/" class="post-title-link" itemprop="url">安卓UI设计</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-07-29 14:43:46" itemprop="dateCreated datePublished" datetime="2022-07-29T14:43:46+08:00">2022-07-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-06 18:09:08" itemprop="dateModified" datetime="2022-08-06T18:09:08+08:00">2022-08-06</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Android-UI组件"><a href="#Android-UI组件" class="headerlink" title="Android UI组件"></a>Android UI组件</h2><p>User Interface，用户接口。包括输入框，文本，按钮，播放器，图片，列表等。常规的组件大多由android.widget包中提供，这些组件有通用的属性和方法，也有自己特定的属性和方法。比如所有组件都有id，height，width，margin等属性，而TextView有setText的方法。</p>
-<h3 id="常规UI组件"><a href="#常规UI组件" class="headerlink" title="常规UI组件"></a>常规UI组件</h3><p>安卓组件以左上角为原点，向下向右为正方向。这也是组件的默认布置为止<br>带有layout的属性通常是组件相对于父容器的对齐方式，带有padding的则是子元素相对于容器的对齐方式</p>
-<!-- ![qaq](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-14-48-30.png) -->
-<p><img src="/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-15-55-51.png" alt="组件属性"></p>
-<h3 id="高级UI组件"><a href="#高级UI组件" class="headerlink" title="高级UI组件"></a>高级UI组件</h3><p>高级组件通常继承自ViewGroup，可以内含多个View组件，也可以继续嵌套ViewGroup</p>
-<h2 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h2><p>布局将ui组合成页面，主要控制<strong>大小、位置、层级</strong></p>
-<h3 id="线性布局"><a href="#线性布局" class="headerlink" title="线性布局"></a>线性布局</h3><!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-15-35-54.png) -->
-
-<table>
-<thead>
-<tr>
-<th>属性</th>
-<th>功能描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>android:orientation</td>
-<td>布局内组件的排列方向</td>
-</tr>
-<tr>
-<td>android:layout_weight</td>
-<td>布局内组件大小权重</td>
-</tr>
-<tr>
-<td>android:divider</td>
-<td>布局内组件间分割线</td>
-</tr>
-<tr>
-<td>android:showDividers</td>
-<td>布局内组件间分割线位置</td>
-</tr>
-<tr>
-<td>android:dividerPadding</td>
-<td>布局内分割线padding</td>
-</tr>
-</tbody></table>
-<p>linearlayout的分割线功能可以很容易的画出有质感的ui</p>
-<p>weight功能是指示分配剩余空间时的权重（剩余空间可正可负），各个组件<a target="_blank" rel="noopener" href="https://blog.csdn.net/ddiididi/article/details/80954084">按照权重加权平均</a>分配剩余的空间。</p>
-<p>如果想要在linearlayout里做出垂直于orientation方向的效果，就要再嵌套一个另一方向的linearlayout</p>
-<h3 id="相对布局"><a href="#相对布局" class="headerlink" title="相对布局"></a>相对布局</h3><p>相对布局提供了根据父容器和兄弟容器进行定位的方法</p>
-<!-- ![ui](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-16-21-06.png) -->
-<html>
-
-<body>
-    <h4></h4>
-    <table border="1">
-        <tr>
-            <th>类别</th>
-            <th>属性</th>
-            <th>功能描述</th>
-        </tr>
-        <tr>
-            <th rowspan="8">根据父容器定位</th>
-            <td>android:layout centerInParent</td>
-            <td>组件位于父容器中央位置</td>
-        </tr>
-        <td>android:layout_centerHorizontal</td>
-        <td>组件位于父容器水平中央位置</td>
-        <tr>
-            <td>android:layout_centerHorizontal</td>
-            <td>组件位于父容器水平中央位置</td>
-        </tr>
-        <tr>
-            <td>android:layout_centerVertical</td>
-            <td>组件位于父容器垂直中央位置</td>
-        </tr>
-        <tr>
-            <td>android:layout_alignParentTop</td>
-            <td>组件与父容器顶部对齐</td>
-        </tr>
-        <tr>
-            <td>android:layout_alignParentLeft</td>
-            <td>组件与父容器左部对齐</td>
-        </tr>
-        <tr>
-            <td>android:layout_alignParentRight</td>
-            <td>组件与父容器右部对齐</td>
-        </tr>
-        <tr>
-            <td>android:layout_alignParentBottom</td>
-            <td>组件与父容器底部对齐</td>
-        </tr>
-        <tr>
-            <th rowspan="7">根据兄弟组件定位</th>
-            <td>android:layout_above</td>
-            <td>组件位于某组件上部</td>
-        </tr>
-        <tr>
-            <td>android:layout_below</td>
-            <td>组件位于某组件下部</td>
-        </tr>
-        <tr>
-            <td>android:layout_toLeftOf/toRightOf</td>
-            <td>组件位于某组件左/右侧</td>
-        </tr>
-        <tr>
-            <td>android:layout_alignTop/Left/Right/Below</td>
-            <td>组件与某组件对齐</td>
-        </tr>
-    </table>
-
-</body>
-
-</html>
-
-<h3 id="层级布局FrameLayout"><a href="#层级布局FrameLayout" class="headerlink" title="层级布局FrameLayout"></a>层级布局FrameLayout</h3><table>
-<thead>
-<tr>
-<th>属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>android:foreground</td>
-<td>设置前景图像（永远位于最前）</td>
-</tr>
-<tr>
-<td>android:foregroundGravity</td>
-<td>设置前景图像Gravity</td>
-</tr>
-</tbody></table>
-<p>各个组件从前到后依次在后方作为背景</p>
-<h3 id="限制布局ConstraintLayout"><a href="#限制布局ConstraintLayout" class="headerlink" title="限制布局ConstraintLayout"></a>限制布局ConstraintLayout</h3><table>
-<thead>
-<tr>
-<th>属性</th>
-<th>功能描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>layout_constraintLeft_toLeftOf</td>
-<td>组件左部与某组件左部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintLeft_toRightOf</td>
-<td>组件左部与某组件右部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintRight_toLefOf</td>
-<td>组件右部与某组件左部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintRight_toRightOf</td>
-<td>组件右部与某组件右部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintTop_toTopof</td>
-<td>组件顶部与某组件顶部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintTop_toBottomOf</td>
-<td>组件右顶与某组件底部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintBotom_toTopof</td>
-<td>组件底部与某组件顶部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintBottom_toBottomOf</td>
-<td>组件底部与某组件底部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintBascline_toBasclincO</td>
-<td>组件基线与某组件基线对齐</td>
-</tr>
-<tr>
-<td>laycut_constraintStart_toEndOf</td>
-<td>组件首部与某组件尾部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintStart_toStartOf</td>
-<td>组件首部与某组件首部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintEnd_toStartOf</td>
-<td>组件尾部与某组件首部对齐</td>
-</tr>
-<tr>
-<td>layout_constraintEnd_toEndOf</td>
-<td>组件尾部与某组件尾部对齐</td>
-</tr>
-</tbody></table>
-<p>如果限制信息确定了图片某几条边的位置，会覆盖height，width属性</p>
-<h3 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h3><p><img src="/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-18-28-58.png" alt="总结"></p>
-<h2 id="渲染"><a href="#渲染" class="headerlink" title="渲染"></a>渲染</h2><p>布局是用xml中声明，java中实现的。因此布局的渲染需要经过加载、解析和渲染的三个过程，</p>
-<p>在activity的onCreate方法中调用setContentView时，它会创建DecorView，最终通过LayoutInflater加载了XML文件</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LayoutInflater.from(mContext).inflate(resId, contentParent)</span><br></pre></td></tr></table></figure>
-
-<p>在这个加载器中，它会调用一个xml解析器，解析器根据tag生成View，组织ViewGroup并把他们添加到DecorView中…</p>
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-18-43-39.png) -->
-
-<p>此时屏幕还没有被绘制，在onResume()中会“借用”ViewRootImpl对象的requestLayout方法来触发配置。</p>
-<!-- ![View绘制流程](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-18-46-13.png)
-![页面绘制流程](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-18-47-16.png) -->
-<p>在这之后，由VSync一帧为单位控制界面的刷新。00</p>
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-18-49-59.png) -->
-
-<h2 id="交互"><a href="#交互" class="headerlink" title="交互"></a>交互</h2><h3 id="查找View"><a href="#查找View" class="headerlink" title="查找View"></a>查找View</h3><p>交互最基本的流程是先获取View实例，再添加相应的监听器（比如按钮的onClickListener()）</p>
-<p>查找的过程中，activity调用DecorView的findViewById方法，每个ViewGroup都会迭代查找自己的孩子，方法是在ViewGroup和View中都实现findViewById，Group会判断自己的id并且调用所有孩子的findViewById。对于View而言，这个方法要么返回自己，要么返回NULL，对于Group而言，他将进行下一轮迭代。这样所有人都只需要知道自己的id，Group再额外记录自己有哪些孩子，就可以从DecorView开始查找到任何被解析过的View了。</p>
-<h3 id="监听事件"><a href="#监听事件" class="headerlink" title="监听事件"></a>监听事件</h3><p>Android系统中常见的事件监听器有如下几种:</p>
-<ol>
-<li><p>单击事件(View.OnClickListener):当用户触碰到某个组件或者方向键被按下时产生该事件，该事件的处理方法是onClick（）.</p>
-</li>
-<li><p>焦点事件(View.OnFocusChangeListener):组件得到或者失去焦点时产生该事件，事件处理方法是onFocusChange（）。</p>
-</li>
-<li><p>按键事件(View.OnKey Listener):用户按下或者释放设备上的某个按键时产生，事件处理方法是 onKey（）。</p>
-</li>
-<li><p>触碰事件(View.OnTouchListener):设备具有触摸屏功能时，触碰屏幕产生该事件。事件处理方法是onTouch（）。</p>
-</li>
-<li><p>创建上下文菜单事件(View.OnCreateContextMenu Listener):创建上下文菜单时产生该事件，事件处理方法是 onCreateContextMenu（）。</p>
-</li>
-</ol>
-<h3 id="屏幕触摸"><a href="#屏幕触摸" class="headerlink" title="屏幕触摸"></a>屏幕触摸</h3><p>所有事件都来自于屏幕触摸，交互事件是对屏幕点击的二次封装！触摸事件MotionEvent包含了触摸的时间、位置等，Activity和View都有onTouchEvent()用于处理触摸事件</p>
-<!-- 
-![触摸事件](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-03-07.png) -->
-
-<p>接收到一个屏幕事件之后，具体要由哪个UI控件来响应，涉及到时事件的处理流程。触摸一个点很可能同时触摸了多个View，几个Layout还有至少一个Activity。在实践处理中，ViewGroup具有分发、拦截、响应的功能，Activity和View则不具有拦截的功能。<br><img src="/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-11-07.png" alt="事件处理"><br>出处(<a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904041487532045">https://juejin.cn/post/6844904041487532045</a>)</p>
-<p>如何理解onLongClickListener，onClickLisener，onTouchEvent的关系呢？在onTouchEvent在ACTION_DOWN时判断是否达到长按延时，而在ACTION_UP的时候才执行短按延时，此时如果已经出发了了长按执行的监听器，就不再执行短按的监听器，所以说onClickListener是在抬起手指时才触发的，并且不能与onLongClickListener一同触发。</p>
-<h3 id="交互总结"><a href="#交互总结" class="headerlink" title="交互总结"></a>交互总结</h3><p>从谁发出，经过了谁，到达哪个对象，有何种行为。</p>
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-17-15.png) -->
-
-<h2 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h2><h3 id="帧动画"><a href="#帧动画" class="headerlink" title="帧动画"></a>帧动画</h3><p>核心原理就是一帧一帧的播放图片，优点是简单、方便，缺点是功能单一，并且消耗资源。相比于gif，帧动画更可控。</p>
-<!-- ![帧动画](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-18-15.png) -->
-
-<p>帧动画是通过animation-list声明的，有子标签item，item包含drawable和duration两个属性。</p>
-<h3 id="补间动画"><a href="#补间动画" class="headerlink" title="补间动画"></a>补间动画</h3><!-- 
-![补间动画](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-21-48.png) -->
-<p>补间动画可以控制透明度，旋转，缩放，平移，由系统自动由插值器（Interpolator）</p>
-<p>这两种动画都是属于View动画，只能处理View对象，并且无法修改View的属性。（会出现动画无法点击的情况）</p>
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-24-32.png) -->
-
-<h3 id="属性动画"><a href="#属性动画" class="headerlink" title="属性动画"></a>属性动画</h3><p>属性动画可以作用于任何一个对象，并且真实的改变了对象的属性。</p>
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/2022-07-29-19-25-57.png) -->
-
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>真正的动画需要结合各个动画才能做出更好的效果。</p>
-<h2 id="自定义UI"><a href="#自定义UI" class="headerlink" title="自定义UI"></a>自定义UI</h2><!-- github.com/zeweng/SwitchButton -->
-
-<h3 id="自定义View"><a href="#自定义View" class="headerlink" title="自定义View"></a>自定义View</h3><p>写四个构造器，对应四种场景。按需复写各方法，并且用各个方法绘制出View，然后再onTouchEvent中处理UI的行为和动画</p>
-<!-- ![自定义View](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/自定义View.png)
-![处理View布局](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/处理View布局.png) -->
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/绘制View.png) -->
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/处理用户交互.png) -->
-<!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/自定义小结.png) -->
-
-<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><!-- ![](/2022/07/29/%E5%AE%89%E5%8D%93UI%E8%AE%BE%E8%AE%A1/整体总结.png) -->
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1542,7 +1327,7 @@
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
@@ -1569,7 +1354,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
