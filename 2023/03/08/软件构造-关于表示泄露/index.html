@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"huiyeruzhou.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="我们将讨论表示泄露的几种情况，以及如何防止表示泄露原创性声明：每一个字（除了代码和引用）都是我手敲的。  表示泄露的定义表示泄露，即Representation Exposure，指的是client端程序可以通过某种手段查询、访问、修改ADT的内部结构。我们将通过一些例子来感受这个定义。 最基本的表示泄露-来自访问权限在java的设计中，一个字段的访问权限有四种。为了避免表示泄露，如果一个字段可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件构造-关于表示泄露1-基本内容">
+<meta property="og:url" content="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/index.html">
+<meta property="og:site_name" content="辉夜的博客">
+<meta property="og:description" content="我们将讨论表示泄露的几种情况，以及如何防止表示泄露原创性声明：每一个字（除了代码和引用）都是我手敲的。  表示泄露的定义表示泄露，即Representation Exposure，指的是client端程序可以通过某种手段查询、访问、修改ADT的内部结构。我们将通过一些例子来感受这个定义。 最基本的表示泄露-来自访问权限在java的设计中，一个字段的访问权限有四种。为了避免表示泄露，如果一个字段可">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-16-57-49.png">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-14-39.png">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-21-50.png">
+<meta property="article:published_time" content="2023-03-08T14:12:17.000Z">
+<meta property="article:modified_time" content="2023-03-22T09:45:06.026Z">
+<meta property="article:author" content="辉夜">
+<meta property="article:tag" content="软件构造">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-16-57-49.png">
+
+<link rel="canonical" href="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件构造-关于表示泄露1-基本内容 | 辉夜的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">辉夜的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">繁花似锦，辉夜如昼</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>Links</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件构造-关于表示泄露1-基本内容
+        </h1>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-08 22:12:17" itemprop="dateCreated datePublished" datetime="2023-03-08T22:12:17+08:00">2023-03-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-22 17:45:06" itemprop="dateModified" datetime="2023-03-22T17:45:06+08:00">2023-03-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>我们将讨论表示泄露的几种情况，以及如何防止表示泄露<br>原创性声明：每一个字（除了代码和引用）都是我手敲的。</p>
+</blockquote>
+<h2 id="表示泄露的定义"><a href="#表示泄露的定义" class="headerlink" title="表示泄露的定义"></a>表示泄露的定义</h2><p>表示泄露，即Representation Exposure，指的是client端程序可以通过某种手段<br>查询、访问、修改ADT的<strong>内部结构</strong>。<br>我们将通过一些例子来感受这个定义。</p>
+<h2 id="最基本的表示泄露-来自访问权限"><a href="#最基本的表示泄露-来自访问权限" class="headerlink" title="最基本的表示泄露-来自访问权限"></a>最基本的表示泄露-来自访问权限</h2><p>在java的设计中，一个字段的访问权限有四种。<br><img src="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-16-57-49.png" alt="访问权限"><br>为了避免表示泄露，<strong>如果一个字段可以是private，那么它就应当是private</strong>。<br>下面我们来看一个因为访问权限导致表示泄露的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * This immutable data type represents a tweet from Twitter.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Tweet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String author;</span><br><span class="line">    <span class="keyword">public</span> String text;</span><br><span class="line">    <span class="keyword">public</span> Date timestamp;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Make a Tweet.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.author = author;</span><br><span class="line">        <span class="keyword">this</span>.text = text;</span><br><span class="line">        <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于这个结构，我们在创建之后可以任意访问修改它的字段，因为字段被声明为public：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Tweet t = <span class="keyword">new</span> Tweet(<span class="string">&quot;justinbieber&quot;</span>, </span><br><span class="line">                    <span class="string">&quot;Thanks to all those beliebers out there inspiring me every day&quot;</span>, </span><br><span class="line">                    <span class="keyword">new</span> Date());</span><br><span class="line">t.author = <span class="string">&quot;rbmllr&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>你可能会想：为什么改变一个对象的字段被认为是一种“泄露”呢？我们从软件构造的3个角度来回答:</p>
+<ol>
+<li>safe from bug: 通过赋值改变一个字段可能会导致错误，例如赋值不匹配的类型或无意义的类型。</li>
+<li>esay to understand： 赋值一个字段的行为可能是令人困惑的，尤其是当各个字段的含义并不是那么清楚的时候。</li>
+<li>ready for change：一旦对象的内部表示发生变化，所有的赋值都必须手动重写。如果用方法进行赋值，则可以很方便的重构。</li>
+</ol>
+<p>此外，随意修改变量使得我们不能构造“immutable”的对象，这将让我们的程序充满了危险，我们不得不非常小心的应对每一次方法调用，<br>我们不知道返回之后的对象是否保持它原来的样子，这真是太可怕了！（译制腔）</p>
+<p>为此，一个常见的方法是将所有字段声明为private， 并且如果要构建immutable对象的话，声明为private final.</p>
+<h2 id="稍微间接一点的表示泄露-来自传递引用"><a href="#稍微间接一点的表示泄露-来自传递引用" class="headerlink" title="稍微间接一点的表示泄露-来自传递引用"></a>稍微间接一点的表示泄露-来自传递引用</h2><p>当我们把所有字段设置为私有，你可能松了口气：现在我的数据类型是安全的了。但还没结束——客户端总是需要了解ADT的“属性”，除非<br>这个ADT是一个纯粹的功能类（比如Math）。既然如此，我们必须为客户端服务，把ADT的内部表示转换为客户端感兴趣的属性。大部分情况下，属性和内部表示的对应关系是比较简单的，例如我们为Tweet类型增加获取作者、内容、发送时间的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> Twitter user who wrote the tweet */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getAuthor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> author;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@return</span> text of the tweet */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getText</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> text;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@return</span> date/time when the tweet was sent */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看上去没什么问题，客户端不能直接访问我们的内部表示，因此如果我们要修改内部表示，例如把text分为title和content，我们只需要重写getText，比如返回title + content，而无需客户端做任何改动。</p>
+<p>但是还存在这样的一种情况：客户端拿到了这个属性之后，又修改了这个属性，这会发生什么呢？<br>考虑下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a tweet that retweets t, one hour later*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Tweet <span class="title">retweetLater</span><span class="params">(Tweet t)</span> </span>&#123;</span><br><span class="line">    Date d = t.getTimestamp();</span><br><span class="line">    d.setHours(d.getHours()+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, t.getText(), d);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>客户端获取了发推时间后，把时间加了一个小时，又用这个时间创建了新的Tweet。这里的<code>d</code>是通过<code>getTimestamp()</code>获得的，而在d上调用了<br><code>setHours()</code>方法将会改变d的值！因此结果是，t和新创建的Tweet现在都指向了一小时后的时间。<br><img src="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-14-39.png" alt="表示泄露-来自传递引用"><br>这个例子中，我们的getter传递了一个引用类型<code>Date</code>，一个可变数据类型。因此，在引用d上调用mutator导致了表示泄露。<br>我们该怎样修改这个代码？通过一种称之为“防御性拷贝”的方式，创建引用的一个副本。这样对返回值的修改便不会影响到对象本身。具体来讲：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，我们就避免了getter（observor的一种）造成的访问泄露。对于所有的observor方法（返回值非空），我们都需要做如下的检查：只要返回的值不是基本数据类型，并且是可变数据类型，那么就要进行防御式拷贝。反之，如果返回值是基本数据类型或者是不可边类型，则可以直接返回。</p>
+<h2 id="稍微间接一点的表示泄露-来自接收引用"><a href="#稍微间接一点的表示泄露-来自接收引用" class="headerlink" title="稍微间接一点的表示泄露-来自接收引用"></a>稍微间接一点的表示泄露-来自接收引用</h2><p>引用类型始终是危险的：ADT内部的引用类型也可能被外部的客户端程序持有，这时一旦外部引用调用了mutator，ADT的内部表示也将同步发生变化。我们来看下面的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a list of 24 inspiring tweets, one per hour today */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Tweet&gt; <span class="title">tweetEveryHourToday</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">    List&lt;Tweet&gt; list = <span class="keyword">new</span> ArrayList&lt;Tweet&gt;(); </span><br><span class="line">    Date date = <span class="keyword">new</span> Date();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">24</span>; i++) &#123;</span><br><span class="line">        date.setHours(i);</span><br><span class="line">        list.add(<span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, <span class="string">&quot;keep it up! you can do it&quot;</span>, date));</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> list;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个例子中，我们试图创建24个Tweet，间隔1小时。然而，我们的构造器方法会直接将时间戳赋值给内部属性，因此当我们在循环中调用<code>setHours</code>时，所有Tweet内部的timestamp都将同步变化。最终，我们得到了24个时间相同的Tweet。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Make a Tweet.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-21-50.png" alt="表示泄露-接收引用"></p>
+<p>为此，我们在接收引用时也要使用防御式拷贝。如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样的，对基本数据类型和不可边数据类型，如String，不需要进行防御式拷贝。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这就是MIT课件中关于表示泄露的内容。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0/" rel="tag"># 软件构造</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/03/RPC%E6%A2%B3%E7%90%86/" rel="prev" title="RPC梳理">
+      <i class="fa fa-chevron-left"></i> RPC梳理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%881%EF%BC%89/" rel="next" title="软件构造-Java学习笔记（1）">
+      软件构造-Java学习笔记（1） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">表示泄露的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%9F%BA%E6%9C%AC%E7%9A%84%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2-%E6%9D%A5%E8%87%AA%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90"><span class="nav-number">2.</span> <span class="nav-text">最基本的表示泄露-来自访问权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8D%E5%BE%AE%E9%97%B4%E6%8E%A5%E4%B8%80%E7%82%B9%E7%9A%84%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2-%E6%9D%A5%E8%87%AA%E4%BC%A0%E9%80%92%E5%BC%95%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">稍微间接一点的表示泄露-来自传递引用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8D%E5%BE%AE%E9%97%B4%E6%8E%A5%E4%B8%80%E7%82%B9%E7%9A%84%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2-%E6%9D%A5%E8%87%AA%E6%8E%A5%E6%94%B6%E5%BC%95%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">稍微间接一点的表示泄露-来自接收引用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="辉夜"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">辉夜</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">辉夜</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
