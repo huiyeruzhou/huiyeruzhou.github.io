@@ -156,6 +156,148 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/08/02/%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/08/02/%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" class="post-title-link" itemprop="url">网络通讯与数据存储</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-08-02 12:45:10" itemprop="dateCreated datePublished" datetime="2022-08-02T12:45:10+08:00">2022-08-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-03 01:22:37" itemprop="dateModified" datetime="2022-08-03T01:22:37+08:00">2022-08-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="网络通信"><a href="#网络通信" class="headerlink" title="网络通信"></a>网络通信</h2><p>网络请求框架对比：</p>
+<ul>
+<li>HttpURLConnection</li>
+<li>Volley<ul>
+<li>停更</li>
+<li>不适合上传下载文件</li>
+</ul>
+</li>
+<li>OkHttp<ul>
+<li>支持大文件上传下载</li>
+<li>性能更好</li>
+<li>一般需要二次封装</li>
+</ul>
+</li>
+<li>Retrofit<ul>
+<li>可以通过注解配置请求</li>
+<li>可以搭配转换器解析数据，支持jackjson，pb等</li>
+</ul>
+</li>
+</ul>
+<h3 id="Retrofit简介"><a href="#Retrofit简介" class="headerlink" title="Retrofit简介"></a>Retrofit简介</h3><p>Retrofit其实是对OkHttp的一个封装，使用Retrofit库的基本流程包括引用、创建用于描述网络请求的接口、使用Retrofit实例发起网络请求。</p>
+<blockquote>
+<p>场景：客户端知道用户uid，要在服务端查询用户姓名，通过Retrofit实现</p>
+</blockquote>
+<ul>
+<li>接口：<code>https://www.bytedane.com/&#123;uid&#125;/name</code></li>
+<li>类型：GET请求</li>
+<li>接口返回：</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;message&quot;</span>: <span class="string">&quot;success&quot;</span>, </span><br><span class="line">    <span class="attr">&quot;data&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;uid&quot;</span>: <span class="string">&quot;1123&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;first_name&quot;</span>:<span class="string">&quot;张&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;last_name&quot;</span>:<span class="string">&quot;三丰&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1.导入dependencies依赖</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">  implementation <span class="string">&#x27;com.squareup.retrofit2:retrofit:2.4.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.创建用于描述网络请求的接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IUserInfoService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@GET(&quot;users/&#123;uid&#125;/name&quot;)</span></span><br><span class="line">  <span class="function">fun <span class="title">getUserName</span><span class="params">(<span class="meta">@Path(&quot;uid&quot;)</span> uid: Int)</span>: Call&lt;ResponseBody&gt;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  ...</span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>接口类名：和请求的含义相关</li>
+<li>函数名：识别出该接口的作用，该Interface里可以增加多个不同的函数</li>
+<li>@GET注解：指定该接口的相对路径，用get方法发起请求</li>
+<li>@Path注解：需要外部调用时，用传入的uid替换注解里的{uid}</li>
+<li>返回值Call&lt;ResponseBody&gt;：可以直接转换把Sring转换为Model，这里就转换为User</li>
+<li>ResponseBody：根据返回内容定义的类，应当包含所有字段和一些输出方法，<code>response.body()</code>是该类的一个实例</li>
+</ul>
+<ol start="3">
+<li>发起网络请求</li>
+</ol>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserName</span><span class="params">(View)</span></span> &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//创建Retrofit实例</span></span><br><span class="line">  <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">  .baseUrl(<span class="string">&quot;https://www.bytedance.com/&quot;</span>)<span class="comment">//请求Url地址</span></span><br><span class="line">  .build()</span><br><span class="line"></span><br><span class="line">  <span class="comment">//创建 网络请求接口 的实例</span></span><br><span class="line">  <span class="keyword">val</span> iUserInterface = retrofit.create(IUserInfoService::<span class="keyword">class</span>.java)</span><br><span class="line">  <span class="keyword">val</span> call = iUserInterface.getUserName(<span class="number">1123</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment">//入队异步请求</span></span><br><span class="line">  call.enqueue(<span class="keyword">object</span>: Callback&lt;ResponseBody&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onResponse</span><span class="params">(call: <span class="type">Call</span>&lt;<span class="type">ResponseBody</span>&gt;,response: <span class="type">Response</span>&lt;<span class="type">ResponseBody</span>&gt;)</span></span> &#123;</span><br><span class="line">      request_result_tv.text = <span class="string">&quot;请求成功：&quot;</span> + response.body()!!.string();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onFailure</span><span class="params">(call: <span class="type">Call</span>&lt;<span class="type">ResponseBody</span>&gt;, e: <span class="type">Throwable</span>)</span></span> &#123;</span><br><span class="line">      request_result_tv.text = <span class="string">&quot;请求失败&quot;</span> + e.message</span><br><span class="line">  &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Retrofit注解"><a href="#Retrofit注解" class="headerlink" title="Retrofit注解"></a>Retrofit注解</h3><!-- ![注解](/2022/08/02/%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/2022-08-03-00-22-55.png) -->
+<ul>
+<li>注解简介<br>注解可以作用在类、方法、参数、成员变量上，并且可以在合适的时机读取注解并进行替换。<br>注解的处理一般有三个时机(Retention)：</li>
+</ul>
+<p>1.SOURCE: 只在源码有效<br>2.CLASS: 编译时用注解处理器处理<br>3.RUNTIME: 运行时处理</p>
+<ul>
+<li>注解定义</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(METHOD)</span><span class="comment">//作用对象</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span><span class="comment">//生命周期</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> GET &#123;</span><br><span class="line">  <span class="function">String <span class="title">value</span><span class="params">()</span> <span class="keyword">default</span> &quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>注解使用</li>
+</ul>
+<p>可以利用Method类的接口来获取注解的内容。配合动态代理可以获取方法和参数的注解，构造Request对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">newProxyInstance</span><span class="params">(ClasslLoader loader, </span></span></span><br><span class="line"><span class="params"><span class="function">Class&lt;?&gt;[] interfaces, </span></span></span><br><span class="line"><span class="params"><span class="function">InvocationHandler h)</span></span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> IllegalArgumentException</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InvocationHandler</span></span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span></span></span><br><span class="line"><span class="function">  throw Throwable</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后可以通过<code>Method.getAnnotaion()</code>和<code>Method.getParameterAnnotation()</code>来获取方法和方法参数的注解内容。</p>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>Retrofit的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Retrofit retrofit = <span class="keyword">new</span> Retrofit.builder()</span><br><span class="line">      .baseUrl(<span class="string">&quot;http://www.bytedance.com/&quot;</span>)</span><br><span class="line">      .addConverterFactory(GsonConverterFactory.create())<span class="comment">//利用gson转换器解析json，需要添加gson依赖</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">IUserInfoService iUserInterface = retrofit.create(IUserInfoService.class);</span><br><span class="line"></span><br><span class="line">retrofit2.Call&lt;ResponseBody&gt; call = iUserInterface.getUserName(<span class="number">1123</span>);</span><br><span class="line"></span><br><span class="line">call.enqueue(<span class="keyword">new</span> Callback&lt;ResponseBody&gt;() &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span> <span class="params">(Call&lt;ResponseBody&gt; call,</span></span></span><br><span class="line"><span class="params"><span class="function">      Response&lt;ResponseBody&gt; response)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;ResponseBody&gt; call,  Throwable t)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>OkHttp的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建OkHttpClient</span></span><br><span class="line">OkHttpClient OkHttpClient = <span class="keyword">new</span> OkHttpClient.Builder().build();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Request request = <span class="keyword">new</span> Request.Builder()</span><br><span class="line">    .get()</span><br><span class="line">    .url(<span class="string">&quot;https://www.bytedance.com/user/1123/name&quot;</span>)</span><br><span class="line">    .build();</span><br><span class="line"><span class="comment">//</span></span><br><span class="line">OkHttp.Call call = okHttpClient.newCall(request);</span><br><span class="line"></span><br><span class="line">Call.enqueue(<span class="keyword">new</span> Callback() &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span> <span class="params">(Call call, IOException e)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span> <span class="params">(Call call, Response response)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//<span class="doctag">TODO:</span> 服务器响应结果</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="字节跳动网络库"><a href="#字节跳动网络库" class="headerlink" title="字节跳动网络库"></a>字节跳动网络库</h3><p>Cronet用C++实现，对OkHttp进行了特定优化。对其进行二次封装，设计一个高已用、功能全面的框架。最终决定基于Retrofit进行二次开发，将底层的OkHttp替换为Cronet，这就是TTNet。<br>核心点就是将OkHttpClient和OkHttpCall的生成替换为OkHttp和Cronet二选一。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/07/31/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%9B%9B%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1512,117 +1654,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/04/21/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/04/21/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/" class="post-title-link" itemprop="url">Android学习笔记（二）</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-04-21 14:42:38" itemprop="dateCreated datePublished" datetime="2022-04-21T14:42:38+08:00">2022-04-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-08 22:40:39" itemprop="dateModified" datetime="2023-03-08T22:40:39+08:00">2023-03-08</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="在Activity间传递参数"><a href="#在Activity间传递参数" class="headerlink" title="在Activity间传递参数"></a>在Activity间传递参数</h2><p>写了个小脚本解决虚拟机频繁锁死的问题:</p>
-<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">del</span> C:\Users\huiyeruzhou\.android\*.lock</span><br></pre></td></tr></table></figure>
-
-<p>这下一键开锁了(<br>在Activity间传递参数的方法很简单,在Intnet里把参数压进去就可以了（此时还没有详细讲解什么是Intent）:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">    Intent i = <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, TheAty.class);</span><br><span class="line">    i.putExtra(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;qaq!QAQ__&quot;</span>);</span><br><span class="line">    startActivity(i);&#125;</span><br></pre></td></tr></table></figure>
-
-<p>intent传递参数的方式是键值对，值可以传很多类型，包括基本类型、数组、字符串等。<br>接收的方法也很简单：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Intent i =getIntent();</span><br><span class="line">tv = findViewById(R.id.viewview);</span><br><span class="line">tv.setText(i.getStringExtra(<span class="string">&quot;data&quot;</span>));</span><br></pre></td></tr></table></figure>
-
-<p>这里的”data”就是之前数据的名称。通过名称可以找到字符串，并且通过setText方法显示在文本框里。</p>
-<h3 id="使用Bundle传递多个参数"><a href="#使用Bundle传递多个参数" class="headerlink" title="使用Bundle传递多个参数"></a>使用Bundle传递多个参数</h3><p>Bundle的使用方法和基本类型是类似的，先新建一个Bundle对象，然后调用对象的<code>put&lt;DataType&gt;</code>方法<br>再调用Intent对象的<code>putExtras</code>方法传递Bundle即可，接收的方法也是类似的：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Intent i = <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, TheAty.class);</span><br><span class="line">               Bundle b = <span class="keyword">new</span> Bundle();</span><br><span class="line">               b.putString(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;qaq?QAQ&gt;_&lt;&quot;</span>);</span><br><span class="line">               b.putInt(<span class="string">&quot;emm&quot;</span>,<span class="number">611</span>);</span><br><span class="line">               i.putExtras(b);</span><br><span class="line">               startActivity(i);</span><br></pre></td></tr></table></figure>
-
-<p>接收Bundle的数据时，可能会存在某个键无法在Bundle中找到对应值得情况，这种情况下Bundle类提供了<br><code>get&lt;DataType&gt;</code>的重载方法以指定默认值：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tv.setText(String.format(<span class="string">&quot;%s,%d,%s&quot;</span>,</span><br><span class="line">                b.getString(<span class="string">&quot;data&quot;</span>),b.getInt(<span class="string">&quot;emm&quot;</span>),</span><br><span class="line">                b.getString(<span class="string">&quot;ne!&quot;</span>,<span class="string">&quot;abab&quot;</span>)));<span class="comment">//&quot;ne!&quot;对应的值不存在，显示为默认值&quot;abab&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>此外，Bundle也可以直接通过putExtra方法进行传递，这种情况可能适用于有多个Bundle的情况，此时<br>接受时也要使用getBundleExtra方法来进行查找。</p>
-<h3 id="传递值对象"><a href="#传递值对象" class="headerlink" title="传递值对象"></a>传递值对象</h3><h2 id="Activity的启动模式"><a href="#Activity的启动模式" class="headerlink" title="Activity的启动模式"></a>Activity的启动模式</h2><p>首先来看标准启动模式，也是默认的启动模式。我们来新建一个项目来演示不同的启动模式。首先为MainActivity添加一个TextView，两个Button<br>新建一个活动，叫做AnotherActivity，复制MainActivity的布局文件</p>
-<p>java代码中设置TextView要显示的内容</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tv.setText(format(<span class="string">&quot;Task ID:%d\nCurrent Instance id:%s&quot;</span>,getTaskId(),<span class="keyword">this</span>.toString()));</span><br></pre></td></tr></table></figure>
-
-<p>Task ID是任务栈id，而当前示例ID则是当前对象的地址，可以用来区分activity的示例。</p>
-<p>接下来设置两个按钮，一个启动MainActivity一个启动AnotherActivity，复制上述代码到AnotherActivity.java，注意修改intent中package context为<code>AnotherActivity.this</code>，效果如图</p>
-<div align="center">
- <img src="Android学习笔记（二）/2022-04-22-22-35-18.png" width="50%">
-</div>
-
-<p>接下来可以点按钮试试，可以观察到TaskId都是一样的，而实例的id是不同的，这就意味着点击按钮会创建新的示例，而且所有的示例都位于一个任务栈中。</p>
-<p>在标准的启动模式中，我们启动一个Activity就会压栈一个新的实例，点击返回键就会弹栈。多次点击app的创建示例按钮，再按返回键，可以观察到他们依次被销毁的过程。</p>
-<p>可以在AndroidManifest.xml文件中的Activity标签下添加Android:launchMode条目来指定启动模式，如果没有这个条目，则默认为Standard。</p>
-<h3 id="SingleTop启动模式"><a href="#SingleTop启动模式" class="headerlink" title="SingleTop启动模式"></a>SingleTop启动模式</h3><p>SingleTop，顾名思义，如果该活动的一个实例位于栈顶，就不能继续创建该活动的新实例。只有当栈顶实例不为该活动时，才能创建该活动的新实例。<br>下面在AndroidManifest.xml文件中配置MainActivity的启动模式为SingleTop.</p>
-<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> &lt;activity</span><br><span class="line">            android:name=&quot;.MainActivity&quot;</span><br><span class="line">            android:exported=&quot;true&quot;</span><br><span class="line"><span class="addition">+            android:launchMode=&quot;singleTop&quot;&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>启动程序，首先点击启动A活动按钮，应用没有反应。此时如果点击返回键会直接退出。<br>如果启动程序后先点击启动B活动按钮，再点击启动A活动按钮，可以发现这次成功的创建了A的新实例。这是因为创建了B活动之后，A活动的上一个实例已经不在栈顶，因此可以创建新的实例。</p>
-<h3 id="SingleTask模式"><a href="#SingleTask模式" class="headerlink" title="SingleTask模式"></a>SingleTask模式</h3><p>在这种情况下，一个任务栈中只能有一个该任务的实例，如果试图创建新实例，将会<strong>弹出</strong>所有位于该实例上的活动实例。<br>修改AndroidManifest文件，将启动模式修改为<code>singleTask</code>,启动应用程序。<br>点击启动A活动按钮，没有反应。点击启动B活动按钮，再点击启动A活动按钮，可以看到B活动退出，而显示的A活动正是第一个示例，如果此时再点击返回键，应用直接退出，说明所有B活动的示例都因为其位于A活动上方而被弹出了。</p>
-<h3 id="SingleInstance模式"><a href="#SingleInstance模式" class="headerlink" title="SingleInstance模式"></a>SingleInstance模式</h3><p>在这种情况下，全局只有该活动的一个实例，第一次创建该活动时会创建一个新的任务栈，并且一个任务栈中只有这一个activity，而其他活动的实例会位于新的任务栈中。这种情况下，试图启动该活动的新实例时，会切换到保存该活动实例的任务栈。其他的任务栈不受影响。</p>
-<h3 id="SingleInstancePerTask"><a href="#SingleInstancePerTask" class="headerlink" title="SingleInstancePerTask"></a>SingleInstancePerTask</h3>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1694,7 +1725,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">27</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

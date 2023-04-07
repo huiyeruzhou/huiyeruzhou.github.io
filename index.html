@@ -221,6 +221,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/03/22/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B22-%E8%BF%9B%E9%98%B6%E4%BD%93%E4%BC%9A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/22/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B22-%E8%BF%9B%E9%98%B6%E4%BD%93%E4%BC%9A/" class="post-title-link" itemprop="url">软件构造-关于表示泄露2-进阶体会</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-03-22 17:45:55 / 修改时间：17:47:27" itemprop="dateCreated datePublished" datetime="2023-03-22T17:45:55+08:00">2023-03-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>我们上次讨论了关于表示泄露的三种基本形式：访问权限、getter传递引用、constructor接收引用，这次来讨论更加细节的内容</p>
+<blockquote>
+<p>原创性声明：每一个字（除了代码和引用）都是我手敲的。</p>
+</blockquote>
+</blockquote>
+<h2 id="更加间接的表示泄露-来自浅拷贝"><a href="#更加间接的表示泄露-来自浅拷贝" class="headerlink" title="更加间接的表示泄露-来自浅拷贝"></a>更加间接的表示泄露-来自浅拷贝</h2><p>我们对一个引用类型（对象）进行拷贝时，有三种做法。</p>
+<ol>
+<li>引用拷贝， 通常通过<code>=</code>运算符实现。两个引用变量将指向同一个内存地址。</li>
+<li>浅拷贝，一些方法提供了浅拷贝。我们把一个对象的<strong>字段值</strong>全部拷贝到另一个对象里，然后把这个对象的引用赋值给新的引用</li>
+<li>深拷贝，一些方法提供了深拷贝，通常需要手动实现。对于基本数据类型字段，我们把值拷贝到另一个对象；对于引用类型字段，我们<br>把这个字段深拷贝到另一个对象的这个字段中，最后把新的对象的引用赋值给新的引用。</li>
+</ol>
+<p>这三个概念有些抽象，我们必须结合一些例子来进行讲解。但是我们可以先注意一点：引用拷贝是一次赋值，浅拷贝对字段遍历赋值，深拷贝是对字段递归地赋值。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_36828822/article/details/129692916#:~:text=%E7%AC%AC%E4%B8%80%E7%A7%8D%E6%96%B9%E5%BC%8F%E6%98%AF%E7%9B%B4%E6%8E%A5,%E7%AC%AC%E4%B8%89%E7%A7%8D%E6%98%AF%E6%B7%B1%E6%8B%B7%E8%B4%9D%E3%80%82">参考这篇文章</a></p>
+<p>如果防御性拷贝只是浅拷贝，那么依然存在风险，考虑如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">qaq</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> List&lt;waw&gt; a = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String name; </span><br><span class="line">    qaq(Stirng name)&#123;<span class="keyword">this</span>.name = name;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(waw w)</span></span>&#123;a.add(w);&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;waw&gt; <span class="title">getA</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> <span class="keyword">new</span> LinkedList&lt;waw&gt;(a);&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> name;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">waw</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> label;</span><br><span class="line">    waw(<span class="keyword">int</span> label)&#123;<span class="keyword">this</span>.label = label;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getLabel</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> label&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLabel</span><span class="params">(<span class="keyword">int</span> label)</span></span>&#123;<span class="keyword">this</span>.label = label;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>和如下的客户端程序</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    qaq q = <span class="keyword">new</span> qaq(<span class="string">&quot;qaq&quot;</span>);</span><br><span class="line">    q.add(<span class="keyword">new</span> waw(<span class="number">1</span>));</span><br><span class="line">    <span class="comment">//浅拷贝</span></span><br><span class="line">    qaq.getA().get(<span class="number">0</span>).setLabel(<span class="number">2</span>);</span><br><span class="line">    System.out.println(qaq.getA().get(<span class="number">0</span>).getLabel())</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，q中的a字段的第零个元素的label还会是1嘛？答案是否定的。<br>究其原因，是因为 qaq.getA()返回的是对LinkedList类型的浅拷贝，这个类型中存放的内容是waw，一个可变引用类型。<br>因此，当我们对浅拷贝（对应<code>qaq.getA()</code>）调用getter（对应<code>get</code>）获取一个可变引用，再对这个引用调用mutator（对应<code>setLabel</code>）<br>时，就会把拷贝的母本中的对象也修改！<br>再次体会一下这个逻辑：母本中的内容是一个引用，我们通过浅拷贝获取了这个引用，修改了引用对应的对象，于是母本的内容虽然没有改变，但是母本的内容指向的对象却发生了改变。<br>这已经很抽象了！为了避免这个方法，对于任何可变类型的List，Map等，在拷贝时要特别注意深浅。如果是List<String>，可以不用深拷贝，因为即使浅拷贝获得了母本的内容，也不能通过这个内容修改对象的值。</p>
+<h2 id="一些探讨-public-final会导致rep-exposure吗？"><a href="#一些探讨-public-final会导致rep-exposure吗？" class="headerlink" title="一些探讨-public final会导致rep exposure吗？"></a>一些探讨-public final会导致rep exposure吗？</h2><p>MIT的课件中说表示泄露“meaning that code outside the class can modify the representation directly.”，<br>不过我认为这是不准确的，即使不能修改ADT的表示，而仅仅能够获取ADT的内部结构，客户端也足以让ADT的抽象性泄露。<br>我们考虑下面这个数据结构：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Represents an immutable right triangle. */</span></span><br><span class="line">      <span class="class"><span class="keyword">class</span> <span class="title">RightTriangle</span> </span>&#123;</span><br><span class="line"><span class="comment">/*A*/</span>     <span class="keyword">private</span> <span class="keyword">double</span>[] sides;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// sides[0] and sides[1] are the two legs,</span></span><br><span class="line">          <span class="comment">// and sides[2] is the hypotenuse, so declare it to avoid having a</span></span><br><span class="line">          <span class="comment">// magic number in the code:</span></span><br><span class="line"><span class="comment">/*B*/</span>     <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> HYPOTENUSE = <span class="number">2</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>其中，HYPOTENUSE被定义为是public static final int，因此它是作为一个不可变类属性。然而，其访问权限是public，这<br>意味着用户将有可能使用</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%881%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -325,7 +410,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -339,7 +424,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/" class="post-title-link" itemprop="url">软件构造-关于表示泄露1-基本内容</a>
+            <a href="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/" class="post-title-link" itemprop="url">软件构造-关于表示泄露1-基本内容</a>
         </h2>
 
         <div class="post-meta">
@@ -385,7 +470,7 @@
 <p>我们将讨论表示泄露的几种情况，以及如何防止表示泄露<br>原创性声明：每一个字（除了代码和引用）都是我手敲的。</p>
 </blockquote>
 <h2 id="表示泄露的定义"><a href="#表示泄露的定义" class="headerlink" title="表示泄露的定义"></a>表示泄露的定义</h2><p>表示泄露，即Representation Exposure，指的是client端程序可以通过某种手段<br>查询、访问、修改ADT的<strong>内部结构</strong>。<br>我们将通过一些例子来感受这个定义。</p>
-<h2 id="最基本的表示泄露-来自访问权限"><a href="#最基本的表示泄露-来自访问权限" class="headerlink" title="最基本的表示泄露-来自访问权限"></a>最基本的表示泄露-来自访问权限</h2><p>在java的设计中，一个字段的访问权限有四种。<br><img src="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-16-57-49.png" alt="访问权限"><br>为了避免表示泄露，<strong>如果一个字段可以是private，那么它就应当是private</strong>。<br>下面我们来看一个因为访问权限导致表示泄露的例子：</p>
+<h2 id="最基本的表示泄露-来自访问权限"><a href="#最基本的表示泄露-来自访问权限" class="headerlink" title="最基本的表示泄露-来自访问权限"></a>最基本的表示泄露-来自访问权限</h2><p>在java的设计中，一个字段的访问权限有四种。<br><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-16-57-49.png" alt="访问权限"><br>为了避免表示泄露，<strong>如果一个字段可以是private，那么它就应当是private</strong>。<br>下面我们来看一个因为访问权限导致表示泄露的例子：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * This immutable data type represents a tweet from Twitter.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Tweet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String author;</span><br><span class="line">    <span class="keyword">public</span> String text;</span><br><span class="line">    <span class="keyword">public</span> Date timestamp;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Make a Tweet.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.author = author;</span><br><span class="line">        <span class="keyword">this</span>.text = text;</span><br><span class="line">        <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>对于这个结构，我们在创建之后可以任意访问修改它的字段，因为字段被声明为public：</p>
@@ -406,7 +491,7 @@
 <p>但是还存在这样的一种情况：客户端拿到了这个属性之后，又修改了这个属性，这会发生什么呢？<br>考虑下面的代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a tweet that retweets t, one hour later*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Tweet <span class="title">retweetLater</span><span class="params">(Tweet t)</span> </span>&#123;</span><br><span class="line">    Date d = t.getTimestamp();</span><br><span class="line">    d.setHours(d.getHours()+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, t.getText(), d);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>客户端获取了发推时间后，把时间加了一个小时，又用这个时间创建了新的Tweet。这里的<code>d</code>是通过<code>getTimestamp()</code>获得的，而在d上调用了<br><code>setHours()</code>方法将会改变d的值！因此结果是，t和新创建的Tweet现在都指向了一小时后的时间。<br><img src="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-14-39.png" alt="表示泄露-来自传递引用"><br>这个例子中，我们的getter传递了一个引用类型<code>Date</code>，一个可变数据类型。因此，在引用d上调用mutator导致了表示泄露。<br>我们该怎样修改这个代码？通过一种称之为“防御性拷贝”的方式，创建引用的一个副本。这样对返回值的修改便不会影响到对象本身。具体来讲：</p>
+<p>客户端获取了发推时间后，把时间加了一个小时，又用这个时间创建了新的Tweet。这里的<code>d</code>是通过<code>getTimestamp()</code>获得的，而在d上调用了<br><code>setHours()</code>方法将会改变d的值！因此结果是，t和新创建的Tweet现在都指向了一小时后的时间。<br><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-14-39.png" alt="表示泄露-来自传递引用"><br>这个例子中，我们的getter传递了一个引用类型<code>Date</code>，一个可变数据类型。因此，在引用d上调用mutator导致了表示泄露。<br>我们该怎样修改这个代码？通过一种称之为“防御性拷贝”的方式，创建引用的一个副本。这样对返回值的修改便不会影响到对象本身。具体来讲：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>现在，我们就避免了getter（observor的一种）造成的访问泄露。对于所有的observor方法（返回值非空），我们都需要做如下的检查：只要返回的值不是基本数据类型，并且是可变数据类型，那么就要进行防御式拷贝。反之，如果返回值是基本数据类型或者是不可边类型，则可以直接返回。</p>
@@ -416,7 +501,7 @@
 <p>这个例子中，我们试图创建24个Tweet，间隔1小时。然而，我们的构造器方法会直接将时间戳赋值给内部属性，因此当我们在循环中调用<code>setHours</code>时，所有Tweet内部的timestamp都将同步变化。最终，我们得到了24个时间相同的Tweet。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Make a Tweet.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2023/03/08/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-21-50.png" alt="表示泄露-接收引用"></p>
+<p><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-21-50.png" alt="表示泄露-接收引用"></p>
 <p>为此，我们在接收引用时也要使用防御式拷贝。如下所示：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1087,148 +1172,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/08/02/%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/08/02/%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" class="post-title-link" itemprop="url">网络通讯与数据存储</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-08-02 12:45:10" itemprop="dateCreated datePublished" datetime="2022-08-02T12:45:10+08:00">2022-08-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-03 01:22:37" itemprop="dateModified" datetime="2022-08-03T01:22:37+08:00">2022-08-03</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="网络通信"><a href="#网络通信" class="headerlink" title="网络通信"></a>网络通信</h2><p>网络请求框架对比：</p>
-<ul>
-<li>HttpURLConnection</li>
-<li>Volley<ul>
-<li>停更</li>
-<li>不适合上传下载文件</li>
-</ul>
-</li>
-<li>OkHttp<ul>
-<li>支持大文件上传下载</li>
-<li>性能更好</li>
-<li>一般需要二次封装</li>
-</ul>
-</li>
-<li>Retrofit<ul>
-<li>可以通过注解配置请求</li>
-<li>可以搭配转换器解析数据，支持jackjson，pb等</li>
-</ul>
-</li>
-</ul>
-<h3 id="Retrofit简介"><a href="#Retrofit简介" class="headerlink" title="Retrofit简介"></a>Retrofit简介</h3><p>Retrofit其实是对OkHttp的一个封装，使用Retrofit库的基本流程包括引用、创建用于描述网络请求的接口、使用Retrofit实例发起网络请求。</p>
-<blockquote>
-<p>场景：客户端知道用户uid，要在服务端查询用户姓名，通过Retrofit实现</p>
-</blockquote>
-<ul>
-<li>接口：<code>https://www.bytedane.com/&#123;uid&#125;/name</code></li>
-<li>类型：GET请求</li>
-<li>接口返回：</li>
-</ul>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;message&quot;</span>: <span class="string">&quot;success&quot;</span>, </span><br><span class="line">    <span class="attr">&quot;data&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;uid&quot;</span>: <span class="string">&quot;1123&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;first_name&quot;</span>:<span class="string">&quot;张&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;last_name&quot;</span>:<span class="string">&quot;三丰&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>1.导入dependencies依赖</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">  implementation <span class="string">&#x27;com.squareup.retrofit2:retrofit:2.4.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>2.创建用于描述网络请求的接口</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IUserInfoService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@GET(&quot;users/&#123;uid&#125;/name&quot;)</span></span><br><span class="line">  <span class="function">fun <span class="title">getUserName</span><span class="params">(<span class="meta">@Path(&quot;uid&quot;)</span> uid: Int)</span>: Call&lt;ResponseBody&gt;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">  ...</span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>接口类名：和请求的含义相关</li>
-<li>函数名：识别出该接口的作用，该Interface里可以增加多个不同的函数</li>
-<li>@GET注解：指定该接口的相对路径，用get方法发起请求</li>
-<li>@Path注解：需要外部调用时，用传入的uid替换注解里的{uid}</li>
-<li>返回值Call&lt;ResponseBody&gt;：可以直接转换把Sring转换为Model，这里就转换为User</li>
-<li>ResponseBody：根据返回内容定义的类，应当包含所有字段和一些输出方法，<code>response.body()</code>是该类的一个实例</li>
-</ul>
-<ol start="3">
-<li>发起网络请求</li>
-</ol>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserName</span><span class="params">(View)</span></span> &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//创建Retrofit实例</span></span><br><span class="line">  <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">  .baseUrl(<span class="string">&quot;https://www.bytedance.com/&quot;</span>)<span class="comment">//请求Url地址</span></span><br><span class="line">  .build()</span><br><span class="line"></span><br><span class="line">  <span class="comment">//创建 网络请求接口 的实例</span></span><br><span class="line">  <span class="keyword">val</span> iUserInterface = retrofit.create(IUserInfoService::<span class="keyword">class</span>.java)</span><br><span class="line">  <span class="keyword">val</span> call = iUserInterface.getUserName(<span class="number">1123</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment">//入队异步请求</span></span><br><span class="line">  call.enqueue(<span class="keyword">object</span>: Callback&lt;ResponseBody&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onResponse</span><span class="params">(call: <span class="type">Call</span>&lt;<span class="type">ResponseBody</span>&gt;,response: <span class="type">Response</span>&lt;<span class="type">ResponseBody</span>&gt;)</span></span> &#123;</span><br><span class="line">      request_result_tv.text = <span class="string">&quot;请求成功：&quot;</span> + response.body()!!.string();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onFailure</span><span class="params">(call: <span class="type">Call</span>&lt;<span class="type">ResponseBody</span>&gt;, e: <span class="type">Throwable</span>)</span></span> &#123;</span><br><span class="line">      request_result_tv.text = <span class="string">&quot;请求失败&quot;</span> + e.message</span><br><span class="line">  &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Retrofit注解"><a href="#Retrofit注解" class="headerlink" title="Retrofit注解"></a>Retrofit注解</h3><!-- ![注解](/2022/08/02/%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/2022-08-03-00-22-55.png) -->
-<ul>
-<li>注解简介<br>注解可以作用在类、方法、参数、成员变量上，并且可以在合适的时机读取注解并进行替换。<br>注解的处理一般有三个时机(Retention)：</li>
-</ul>
-<p>1.SOURCE: 只在源码有效<br>2.CLASS: 编译时用注解处理器处理<br>3.RUNTIME: 运行时处理</p>
-<ul>
-<li>注解定义</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(METHOD)</span><span class="comment">//作用对象</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span><span class="comment">//生命周期</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> GET &#123;</span><br><span class="line">  <span class="function">String <span class="title">value</span><span class="params">()</span> <span class="keyword">default</span> &quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>注解使用</li>
-</ul>
-<p>可以利用Method类的接口来获取注解的内容。配合动态代理可以获取方法和参数的注解，构造Request对象。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">newProxyInstance</span><span class="params">(ClasslLoader loader, </span></span></span><br><span class="line"><span class="params"><span class="function">Class&lt;?&gt;[] interfaces, </span></span></span><br><span class="line"><span class="params"><span class="function">InvocationHandler h)</span></span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> IllegalArgumentException</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InvocationHandler</span></span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span></span></span><br><span class="line"><span class="function">  throw Throwable</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>之后可以通过<code>Method.getAnnotaion()</code>和<code>Method.getParameterAnnotation()</code>来获取方法和方法参数的注解内容。</p>
-<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>Retrofit的代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Retrofit retrofit = <span class="keyword">new</span> Retrofit.builder()</span><br><span class="line">      .baseUrl(<span class="string">&quot;http://www.bytedance.com/&quot;</span>)</span><br><span class="line">      .addConverterFactory(GsonConverterFactory.create())<span class="comment">//利用gson转换器解析json，需要添加gson依赖</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">IUserInfoService iUserInterface = retrofit.create(IUserInfoService.class);</span><br><span class="line"></span><br><span class="line">retrofit2.Call&lt;ResponseBody&gt; call = iUserInterface.getUserName(<span class="number">1123</span>);</span><br><span class="line"></span><br><span class="line">call.enqueue(<span class="keyword">new</span> Callback&lt;ResponseBody&gt;() &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span> <span class="params">(Call&lt;ResponseBody&gt; call,</span></span></span><br><span class="line"><span class="params"><span class="function">      Response&lt;ResponseBody&gt; response)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;ResponseBody&gt; call,  Throwable t)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>OkHttp的代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建OkHttpClient</span></span><br><span class="line">OkHttpClient OkHttpClient = <span class="keyword">new</span> OkHttpClient.Builder().build();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Request request = <span class="keyword">new</span> Request.Builder()</span><br><span class="line">    .get()</span><br><span class="line">    .url(<span class="string">&quot;https://www.bytedance.com/user/1123/name&quot;</span>)</span><br><span class="line">    .build();</span><br><span class="line"><span class="comment">//</span></span><br><span class="line">OkHttp.Call call = okHttpClient.newCall(request);</span><br><span class="line"></span><br><span class="line">Call.enqueue(<span class="keyword">new</span> Callback() &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span> <span class="params">(Call call, IOException e)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span> <span class="params">(Call call, Response response)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//<span class="doctag">TODO:</span> 服务器响应结果</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="字节跳动网络库"><a href="#字节跳动网络库" class="headerlink" title="字节跳动网络库"></a>字节跳动网络库</h3><p>Cronet用C++实现，对OkHttp进行了特定优化。对其进行二次封装，设计一个高已用、功能全面的框架。最终决定基于Retrofit进行二次开发，将底层的OkHttp替换为Cronet，这就是TTNet。<br>核心点就是将OkHttpClient和OkHttpCall的生成替换为OkHttp和Cronet二选一。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1300,7 +1243,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">27</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
