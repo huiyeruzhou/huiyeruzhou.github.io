@@ -156,117 +156,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/04/21/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/04/21/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/" class="post-title-link" itemprop="url">Android学习笔记（二）</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-04-21 14:42:38" itemprop="dateCreated datePublished" datetime="2022-04-21T14:42:38+08:00">2022-04-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-08 22:40:39" itemprop="dateModified" datetime="2023-03-08T22:40:39+08:00">2023-03-08</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="在Activity间传递参数"><a href="#在Activity间传递参数" class="headerlink" title="在Activity间传递参数"></a>在Activity间传递参数</h2><p>写了个小脚本解决虚拟机频繁锁死的问题:</p>
-<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">del</span> C:\Users\huiyeruzhou\.android\*.lock</span><br></pre></td></tr></table></figure>
-
-<p>这下一键开锁了(<br>在Activity间传递参数的方法很简单,在Intnet里把参数压进去就可以了（此时还没有详细讲解什么是Intent）:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">    Intent i = <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, TheAty.class);</span><br><span class="line">    i.putExtra(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;qaq!QAQ__&quot;</span>);</span><br><span class="line">    startActivity(i);&#125;</span><br></pre></td></tr></table></figure>
-
-<p>intent传递参数的方式是键值对，值可以传很多类型，包括基本类型、数组、字符串等。<br>接收的方法也很简单：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Intent i =getIntent();</span><br><span class="line">tv = findViewById(R.id.viewview);</span><br><span class="line">tv.setText(i.getStringExtra(<span class="string">&quot;data&quot;</span>));</span><br></pre></td></tr></table></figure>
-
-<p>这里的”data”就是之前数据的名称。通过名称可以找到字符串，并且通过setText方法显示在文本框里。</p>
-<h3 id="使用Bundle传递多个参数"><a href="#使用Bundle传递多个参数" class="headerlink" title="使用Bundle传递多个参数"></a>使用Bundle传递多个参数</h3><p>Bundle的使用方法和基本类型是类似的，先新建一个Bundle对象，然后调用对象的<code>put&lt;DataType&gt;</code>方法<br>再调用Intent对象的<code>putExtras</code>方法传递Bundle即可，接收的方法也是类似的：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Intent i = <span class="keyword">new</span> Intent(MainActivity.<span class="keyword">this</span>, TheAty.class);</span><br><span class="line">               Bundle b = <span class="keyword">new</span> Bundle();</span><br><span class="line">               b.putString(<span class="string">&quot;data&quot;</span>,<span class="string">&quot;qaq?QAQ&gt;_&lt;&quot;</span>);</span><br><span class="line">               b.putInt(<span class="string">&quot;emm&quot;</span>,<span class="number">611</span>);</span><br><span class="line">               i.putExtras(b);</span><br><span class="line">               startActivity(i);</span><br></pre></td></tr></table></figure>
-
-<p>接收Bundle的数据时，可能会存在某个键无法在Bundle中找到对应值得情况，这种情况下Bundle类提供了<br><code>get&lt;DataType&gt;</code>的重载方法以指定默认值：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tv.setText(String.format(<span class="string">&quot;%s,%d,%s&quot;</span>,</span><br><span class="line">                b.getString(<span class="string">&quot;data&quot;</span>),b.getInt(<span class="string">&quot;emm&quot;</span>),</span><br><span class="line">                b.getString(<span class="string">&quot;ne!&quot;</span>,<span class="string">&quot;abab&quot;</span>)));<span class="comment">//&quot;ne!&quot;对应的值不存在，显示为默认值&quot;abab&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>此外，Bundle也可以直接通过putExtra方法进行传递，这种情况可能适用于有多个Bundle的情况，此时<br>接受时也要使用getBundleExtra方法来进行查找。</p>
-<h3 id="传递值对象"><a href="#传递值对象" class="headerlink" title="传递值对象"></a>传递值对象</h3><h2 id="Activity的启动模式"><a href="#Activity的启动模式" class="headerlink" title="Activity的启动模式"></a>Activity的启动模式</h2><p>首先来看标准启动模式，也是默认的启动模式。我们来新建一个项目来演示不同的启动模式。首先为MainActivity添加一个TextView，两个Button<br>新建一个活动，叫做AnotherActivity，复制MainActivity的布局文件</p>
-<p>java代码中设置TextView要显示的内容</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tv.setText(format(<span class="string">&quot;Task ID:%d\nCurrent Instance id:%s&quot;</span>,getTaskId(),<span class="keyword">this</span>.toString()));</span><br></pre></td></tr></table></figure>
-
-<p>Task ID是任务栈id，而当前示例ID则是当前对象的地址，可以用来区分activity的示例。</p>
-<p>接下来设置两个按钮，一个启动MainActivity一个启动AnotherActivity，复制上述代码到AnotherActivity.java，注意修改intent中package context为<code>AnotherActivity.this</code>，效果如图</p>
-<div align="center">
- <img src="Android学习笔记（二）/2022-04-22-22-35-18.png" width="50%">
-</div>
-
-<p>接下来可以点按钮试试，可以观察到TaskId都是一样的，而实例的id是不同的，这就意味着点击按钮会创建新的示例，而且所有的示例都位于一个任务栈中。</p>
-<p>在标准的启动模式中，我们启动一个Activity就会压栈一个新的实例，点击返回键就会弹栈。多次点击app的创建示例按钮，再按返回键，可以观察到他们依次被销毁的过程。</p>
-<p>可以在AndroidManifest.xml文件中的Activity标签下添加Android:launchMode条目来指定启动模式，如果没有这个条目，则默认为Standard。</p>
-<h3 id="SingleTop启动模式"><a href="#SingleTop启动模式" class="headerlink" title="SingleTop启动模式"></a>SingleTop启动模式</h3><p>SingleTop，顾名思义，如果该活动的一个实例位于栈顶，就不能继续创建该活动的新实例。只有当栈顶实例不为该活动时，才能创建该活动的新实例。<br>下面在AndroidManifest.xml文件中配置MainActivity的启动模式为SingleTop.</p>
-<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> &lt;activity</span><br><span class="line">            android:name=&quot;.MainActivity&quot;</span><br><span class="line">            android:exported=&quot;true&quot;</span><br><span class="line"><span class="addition">+            android:launchMode=&quot;singleTop&quot;&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>启动程序，首先点击启动A活动按钮，应用没有反应。此时如果点击返回键会直接退出。<br>如果启动程序后先点击启动B活动按钮，再点击启动A活动按钮，可以发现这次成功的创建了A的新实例。这是因为创建了B活动之后，A活动的上一个实例已经不在栈顶，因此可以创建新的实例。</p>
-<h3 id="SingleTask模式"><a href="#SingleTask模式" class="headerlink" title="SingleTask模式"></a>SingleTask模式</h3><p>在这种情况下，一个任务栈中只能有一个该任务的实例，如果试图创建新实例，将会<strong>弹出</strong>所有位于该实例上的活动实例。<br>修改AndroidManifest文件，将启动模式修改为<code>singleTask</code>,启动应用程序。<br>点击启动A活动按钮，没有反应。点击启动B活动按钮，再点击启动A活动按钮，可以看到B活动退出，而显示的A活动正是第一个示例，如果此时再点击返回键，应用直接退出，说明所有B活动的示例都因为其位于A活动上方而被弹出了。</p>
-<h3 id="SingleInstance模式"><a href="#SingleInstance模式" class="headerlink" title="SingleInstance模式"></a>SingleInstance模式</h3><p>在这种情况下，全局只有该活动的一个实例，第一次创建该活动时会创建一个新的任务栈，并且一个任务栈中只有这一个activity，而其他活动的实例会位于新的任务栈中。这种情况下，试图启动该活动的新实例时，会切换到保存该活动实例的任务栈。其他的任务栈不受影响。</p>
-<h3 id="SingleInstancePerTask"><a href="#SingleInstancePerTask" class="headerlink" title="SingleInstancePerTask"></a>SingleInstancePerTask</h3>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/04/20/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%B8%80%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1049,6 +938,106 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/03/12/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%B1%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/12/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%B1%BB/" class="post-title-link" itemprop="url">Java学习笔记2-对象和类</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-12 16:51:47" itemprop="dateCreated datePublished" datetime="2022-03-12T16:51:47+08:00">2022-03-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-12 23:11:29" itemprop="dateModified" datetime="2023-04-12T23:11:29+08:00">2023-04-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>适当的提醒自己学习的目的是有必要的。笔记的作者和理想中的读者应当是具有C语言编程的基础，对指针的概念有清晰理解，<br>正在学习面向对象编程并且希望理解类、对象的概念，特性和其大致实现原理。<br>本文的参考教材是java核心技术卷一</p>
+</blockquote>
+<h2 id="面向对象的编程"><a href="#面向对象的编程" class="headerlink" title="面向对象的编程"></a>面向对象的编程</h2><p>我很喜欢书中的一句话：对于面向过程而言，首先决定如何操作数据，然后再觉得如何组织数据的结构。而OOP却调换了这个次序，将数据放在第一位，然后再考虑组织数据的算法。<br>书中进一步提到，Web浏览器可能需要两千个过程对一组全局数据进行操作，而OOP只需要一百个含有20个方法的类，我对此存疑，但这不是重点。</p>
+<h2 id="一、类和对象"><a href="#一、类和对象" class="headerlink" title="一、类和对象"></a>一、类和对象</h2><h3 id="1-1-基本概念"><a href="#1-1-基本概念" class="headerlink" title="1.1 基本概念"></a>1.1 基本概念</h3><p><strong>类</strong>是构造对象的模板或蓝图。由类构造<strong>对象</strong>的过程称为创建类的<strong>实例</strong>。<br>对象中的数据称为<em>实例字段</em>，这些字段的值构成了对象的当前<em>状态</em>。<br>操作数据的过程称之为<em>方法</em>，程序只能通过一个类的方法来与该类的数据交互，这实现了类的<strong>封装</strong>。<br>可以通过<em>保留</em>一个类的全部属性和方法并<em>扩展</em>一些新的方法和数据字段的过程来创建一个新的类，这个过程称为<strong>继承</strong>。<br>对象的方法集合构成了对象的<strong>行为</strong>，示例字段值得集合构成了对象的当前<em>状态</em>同一个类的不同对象具有不同的<strong>标识</strong>。</p>
+<h3 id="1-2-编写OOP程序的原则"><a href="#1-2-编写OOP程序的原则" class="headerlink" title="1.2 编写OOP程序的原则"></a>1.2 编写OOP程序的原则</h3><p>先识别类，再为类添加方法。重要的名词可能是类，重要的动词可能是类的方法。</p>
+<h3 id="1-3-类之间的关系"><a href="#1-3-类之间的关系" class="headerlink" title="1.3 类之间的关系"></a>1.3 类之间的关系</h3><ol>
+<li><p>依赖关系<br> 一个类的方法操作或使用另一个类的对象，就称为这个类<strong>依赖</strong>于另一个类</p>
+</li>
+<li><p>聚合关系<br>一个类的对象包含另一个类的对象</p>
+</li>
+<li><p>继承关系<br>一个类继承并扩展了另一个类的功能</p>
+</li>
+</ol>
+<h2 id="二、使用类的方法"><a href="#二、使用类的方法" class="headerlink" title="二、使用类的方法"></a>二、使用类的方法</h2><p>使用对象要先<strong>构造</strong>对象，然后<strong>初始化</strong>对象，之后<strong>调用</strong>对象的方法。</p>
+<h3 id="2-1-构造对象"><a href="#2-1-构造对象" class="headerlink" title="2.1 构造对象"></a>2.1 构造对象</h3><p>构造对象使用<code>new</code>运算符，这意味着为该对象分配存储空间。单独声明一个对象变量只是声明了一个指针（仔细思考一下，这意味着如果两个对象变量持有同一个对象的引用，通过任何一个对象变量调用方法都会影响另一个对象变量获得的数据）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Date birthday;          <span class="comment">//unavailable</span></span><br><span class="line">birthday = <span class="keyword">new</span> Date();  <span class="comment">//available</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*other usage*/</span></span><br><span class="line">qaq(<span class="keyword">new</span> Q());   <span class="comment">//use constructed object as argument</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-成员"><a href="#2-2-成员" class="headerlink" title="2.2 成员"></a>2.2 成员</h3><p>对对象变量使用<code>.</code>运算符，就可以在对象上取出对应的成员。如果是成员字段，将会获得这个字段的<strong>引用</strong>。如果是方法，那么可以调用这个方法并且该方法已经绑定到该对象上。<br>这是相对而言比较正常的语法。</p>
+<h3 id="2-3-方法"><a href="#2-3-方法" class="headerlink" title="2.3 方法"></a>2.3 方法</h3><p>我们在java中将一个类的成员函数称之为“方法”，这是一个非常拗口的称呼，尽管大多数程序员并不这么认为（<br>通常使用的成员方法可以分为两类：</p>
+<ul>
+<li>更改器</li>
+<li>访问器<br>在C++中，我们会使用const来标志访问器方法，从语法上限制这个函数修改对象内容的能力。然而，在java里我们无能为力。<br>要问：这种区别有什么用呢？这涉及到后面重要的概念“不可变性”。</li>
+</ul>
+<h2 id="2-4-定义"><a href="#2-4-定义" class="headerlink" title="2.4 定义"></a>2.4 定义</h2><p>如果要定义一个类，我们需要定义其数据和对数据的操作，也就是成员字段和成员方法。同时，我们还应该准备一系列构造器，以初始化这个类。<br>定义字段的方法为访问修饰符+类型+标识符+;<br>定义方法的方式为访问修饰符+函数原型+函数定义<br>构造器的原型没有返回值</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/01/19/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1200,7 +1189,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
