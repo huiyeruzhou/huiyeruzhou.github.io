@@ -227,6 +227,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/" class="post-title-link" itemprop="url">软件构造-OOP中类的关系关联/依赖</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-05-26 20:53:43 / 修改时间：21:10:25" itemprop="dateCreated datePublished" datetime="2023-05-26T20:53:43+08:00">2023-05-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="OOP中对象的关系"><a href="#OOP中对象的关系" class="headerlink" title="OOP中对象的关系"></a>OOP中对象的关系</h2><p>在面向对象编程（Object-Oriented Programming，OOP）中，”delegation”（委托）、”association”（关联）、”composition”（组合）和”aggregation”（聚合）是几个重要的概念，用于描述对象之间的关系。</p>
+<p>委托（Delegation, A uses B）：<br>委托是一种对象之间的关系，其中一个对象将某些任务委托给另一个对象来完成。在委托关系中，一个对象将一部分功能交给另一个对象处理，通过委托可以实现代码的复用和模块化。委托关系通常是动态的，可以在运行时进行修改。</p>
+<p>依赖关系（Dependency, A uses B）:<br>依赖关系表示A的某些方法依赖于B的行为。在使用依赖实现的委托中，A接受一个B类型的参数，并将行为委托给B：<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-09-27.png"></p>
+<p>关联（Association, A has B）：<br>关联是对象之间的一种关系，表示对象之间的连接或联系。关联关系可以是单向或双向的，可以是一对一、一对多或多对多的。关联关系通常用于描述对象之间的交互关系。<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-07-02.png" alt="ass"></p>
+<p>组合（Composition, B is part of A）：<br>组合是一种强关联的关系，表示一个对象是由其他对象组成的整体，对象之间具有“整体-部分”的关系。在组合关系中，部分对象无法独立存在，它们的生命周期与整体对象相互依赖。如果整体对象被销毁，部分对象也会被销毁。<br>通常表现为静态初始化的字段, 不可通过外部方法更改.<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-02-43.png" alt="comp"></p>
+<p>聚合（Aggregation, A owns B）：<br>聚合是一种弱关联的关系，表示一个对象包含其他对象，但被包含对象可以独立存在。聚合关系中，包含对象与被包含对象之间没有强依赖关系，被包含对象可以从一个包含对象中脱离出来，继续存在。聚合关系通常用于表示整体与部分之间的关系，但部分对象的生命周期不受整体对象控制。<br>通常表现为动态初始化的字段, 可通过外部方法更改.<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-02-16.png" alt="agg"></p>
+<h2 id="委托-x2F-关联-x2F-依赖的关系"><a href="#委托-x2F-关联-x2F-依赖的关系" class="headerlink" title="委托&#x2F;关联&#x2F;依赖的关系"></a>委托&#x2F;关联&#x2F;依赖的关系</h2><ul>
+<li>委托和关联&#x2F;依赖的关系:在委托（Delegation）中，一个对象（委托者）将任务的执行委托给另一个对象（委托对象）。<br>  委托对象负责执行特定的任务，而委托者可以通过调用委托对象的方法来触发任务的执行。在这种情况下，委托者需要持有委托对象的引用，以便能够调用其方法。这种关联关系要么通过<br>  参数传递来实现, 通过字段（属性）保存委托对象的引用来实现。<br>  前者构成依赖关系,后者构成关联关系</li>
+<li>关联和聚合&#x2F;组合的关系: 组合和聚合是关联的两种具体形式<br>  组合是一种比聚合更强的关系，它表示整体对象包含部分对象，并且部分对象无法独立存在。<br>  聚合是一种弱关系，表示整体对象包含部分对象，但部分对象可以独立存在。</li>
+</ul>
+<h2 id="小结和讨论"><a href="#小结和讨论" class="headerlink" title="小结和讨论"></a>小结和讨论</h2><p>综上所述:</p>
+<ul>
+<li>委托是一种设计模式, 将任务的执行委托给另一个对象.</li>
+<li>通过参数进行的委托使类之间存在依赖关系.</li>
+<li>通过引用进行的委托使类之间存在关联关系.<ul>
+<li>组合是一种强关系，同生共死, 通常在构造函数中创建,在析构函数中销毁</li>
+<li>聚合是一种弱关系, 仅持有引用. 通常在外部创建,通过调用public方法保存到rep里,在外部某处销毁.</li>
+</ul>
+</li>
+</ul>
+<p>讨论:</p>
+<ul>
+<li>委托关系的强弱? 依赖 &lt; 聚合 &lt; 关联 &lt; 组合, 越强, 越不容易修改, 越发生在类的内部. 反之, 则容易修改, 并且可以发生在类的外部.<br>所以依赖关系是最方便修改的, 组合关系是最难修改的.</li>
+<li>临时委托VS永久委托？ 依赖关系的委托是临时的，因为没有任何信息记录委托对象。而关联关系的委托是永久的，因为委托对象通过字段的形式保存了下来。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E5%A4%9A%E6%80%81-Java%E5%92%8CC%E4%B8%AD%E7%9A%84%E5%AD%90%E7%B1%BB%E4%B8%8E%E6%B3%9B%E5%9E%8B.md/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1042,91 +1127,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/09/25/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%94/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/25/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%94/" class="post-title-link" itemprop="url">RPC框架设计侧重点, 特色和架构调研</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-09-25 16:53:30" itemprop="dateCreated datePublished" datetime="2022-09-25T16:53:30+08:00">2022-09-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-24 21:19:12" itemprop="dateModified" datetime="2022-10-24T21:19:12+08:00">2022-10-24</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Volo调研"><a href="#Volo调研" class="headerlink" title="Volo调研"></a>Volo调研</h2><p>Volo 是字节跳动服务框架团队研发的轻量级、高性能、可扩展性强、易用性好的 Rust RPC 框架，使用了 Rust 最新的 GAT 特性。</p>
-<h3 id="特色-易用性"><a href="#特色-易用性" class="headerlink" title="特色-易用性"></a>特色-易用性</h3><p>具体来说，这个框架使用了<a target="_blank" rel="noopener" href="https://github.com/cloudwego/motore">motore</a>中间件, 而其使用GAT语法完成了<a target="_blank" rel="noopener" href="https://github.com/cloudwego/motore">高效的异步接口</a></p>
-<p>Rust不支持一个<code>async trait</code>, 一般的解决方法是使用Box(类似智能指针)来完成这件事情, <a target="_blank" rel="noopener" href="https://www.cloudwego.io/zh/docs/motore/faq/q1_gat/">但这会</a>带来额外的开销并且降低代码可读性. 有一个使用宏完成用Box实现异步接口的<a target="_blank" rel="noopener" href="https://docs.rs/async-trait/latest/async_trait/">Crate</a></p>
-<p>具体细节可能需要进一步理解一些Rust的语言特性</p>
-<h3 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">├─volo          RPC框架的通用组件</span><br><span class="line">│  └─src  </span><br><span class="line">│      ├─discovery      #服务发现:一些接口,一种简单实现(返回静态单链表)</span><br><span class="line">│      ├─loadbalance    #负载均衡:同上(加权随机)</span><br><span class="line">│      ├─net            #网络链接: probe创建套接字,dial建立连接,incomming进行监听,conn进行读写 </span><br><span class="line">│      └─util           #工具: buf_reader</span><br><span class="line">|                       #</span><br><span class="line">├─volo-build    #编译用</span><br><span class="line">│  └─src</span><br><span class="line">├─volo-cli      #用户界面</span><br><span class="line">│  └─...</span><br><span class="line">├─volo-grpc     #grpc框架</span><br><span class="line">│  └─src</span><br><span class="line">│      ├─client         #客户端底层组件</span><br><span class="line">│      ├─codec          #编解码器</span><br><span class="line">│      ├─layer          #待调研,类似某种封装tonic/src/metadata</span><br><span class="line">│      │  └─loadbalance</span><br><span class="line">│      ├─metadata</span><br><span class="line">│      ├─server         #服务端底层组件</span><br><span class="line">│      └─transport</span><br><span class="line">    ...                 #从tonic/src/中copy并修改了一些文件,完成rpc的请求响应相关工作</span><br><span class="line">├─volo-macros   #宏</span><br><span class="line">│  └─src</span><br><span class="line">└─volo-thrift   #thrift框架</span><br><span class="line">    └─src</span><br><span class="line">        ├─client</span><br><span class="line">        │  └─layer</span><br><span class="line">        ├─codec</span><br><span class="line">        ├─protocol</span><br><span class="line">        └─transport</span><br><span class="line">            ├─pingpong</span><br><span class="line">            └─pool</span><br></pre></td></tr></table></figure>
-
-<p><strong>如何用Volo的特色实现grpc</strong><br><img src="/2022/09/25/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%94/2022-09-25-16-54-19.png" alt="架构图"></p>
-<h3 id="erpc"><a href="#erpc" class="headerlink" title="erpc"></a>erpc</h3><p><strong>传输层(串口),嵌入式,代码生成(结合nanopb)</strong></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/EmbeddedRPC/erpc">erpc项目地址</a>及其<a target="_blank" rel="noopener" href="https://embeddedrpc.github.io/eRPC">详细文档</a></p>
-<h3 id="侧重点"><a href="#侧重点" class="headerlink" title="侧重点"></a>侧重点</h3><p>嵌入式,轻量化</p>
-<h3 id="框架图"><a href="#框架图" class="headerlink" title="框架图"></a>框架图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">├─erpcgen           #代码生成工具</span><br><span class="line">├─erpcsniffer</span><br><span class="line">│  └─src</span><br><span class="line">├─erpc_c            #基础架构</span><br><span class="line">│  ├─config         #config.h配置文件 </span><br><span class="line">│  └─infra</span><br><span class="line">|     ├─ erpc_arbitrated_client_manager.cpp</span><br><span class="line">|     ├─ erpc_arbitrated_client_manager.hpp</span><br><span class="line">|     ├─ erpc_basic_codec.cpp      #基础编解码器</span><br><span class="line">|     ├─ erpc_basic_codec.hpp</span><br><span class="line">|     ├─ erpc_client_manager.cpp</span><br><span class="line">|     ├─ erpc_client_manager.h</span><br><span class="line">|     ├─ erpc_client_server_common.hpp</span><br><span class="line">|     ├─ erpc_codec.hpp             #编解码器抽象定义</span><br><span class="line">|     ├─ erpc_common.h              #状态码枚举类型的定义</span><br><span class="line">|     ├─ erpc_crc16.cpp</span><br><span class="line">|     ├─ erpc_crc16.hpp</span><br><span class="line">|     ├─ erpc_framed_transport.cpp</span><br><span class="line">|     ├─ erpc_framed_transport.hpp</span><br><span class="line">|     ├─ erpc_manually_constructed.hpp</span><br><span class="line">|     ├─ erpc_message_buffer.cpp</span><br><span class="line">|     ├─ erpc_message_buffer.hpp</span><br><span class="line">|     ├─ erpc_message_loggers.cpp</span><br><span class="line">|     ├─ erpc_message_loggers.hpp</span><br><span class="line">|     ├─ erpc_pre_post_action.cpp</span><br><span class="line">|     ├─ erpc_pre_post_action.h</span><br><span class="line">|     ├─ erpc_server.cpp            </span><br><span class="line">|     ├─ erpc_server.hpp            #Service和Server的抽象接口,注册移除服务,处理信息等</span><br><span class="line">|     ├─ erpc_simple_server.cpp     #</span><br><span class="line">|     ├─ erpc_simple_server.hpp</span><br><span class="line">|     ├─ erpc_static_queue.hpp      #数组实现的队列</span><br><span class="line">|     ├─ erpc_transport.hpp         #Transport</span><br><span class="line">|     ├─ erpc_transport_arbitrator.cpp</span><br><span class="line">|     ├─ erpc_transport_arbitrator.hpp</span><br><span class="line">|     ├─ erpc_version.h</span><br><span class="line">|     ├─ infra.dox     </span><br><span class="line">│  ├─port           #便于移植</span><br><span class="line">│  ├─setup          #C语言接口</span><br><span class="line">│  └─transports     #支持不同通信方法的工具类</span><br><span class="line">├─erpc_python</span><br><span class="line">│  └─erpc</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li>rtos上的 protobuf-c</li>
-<li>erpc 传输层 nanopb</li>
-<li>volo 语法特性</li>
-<li>motan dubbo 事件逻辑</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1198,7 +1198,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

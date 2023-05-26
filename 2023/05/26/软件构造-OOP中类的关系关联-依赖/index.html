@@ -20,19 +20,24 @@
     var CONFIG = {"hostname":"huiyeruzhou.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Structure of RA Title Authors &amp; Affiliation(单位) Abstract Introduction Materials &amp; Methods Results &amp; Discussion Conclusion Acknowledgements(致谢) Appendix Reference(引用) Bibliography(参考)  Titl">
+  <meta name="description" content="OOP中对象的关系在面向对象编程（Object-Oriented Programming，OOP）中，”delegation”（委托）、”association”（关联）、”composition”（组合）和”aggregation”（聚合）是几个重要的概念，用于描述对象之间的关系。 委托（Delegation, A uses B）：委托是一种对象之间的关系，其中一个对象将某些任务委托给另一个对象">
 <meta property="og:type" content="article">
-<meta property="og:title" content="英语科技文献阅读">
-<meta property="og:url" content="http://huiyeruzhou.github.io/2022/05/11/%E8%8B%B1%E8%AF%AD%E7%A7%91%E6%8A%80%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/index.html">
+<meta property="og:title" content="软件构造-OOP中类的关系关联&#x2F;依赖">
+<meta property="og:url" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/index.html">
 <meta property="og:site_name" content="辉夜的博客">
-<meta property="og:description" content="Structure of RA Title Authors &amp; Affiliation(单位) Abstract Introduction Materials &amp; Methods Results &amp; Discussion Conclusion Acknowledgements(致谢) Appendix Reference(引用) Bibliography(参考)  Titl">
+<meta property="og:description" content="OOP中对象的关系在面向对象编程（Object-Oriented Programming，OOP）中，”delegation”（委托）、”association”（关联）、”composition”（组合）和”aggregation”（聚合）是几个重要的概念，用于描述对象之间的关系。 委托（Delegation, A uses B）：委托是一种对象之间的关系，其中一个对象将某些任务委托给另一个对象">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-05-11T02:44:35.000Z">
-<meta property="article:modified_time" content="2022-05-11T02:51:52.496Z">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-09-27.png">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-07-02.png">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-02-43.png">
+<meta property="og:image" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-02-16.png">
+<meta property="article:published_time" content="2023-05-26T12:53:43.000Z">
+<meta property="article:modified_time" content="2023-05-26T13:10:25.460Z">
 <meta property="article:author" content="辉夜">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-09-27.png">
 
-<link rel="canonical" href="http://huiyeruzhou.github.io/2022/05/11/%E8%8B%B1%E8%AF%AD%E7%A7%91%E6%8A%80%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/">
+<link rel="canonical" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/">
 
 
 <script id="page-configurations">
@@ -45,7 +50,7 @@
   };
 </script>
 
-  <title>英语科技文献阅读 | 辉夜的博客</title>
+  <title>软件构造-OOP中类的关系关联/依赖 | 辉夜的博客</title>
   
 
 
@@ -161,7 +166,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/05/11/%E8%8B%B1%E8%AF%AD%E7%A7%91%E6%8A%80%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -174,7 +179,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          英语科技文献阅读
+          软件构造-OOP中类的关系关联/依赖
         </h1>
 
         <div class="post-meta">
@@ -187,7 +192,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-05-11 10:44:35 / 修改时间：10:51:52" itemprop="dateCreated datePublished" datetime="2022-05-11T10:44:35+08:00">2022-05-11</time>
+              <time title="创建时间：2023-05-26 20:53:43 / 修改时间：21:10:25" itemprop="dateCreated datePublished" datetime="2023-05-26T20:53:43+08:00">2023-05-26</time>
             </span>
 
           
@@ -201,96 +206,30 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="Structure-of-RA"><a href="#Structure-of-RA" class="headerlink" title="Structure of RA"></a>Structure of RA</h2><ul>
-<li>Title</li>
-<li>Authors &amp; Affiliation(单位)</li>
-<li><em>Abstract</em></li>
-<li><strong>Introduction</strong></li>
-<li><strong>Materials &amp; Methods</strong></li>
-<li><strong>Results &amp; Discussion</strong></li>
-<li>Conclusion</li>
-<li>Acknowledgements(致谢)</li>
-<li>Appendix</li>
-<li>Reference(引用)</li>
-<li>Bibliography(参考)</li>
+        <h2 id="OOP中对象的关系"><a href="#OOP中对象的关系" class="headerlink" title="OOP中对象的关系"></a>OOP中对象的关系</h2><p>在面向对象编程（Object-Oriented Programming，OOP）中，”delegation”（委托）、”association”（关联）、”composition”（组合）和”aggregation”（聚合）是几个重要的概念，用于描述对象之间的关系。</p>
+<p>委托（Delegation, A uses B）：<br>委托是一种对象之间的关系，其中一个对象将某些任务委托给另一个对象来完成。在委托关系中，一个对象将一部分功能交给另一个对象处理，通过委托可以实现代码的复用和模块化。委托关系通常是动态的，可以在运行时进行修改。</p>
+<p>依赖关系（Dependency, A uses B）:<br>依赖关系表示A的某些方法依赖于B的行为。在使用依赖实现的委托中，A接受一个B类型的参数，并将行为委托给B：<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-09-27.png"></p>
+<p>关联（Association, A has B）：<br>关联是对象之间的一种关系，表示对象之间的连接或联系。关联关系可以是单向或双向的，可以是一对一、一对多或多对多的。关联关系通常用于描述对象之间的交互关系。<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-07-02.png" alt="ass"></p>
+<p>组合（Composition, B is part of A）：<br>组合是一种强关联的关系，表示一个对象是由其他对象组成的整体，对象之间具有“整体-部分”的关系。在组合关系中，部分对象无法独立存在，它们的生命周期与整体对象相互依赖。如果整体对象被销毁，部分对象也会被销毁。<br>通常表现为静态初始化的字段, 不可通过外部方法更改.<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-02-43.png" alt="comp"></p>
+<p>聚合（Aggregation, A owns B）：<br>聚合是一种弱关联的关系，表示一个对象包含其他对象，但被包含对象可以独立存在。聚合关系中，包含对象与被包含对象之间没有强依赖关系，被包含对象可以从一个包含对象中脱离出来，继续存在。聚合关系通常用于表示整体与部分之间的关系，但部分对象的生命周期不受整体对象控制。<br>通常表现为动态初始化的字段, 可通过外部方法更改.<br><img src="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/2023-05-26-21-02-16.png" alt="agg"></p>
+<h2 id="委托-x2F-关联-x2F-依赖的关系"><a href="#委托-x2F-关联-x2F-依赖的关系" class="headerlink" title="委托&#x2F;关联&#x2F;依赖的关系"></a>委托&#x2F;关联&#x2F;依赖的关系</h2><ul>
+<li>委托和关联&#x2F;依赖的关系:在委托（Delegation）中，一个对象（委托者）将任务的执行委托给另一个对象（委托对象）。<br>  委托对象负责执行特定的任务，而委托者可以通过调用委托对象的方法来触发任务的执行。在这种情况下，委托者需要持有委托对象的引用，以便能够调用其方法。这种关联关系要么通过<br>  参数传递来实现, 通过字段（属性）保存委托对象的引用来实现。<br>  前者构成依赖关系,后者构成关联关系</li>
+<li>关联和聚合&#x2F;组合的关系: 组合和聚合是关联的两种具体形式<br>  组合是一种比聚合更强的关系，它表示整体对象包含部分对象，并且部分对象无法独立存在。<br>  聚合是一种弱关系，表示整体对象包含部分对象，但部分对象可以独立存在。</li>
 </ul>
-<h2 id="Title"><a href="#Title" class="headerlink" title="Title"></a>Title</h2><h3 id="Type-of-Title"><a href="#Type-of-Title" class="headerlink" title="Type of Title"></a>Type of Title</h3><ul>
-<li><p>Declaration 声明性</p>
-<p>  整句<strong>话</strong></p>
-</li>
-<li><p>Descriptive&#x2F;neutral 描述性&#x2F;中性标题</p>
-<p>  名<strong>词</strong>短语+定语</p>
-</li>
-<li><p>Interrogative 疑问句式</p>
-<p>  疑问<strong>句</strong></p>
-</li>
-<li><p>Compound 复合型标题</p>
-<p>  由主副两部分构成（冒号或破折号分开）</p>
-</li>
-</ul>
-<h3 id="How-to-read-title"><a href="#How-to-read-title" class="headerlink" title="How to read title"></a>How to read title</h3><p>devide the title into sense group</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Strategies | to re-establish stable granulation | after filamentous outgrowth | : Insignts | from lab-scale</span><br></pre></td></tr></table></figure>
-
+<h2 id="小结和讨论"><a href="#小结和讨论" class="headerlink" title="小结和讨论"></a>小结和讨论</h2><p>综上所述:</p>
 <ul>
-<li>名词</li>
-<li>动宾短语</li>
-<li>介词短语</li>
-<li>…</li>
-</ul>
-<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><ul>
-<li>at the beginning (or the end) of a research article, miniature of a research work.</li>
-<li>independent, self-contained, well-structured 独立完整&#x2F;自圆其说&#x2F;结构严谨</li>
-<li>Consist of Five Move(话步,语步)<ul>
-<li>background 是什么</li>
-<li>problem 做了什么 (purpose&#x2F;hypotheses)</li>
-<li>method 怎么做的</li>
-<li>result 有何结果 (major finding&#x2F;important data)</li>
-<li>conclusion 总结展望 (further study&#x2F;future directions)</li>
+<li>委托是一种设计模式, 将任务的执行委托给另一个对象.</li>
+<li>通过参数进行的委托使类之间存在依赖关系.</li>
+<li>通过引用进行的委托使类之间存在关联关系.<ul>
+<li>组合是一种强关系，同生共死, 通常在构造函数中创建,在析构函数中销毁</li>
+<li>聚合是一种弱关系, 仅持有引用. 通常在外部创建,通过调用public方法保存到rep里,在外部某处销毁.</li>
 </ul>
 </li>
 </ul>
-<h3 id="How-to-read-abstract"><a href="#How-to-read-abstract" class="headerlink" title="How to read abstract"></a>How to read abstract</h3><ul>
-<li><p>focus on subject + verb</p>
-</li>
-<li><p>devide the abstract into five moves</p>
-</li>
-<li><p>focus on clue words:</p>
+<p>讨论:</p>
 <ul>
-<li>“such”, “recently”,”today” that indicates present time can be found in move 1.</li>
-<li>“here”, “this paper” with past tense usually come with move 2 and 3</li>
-<li>method will be described with verbs.</li>
-<li>“showed”“revealed”“indicated” are used to discribe result and “find” for finding</li>
-<li>present and future tenses with subjective mood are used in making conclusion, with words like “could””would”.</li>
-</ul>
-</li>
-</ul>
-<h2 id="keywords"><a href="#keywords" class="headerlink" title="keywords"></a>keywords</h2><h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><ul>
-<li><p>context : explains the rationale for undertaking the study and clearly describes the main purpose of conducing it.</p>
-</li>
-<li><p>purpose : to <strong>c</strong>reate <strong>a</strong> <strong>r</strong>esearch <strong>s</strong>pace(CARS)</p>
-</li>
-<li><p>moves</p>
-<ol>
-<li>Establishing a territory<br>现状描述词</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Increasing interest has grown on ...</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>Reviewing previous related research<br> 文献综述词</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Several Studies have ...</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>Establishing a niche(壁炉)<br>转折否定词</li>
-</ol>
-<pre><code>- However/while/but...
-- failed to 
-- ignored/neglected to
-</code></pre>
-<ol start="4">
-<li>Occupying the niche</li>
-</ol>
-</li>
+<li>委托关系的强弱? 依赖 &lt; 聚合 &lt; 关联 &lt; 组合, 越强, 越不容易修改, 越发生在类的内部. 反之, 则容易修改, 并且可以发生在类的外部.<br>所以依赖关系是最方便修改的, 组合关系是最难修改的.</li>
+<li>临时委托VS永久委托？ 依赖关系的委托是临时的，因为没有任何信息记录委托对象。而关联关系的委托是永久的，因为委托对象通过字段的形式保存了下来。</li>
 </ul>
 
     </div>
@@ -307,13 +246,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/04/21/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E4%BA%8C%EF%BC%89/" rel="prev" title="Android学习笔记（二）">
-      <i class="fa fa-chevron-left"></i> Android学习笔记（二）
+    <a href="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E5%A4%9A%E6%80%81-Java%E5%92%8CC%E4%B8%AD%E7%9A%84%E5%AD%90%E7%B1%BB%E4%B8%8E%E6%B3%9B%E5%9E%8B.md/" rel="prev" title="软件构造-关于多态-Java和C++中的子类与泛型">
+      <i class="fa fa-chevron-left"></i> 软件构造-关于多态-Java和C++中的子类与泛型
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/07/04/README/" rel="next" title="">
-       <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -372,7 +308,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Structure-of-RA"><span class="nav-number">1.</span> <span class="nav-text">Structure of RA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Title"><span class="nav-number">2.</span> <span class="nav-text">Title</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-of-Title"><span class="nav-number">2.1.</span> <span class="nav-text">Type of Title</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to-read-title"><span class="nav-number">2.2.</span> <span class="nav-text">How to read title</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Abstract"><span class="nav-number">3.</span> <span class="nav-text">Abstract</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to-read-abstract"><span class="nav-number">3.1.</span> <span class="nav-text">How to read abstract</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#keywords"><span class="nav-number">4.</span> <span class="nav-text">keywords</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">5.</span> <span class="nav-text">Introduction</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#OOP%E4%B8%AD%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.</span> <span class="nav-text">OOP中对象的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A7%94%E6%89%98-x2F-%E5%85%B3%E8%81%94-x2F-%E4%BE%9D%E8%B5%96%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">委托&#x2F;关联&#x2F;依赖的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93%E5%92%8C%E8%AE%A8%E8%AE%BA"><span class="nav-number">3.</span> <span class="nav-text">小结和讨论</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
