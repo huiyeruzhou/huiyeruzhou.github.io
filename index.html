@@ -193,7 +193,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-05-26 16:39:46" itemprop="dateModified" datetime="2023-05-26T16:39:46+08:00">2023-05-26</time>
+                <time title="修改时间：2023-05-26 22:36:41" itemprop="dateModified" datetime="2023-05-26T22:36:41+08:00">2023-05-26</time>
               </span>
 
           
@@ -207,7 +207,129 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>这是一条置顶公告。<br>如果要查阅专门为软件构造课程写的博客，请点击“标签”并在其中选择 <code>#软件构造</code>。<br>我强烈推荐您阅读“关于表示泄露-2”，这篇文章描述了浅拷贝和public final字段造成的表示泄露，是很微妙的细节。</p>
+          <p>这是一条置顶公告。<br>如果要查阅专门为软件构造课程写的博客，请点击“标签”并在其中选择 <code>#软件构造</code>。<br>我强烈推荐您阅读“关于表示泄露-2”，这篇文章描述了浅拷贝和public final字段造成的表示泄露，是很微妙的细节。<br>为了复习期末考试，编写了很多用于加强记忆的文章，也一并放在这里了。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-3%E7%BB%B4%E5%BA%A68%E8%A7%86%E5%9B%BE%E5%8F%8A%E8%BD%AF%E6%9E%84%E5%9F%BA%E6%9C%AC%E7%90%86%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-3%E7%BB%B4%E5%BA%A68%E8%A7%86%E5%9B%BE%E5%8F%8A%E8%BD%AF%E6%9E%84%E5%9F%BA%E6%9C%AC%E7%90%86%E5%BF%B5/" class="post-title-link" itemprop="url">软件构造-3维度8视图及软构基本理念</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-05-26 22:37:03 / 修改时间：23:17:19" itemprop="dateCreated datePublished" datetime="2023-05-26T22:37:03+08:00">2023-05-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="软件三维度八视图"><a href="#软件三维度八视图" class="headerlink" title="软件三维度八视图"></a>软件三维度八视图</h2><p>软件描述的三个维度分别是：Code&#x2F;Component, Run-time&#x2F;Build-time, Moment&#x2F;Period<br>分别对应于空间、时间、状态。从局部代码的角度来看能看到软件的内容，从整体组件的角度来看能看到代码的结构。一个软件可以是静态的程序，也可以是动态的应用。一个软件具有某一时刻的状态，在一段时间内具有一定的行为模式，这就构成了基本的三个维度。</p>
+<!-- 表格-->
+<table>
+<!-- 第一行 -->
+<tr>
+    <td rowspan="2"></td>
+    <td colspan="2">Period</td>
+    <td colspan="2">Moment</td>
+</tr>
+<!-- 第二行 -->
+<tr>
+    <td>Code</td>
+    <td>Component</td>
+    <td>Code</td>
+    <td>Component</td>
+</tr>
+<!-- 第三行 -->
+<tr>
+    <td>Build-time</td>
+    <td>Source code, AST</td>
+    <td>Package, File, Test case, Build Script</td>
+    <td>Code Churn</td>
+    <td>Configuration Item, Version</td>
+</tr>
+<!-- 第四行 -->
+<tr>
+    <td rowspan="2">Run-time</td>
+    <td rowspan="2">Code Snap, Memory</td>
+    <td rowspan="2">Package, Dynamic Linking, Network, Hardware</td>
+    <td >Execution Trace, Multi-Thread</td>
+    <td >Event log, Multi-Process</td>
+</tr>
+<!-- 第五行 -->
+<tr>
+    <td colspan="2">Sequence Diagram</td>
+</tr>
+</table>
+
+<h2 id="各象限的内容浅析"><a href="#各象限的内容浅析" class="headerlink" title="各象限的内容浅析"></a>各象限的内容浅析</h2><h3 id="构建时，代码视角，时间点：源码、AST、语意"><a href="#构建时，代码视角，时间点：源码、AST、语意" class="headerlink" title="构建时，代码视角，时间点：源码、AST、语意"></a>构建时，代码视角，时间点：源码、AST、语意</h3><p>代码是程序的最基本内容，一个代码经过词法分析和语法分析得到抽象语法树，进而对应某种机器的形式化操作。而原始的源代码对应的功能，即语意，则是程序员希望达到的目标。</p>
+<h3 id="构建时，组件视角，时间段：包、文件、测试用例、构建脚本"><a href="#构建时，组件视角，时间段：包、文件、测试用例、构建脚本" class="headerlink" title="构建时，组件视角，时间段：包、文件、测试用例、构建脚本"></a>构建时，组件视角，时间段：包、文件、测试用例、构建脚本</h3><p>一个程序要想构建起来，仅有源代码是不够的。程序必须按照一定的规则组织成包、模块、编译单元等编译系统支持的结构，配合依赖的库文件，经过构建脚本的处理，才能得到可执行的程序。静态链接和运行测试用例也是在构建时进行的。</p>
+<h3 id="构建时，代码视角，时间段：代码变更"><a href="#构建时，代码视角，时间段：代码变更" class="headerlink" title="构建时，代码视角，时间段：代码变更"></a>构建时，代码视角，时间段：代码变更</h3><p>代码变更是以行为单位的增、删、改，是代码的最小变更单位。代码变更的频率和代码的质量有很大的关系，代码变更的频率越高，说明代码的质量相对较差，需要不断的改bug或改需求。</p>
+<h3 id="构建时，组件视角，时间段：配置项、版本"><a href="#构建时，组件视角，时间段：配置项、版本" class="headerlink" title="构建时，组件视角，时间段：配置项、版本"></a>构建时，组件视角，时间段：配置项、版本</h3><p>软件配置项是更宏观的软件管理单位，例如Git将文件作为软件配置项。软件版本则是特定时间下所有软件配置项的综合体，是软件的一个快照。软件版本管理通过记录软件配置项的变更，并维护软件版本中的软件配置项的内容，来实现记录软件开发的历史。</p>
+<h3 id="运行时，代码视角，时间点：代码快照、内存"><a href="#运行时，代码视角，时间点：代码快照、内存" class="headerlink" title="运行时，代码视角，时间点：代码快照、内存"></a>运行时，代码视角，时间点：代码快照、内存</h3><p>运行时的代码快照图是对代码当前引用和对象内容的一个抽象展示，体现出引用和对象是否可变，包含哪些内容，经历过哪些变化。内存则包含代码运行时的具体数据。</p>
+<h3 id="运行时，组件视角，时间段：包、动态链接、网络、硬件"><a href="#运行时，组件视角，时间段：包、动态链接、网络、硬件" class="headerlink" title="运行时，组件视角，时间段：包、动态链接、网络、硬件"></a>运行时，组件视角，时间段：包、动态链接、网络、硬件</h3><p>部署图展示了软件在运行时如何进行机器间的业务交互，通常是展示了包含网络通讯和远程服务的情况下，各中间节点机器的OS、软件支持、代码模块、代码逻辑，以及他们之间的数据链路。</p>
+<h3 id="运行时，代码视角，时间段：栈追踪、多线程"><a href="#运行时，代码视角，时间段：栈追踪、多线程" class="headerlink" title="运行时，代码视角，时间段：栈追踪、多线程"></a>运行时，代码视角，时间段：栈追踪、多线程</h3><p>代码中的调用栈信息可以展示出代码是如何一步步地进入当前函数的，常用于调试。</p>
+<h3 id="运行时，模块视角，时间段：事件日志、多进程"><a href="#运行时，模块视角，时间段：事件日志、多进程" class="headerlink" title="运行时，模块视角，时间段：事件日志、多进程"></a>运行时，模块视角，时间段：事件日志、多进程</h3><p>事件日志提供了宏观视角下的软件运行情况，可以用于分析软件的性能瓶颈和问题原因。</p>
+<h2 id="软件构造的阶段"><a href="#软件构造的阶段" class="headerlink" title="软件构造的阶段"></a>软件构造的阶段</h2><p>1.从无到代码：程序员设计代码<br>2.从代码到模块：程序员设计软件结构<br>3.从构建到运行：程序员将软件部署在设备上<br>4.从时间点到时间段：运行软件，获取结果和日志</p>
+<h2 id="软件设计的五个核心维度"><a href="#软件设计的五个核心维度" class="headerlink" title="软件设计的五个核心维度"></a>软件设计的五个核心维度</h2><p>核心：</p>
+<ul>
+<li><p>避免错误</p>
+</li>
+<li><p>易于理解</p>
+</li>
+<li><p>便于修改</p>
+</li>
+<li><p>其余：</p>
+</li>
+<li><p>高效开发</p>
+</li>
+<li><p>高效运行</p>
+</li>
+</ul>
 
       
     </div>
@@ -1034,103 +1156,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/" class="post-title-link" itemprop="url">RPC框架设计侧重点-特色和架构调研2.md</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-10-02 16:26:48" itemprop="dateCreated datePublished" datetime="2022-10-02T16:26:48+08:00">2022-10-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-03 20:35:34" itemprop="dateModified" datetime="2022-10-03T20:35:34+08:00">2022-10-03</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Thrift"><a href="#Thrift" class="headerlink" title="Thrift"></a><a target="_blank" rel="noopener" href="https://github.com/apache/thrift">Thrift</a></h2><p>Thrift 是用于点对点 RPC 实现的轻量级、跨语言的软件栈。Thrift，为传输、序列化、应用级逻辑都提供了实现，同时具有从idl生成代码的功能。</p>
-<p>Thrift将架构分为6层，每层都可以自由组合，以适应不同的需求。<br><img src="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/thrift%E6%8A%80%E6%9C%AF%E6%A0%88.png" alt="1"></p>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">├── ...(一些构建相关)</span><br><span class="line">├── compiler</span><br><span class="line">│   └── cpp</span><br><span class="line">├── debian</span><br><span class="line">├── lib             #代码实现</span><br><span class="line">│   ├── c_glib/src/thrift</span><br><span class="line">|       ├── processor                               #处理请求</span><br><span class="line">|       │   ├── thrift_dispatch_processor.c         #实现,使用glib-object完成面向对象</span><br><span class="line">|       │   ├── thrift_dispatch_processor.h</span><br><span class="line">|       │   ├── thrift_multiplexed_processor.c      #提供多个处理器</span><br><span class="line">|       │   ├── thrift_multiplexed_processor.h</span><br><span class="line">|       │   ├── thrift_processor.c                  #接口</span><br><span class="line">|       │   └── thrift_processor.h</span><br><span class="line">|       ├── protocol</span><br><span class="line">|       │   ├── thrift_binary_protocol.c            #二进制协议的实现,把数据转化为合适的形式(bool转化为uint8, double转化为IEEE int64等)</span><br><span class="line">|       │   ├── thrift_binary_protocol.h</span><br><span class="line">|       │   ├── thrift_binary_protocol_factory.c</span><br><span class="line">|       │   ├── thrift_binary_protocol_factory.h</span><br><span class="line">|       │   ├── thrift_compact_protocol.c</span><br><span class="line">|       │   ├── thrift_compact_protocol.h</span><br><span class="line">|       │   ├── thrift_compact_protocol_factory.c</span><br><span class="line">|       │   ├── thrift_compact_protocol_factory.h</span><br><span class="line">|       │   ├── thrift_multiplexed_protocol.c</span><br><span class="line">|       │   ├── thrift_multiplexed_protocol.h</span><br><span class="line">|       │   ├── thrift_protocol.c                   #写入数据,`THRIFT_PROTOCOL_GET_CLASS (protocol)-&gt;write`</span><br><span class="line">|       │   ├── thrift_protocol.h</span><br><span class="line">|       │   ├── thrift_protocol_decorator.c         #用decorator模式提供了多协议`THRIFT_PROTOCOL_GET_CLASS (self-&gt;concrete_protocol)-&gt;write_struct_begin (self-&gt;concrete_protocol,name, error)`</span><br><span class="line">|       │   ├── thrift_protocol_decorator.h</span><br><span class="line">|       │   ├── thrift_protocol_factory.c</span><br><span class="line">|       │   ├── thrift_protocol_factory.h</span><br><span class="line">|       │   ├── thrift_stored_message_protocol.c</span><br><span class="line">|       │   └── thrift_stored_message_protocol.h</span><br><span class="line">|       ├── server</span><br><span class="line">|       │   ├── thrift_server.c                 #服务器抽象类</span><br><span class="line">|       │   ├── thrift_server.h                 </span><br><span class="line">|       │   ├── thrift_simple_server.c          #简单实现</span><br><span class="line">|       │   └── thrift_simple_server.h</span><br><span class="line">|       ├── thrift.c</span><br><span class="line">|       ├── thrift.h</span><br><span class="line">|       ├── thrift_application_exception.c</span><br><span class="line">|       ├── thrift_application_exception.h</span><br><span class="line">|       ├── thrift_configuration.c</span><br><span class="line">|       ├── thrift_configuration.h</span><br><span class="line">|       ├── thrift_struct.c</span><br><span class="line">|       ├── thrift_struct.h</span><br><span class="line">|       └── transport</span><br><span class="line">|           ├── thrift_buffered_transport.c</span><br><span class="line">|           ├── thrift_buffered_transport.h</span><br><span class="line">|           ├── thrift_buffered_transport_factory.c</span><br><span class="line">|           ├── thrift_buffered_transport_factory.h</span><br><span class="line">|           ├── thrift_fd_transport.c</span><br><span class="line">|           ├── thrift_fd_transport.h</span><br><span class="line">|           ├── thrift_framed_transport.c</span><br><span class="line">|           ├── thrift_framed_transport.h</span><br><span class="line">|           ├── thrift_framed_transport_factory.c</span><br><span class="line">|           ├── thrift_framed_transport_factory.h</span><br><span class="line">|           ├── thrift_memory_buffer.c</span><br><span class="line">|           ├── thrift_memory_buffer.h</span><br><span class="line">|           ├── thrift_platform_socket.h</span><br><span class="line">|           ├── thrift_server_socket.c</span><br><span class="line">|           ├── thrift_server_socket.h          </span><br><span class="line">|           ├── thrift_server_transport.c</span><br><span class="line">|           ├── thrift_server_transport.h</span><br><span class="line">|           ├── thrift_socket.c</span><br><span class="line">|           ├── thrift_socket.h</span><br><span class="line">|           ├── thrift_ssl_socket.c</span><br><span class="line">|           ├── thrift_ssl_socket.h</span><br><span class="line">|           ├── thrift_transport.c</span><br><span class="line">|           ├── thrift_transport.h</span><br><span class="line">|           ├── thrift_transport_factory.c</span><br><span class="line">|           ├── thrift_transport_factory.h</span><br><span class="line">|           ├── thrift_zlib_transport.c</span><br><span class="line">|           ├── thrift_zlib_transport.h</span><br><span class="line">|           ├── thrift_zlib_transport_factory.c</span><br><span class="line">|           └── thrift_zlib_transport_factory.h</span><br><span class="line">|   ...</span><br><span class="line">|</span><br><span class="line">├── contrib         #一些实例,但不是官方测试用例</span><br><span class="line">├── test            #测试用例</span><br><span class="line">├── doc</span><br><span class="line">│   ├── specs       #一些格式信息</span><br><span class="line">|       ├── HeaderFormat.md                 #请求头格式</span><br><span class="line">|       ├── SequenceNumbers.md              #序列号(用于在一个链接中异步处理多个请求)</span><br><span class="line">|       ├── idl.md                          #接口定义语言</span><br><span class="line">|       ├── thrift-binary-protocol.md       #二进制协议, TLV格式</span><br><span class="line">|       ├── thrift-compact-protocol.md      #压缩方式 zigzag压缩整数, 其他的似乎编码没有太大不同?</span><br><span class="line">|       ├── thrift-parameter-validation-proposal.md     #参数验证,也就是通过某些方式限定参数的取值范围.比如int32类型必须取1,2,4,或者限定某个字符串长度必须大于4</span><br><span class="line">|       ├── thrift-protocol-spec.md         #BNF</span><br><span class="line">|       ├── thrift-rpc.md                   #框架整体简介</span><br><span class="line">|       ├── thrift-sasl-spec.txt            #(Simple Authentication and Security Layer)</span><br><span class="line">|       ├── thrift-tconfiguration.md        #一些设置</span><br><span class="line">|       └── thrift.tex</span><br><span class="line">│       └── ...         #没啥用</span><br><span class="line">└── tutorial        #教程</span><br><span class="line">    ├── c_glib</span><br><span class="line">    ...</span><br><span class="line">    └── swift</span><br></pre></td></tr></table></figure>
-
-<h3 id="特色"><a href="#特色" class="headerlink" title="特色"></a>特色</h3><p>Thrift 专门设计用于支持跨客户端和服务器代码的非原子版本更改。这使您可以升级服务器，同时仍然能够为旧客户端提供服务；或让较新的客户端向较旧的服务器发出请求。</p>
-<h2 id="Motan"><a href="#Motan" class="headerlink" title="Motan"></a><a target="_blank" rel="noopener" href="https://github.com/weibocom/motan/wiki/zh_overview">Motan</a></h2><p>Motan是一套基于java开发的RPC框架，除了常规的点对点调用外，Motan还提供服务治理功能，包括服务节点的自动发现、摘除、高可用和负载均衡等。</p>
-<p>Motan具有良好的扩展性，主要模块都提供了多种不同的实现，例如支持多种注册中心，支持多种rpc协议等。</p>
-<h3 id="架构概述"><a href="#架构概述" class="headerlink" title="架构概述"></a><a target="_blank" rel="noopener" href="https://github.com/weibocom/motan/wiki/zh_userguide#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0">架构概述</a></h3><p><img src="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/%E6%9E%B6%E6%9E%84%E6%A6%82%E8%BF%B0.png" alt="2"><br>默认序列化: Hessian2, 默认传输层: Netty NIO TCP长连接</p>
-<ul>
-<li><p>register:<br>用来和注册中心进行交互，包括注册服务、订阅服务、服务变更通知、服务心跳发送等功能；Server端会在系统初始化时通过register模块注册服务，Client端在系统初始化时会通过register模块订阅到具体提供服务的Server列表，当Server 列表发生变更时也由register模块通知Client。</p>
-</li>
-<li><p>Cluster:<br>cluster是一组可用的Server在逻辑上的封装，包含若干可以提供RPC服务的Server，实际请求时会根据不同的高可用与负载均衡策略选择一个可用的Server发起远程调用。</p>
-<p>在进行RPC请求时，Client通过代理机制调用cluster模块，cluster根据配置的HA和LoadBalance选出一个可用的Server，通过serialize模块把RPC请求转换为字节流，然后通过transport模块发送到Server端。</p>
-</li>
-</ul>
-<h3 id="代码结构"><a href="#代码结构" class="headerlink" title="代码结构"></a>代码结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">├── closable</span><br><span class="line">├── cluster</span><br><span class="line">│   ├── ha</span><br><span class="line">│   ├── loadbalance</span><br><span class="line">│   └── support</span><br><span class="line">├── codec</span><br><span class="line">├── common</span><br><span class="line">├── config</span><br><span class="line">│   ├── annotation</span><br><span class="line">│   └── handler</span><br><span class="line">├── core</span><br><span class="line">│   └── extension</span><br><span class="line">├── exception</span><br><span class="line">├── filter</span><br><span class="line">├── log</span><br><span class="line">├── protocol</span><br><span class="line">│   ├── injvm</span><br><span class="line">│   ├── mock</span><br><span class="line">│   ├── rpc</span><br><span class="line">│   ├── support</span><br><span class="line">│   └── v2motan</span><br><span class="line">├── proxy</span><br><span class="line">│   └── spi</span><br><span class="line">├── registry    #服务注册:发现注册/变更通知/流量配置/失败返回</span><br><span class="line">│   └── support</span><br><span class="line">│       └── command</span><br><span class="line">├── rpc         #奇怪的工具类 Callbackable/Future/Node/Refer/Request/...Response</span><br><span class="line">│   └── init</span><br><span class="line">├── serialize   #FastJson, Hessian2, Breeze, Simple</span><br><span class="line">├── switcher</span><br><span class="line">├── transport   #Channel/Transport/Server绑定/Clent心跳/..</span><br><span class="line">│   ├── async</span><br><span class="line">│   └── support</span><br><span class="line">└── util        #Math/Net/Stats/Reflect/....</span><br></pre></td></tr></table></figure>
-
-<h2 id="Dubbo"><a href="#Dubbo" class="headerlink" title="Dubbo"></a><a target="_blank" rel="noopener" href="https://github.com/apache/dubbo">Dubbo</a></h2><ul>
-<li>基于透明接口的 RPC</li>
-<li>智能负载均衡</li>
-<li>自动服务注册和发现</li>
-<li>高扩展性</li>
-<li>运行时流量路由</li>
-<li>可视化服务治理</li>
-</ul>
-<h3 id="架构-1"><a href="#架构-1" class="headerlink" title="架构"></a>架构</h3><p><img src="/2022/10/02/RPC%E6%A1%86%E6%9E%B6%E8%AE%BE%E8%AE%A1%E4%BE%A7%E9%87%8D%E7%82%B9-%E7%89%B9%E8%89%B2%E5%92%8C%E6%9E%B6%E6%9E%84%E8%B0%83%E7%A0%942/Dubbo%E6%9E%B6%E6%9E%84.png" alt="3"></p>
-<p><a target="_blank" rel="noopener" href="https://dubbo.apache.org/docs/v2.7/dev/design/">代码架构和设计内容像详解</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1198,7 +1227,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">31</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

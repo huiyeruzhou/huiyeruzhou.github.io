@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"huiyeruzhou.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="软件三维度八视图软件描述的三个维度分别是：Code&#x2F;Component, Run-time&#x2F;Build-time, Moment&#x2F;Period分别对应于空间、时间、状态。从局部代码的角度来看能看到软件的内容，从整体组件的角度来看能看到代码的结构。一个软件可以是静态的程序，也可以是动态的应用。一个软件具有某一时刻的状态，在一段时间内具有一定的行为模式，这就构成了基本的三">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件构造-3维度8视图及软构基本理念">
+<meta property="og:url" content="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-3%E7%BB%B4%E5%BA%A68%E8%A7%86%E5%9B%BE%E5%8F%8A%E8%BD%AF%E6%9E%84%E5%9F%BA%E6%9C%AC%E7%90%86%E5%BF%B5/index.html">
+<meta property="og:site_name" content="辉夜的博客">
+<meta property="og:description" content="软件三维度八视图软件描述的三个维度分别是：Code&#x2F;Component, Run-time&#x2F;Build-time, Moment&#x2F;Period分别对应于空间、时间、状态。从局部代码的角度来看能看到软件的内容，从整体组件的角度来看能看到代码的结构。一个软件可以是静态的程序，也可以是动态的应用。一个软件具有某一时刻的状态，在一段时间内具有一定的行为模式，这就构成了基本的三">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-26T14:37:03.000Z">
+<meta property="article:modified_time" content="2023-05-26T15:17:19.607Z">
+<meta property="article:author" content="辉夜">
+<meta property="article:tag" content="软件构造">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-3%E7%BB%B4%E5%BA%A68%E8%A7%86%E5%9B%BE%E5%8F%8A%E8%BD%AF%E6%9E%84%E5%9F%BA%E6%9C%AC%E7%90%86%E5%BF%B5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件构造-3维度8视图及软构基本理念 | 辉夜的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">辉夜的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">繁花似锦，辉夜如昼</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-links">
+
+    <a href="/links/" rel="section"><i class="fa fa-link fa-fw"></i>Links</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-3%E7%BB%B4%E5%BA%A68%E8%A7%86%E5%9B%BE%E5%8F%8A%E8%BD%AF%E6%9E%84%E5%9F%BA%E6%9C%AC%E7%90%86%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件构造-3维度8视图及软构基本理念
+        </h1>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-05-26 22:37:03 / 修改时间：23:17:19" itemprop="dateCreated datePublished" datetime="2023-05-26T22:37:03+08:00">2023-05-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="软件三维度八视图"><a href="#软件三维度八视图" class="headerlink" title="软件三维度八视图"></a>软件三维度八视图</h2><p>软件描述的三个维度分别是：Code&#x2F;Component, Run-time&#x2F;Build-time, Moment&#x2F;Period<br>分别对应于空间、时间、状态。从局部代码的角度来看能看到软件的内容，从整体组件的角度来看能看到代码的结构。一个软件可以是静态的程序，也可以是动态的应用。一个软件具有某一时刻的状态，在一段时间内具有一定的行为模式，这就构成了基本的三个维度。</p>
+<!-- 表格-->
+<table>
+<!-- 第一行 -->
+<tr>
+    <td rowspan="2"></td>
+    <td colspan="2">Period</td>
+    <td colspan="2">Moment</td>
+</tr>
+<!-- 第二行 -->
+<tr>
+    <td>Code</td>
+    <td>Component</td>
+    <td>Code</td>
+    <td>Component</td>
+</tr>
+<!-- 第三行 -->
+<tr>
+    <td>Build-time</td>
+    <td>Source code, AST</td>
+    <td>Package, File, Test case, Build Script</td>
+    <td>Code Churn</td>
+    <td>Configuration Item, Version</td>
+</tr>
+<!-- 第四行 -->
+<tr>
+    <td rowspan="2">Run-time</td>
+    <td rowspan="2">Code Snap, Memory</td>
+    <td rowspan="2">Package, Dynamic Linking, Network, Hardware</td>
+    <td >Execution Trace, Multi-Thread</td>
+    <td >Event log, Multi-Process</td>
+</tr>
+<!-- 第五行 -->
+<tr>
+    <td colspan="2">Sequence Diagram</td>
+</tr>
+</table>
+
+<h2 id="各象限的内容浅析"><a href="#各象限的内容浅析" class="headerlink" title="各象限的内容浅析"></a>各象限的内容浅析</h2><h3 id="构建时，代码视角，时间点：源码、AST、语意"><a href="#构建时，代码视角，时间点：源码、AST、语意" class="headerlink" title="构建时，代码视角，时间点：源码、AST、语意"></a>构建时，代码视角，时间点：源码、AST、语意</h3><p>代码是程序的最基本内容，一个代码经过词法分析和语法分析得到抽象语法树，进而对应某种机器的形式化操作。而原始的源代码对应的功能，即语意，则是程序员希望达到的目标。</p>
+<h3 id="构建时，组件视角，时间段：包、文件、测试用例、构建脚本"><a href="#构建时，组件视角，时间段：包、文件、测试用例、构建脚本" class="headerlink" title="构建时，组件视角，时间段：包、文件、测试用例、构建脚本"></a>构建时，组件视角，时间段：包、文件、测试用例、构建脚本</h3><p>一个程序要想构建起来，仅有源代码是不够的。程序必须按照一定的规则组织成包、模块、编译单元等编译系统支持的结构，配合依赖的库文件，经过构建脚本的处理，才能得到可执行的程序。静态链接和运行测试用例也是在构建时进行的。</p>
+<h3 id="构建时，代码视角，时间段：代码变更"><a href="#构建时，代码视角，时间段：代码变更" class="headerlink" title="构建时，代码视角，时间段：代码变更"></a>构建时，代码视角，时间段：代码变更</h3><p>代码变更是以行为单位的增、删、改，是代码的最小变更单位。代码变更的频率和代码的质量有很大的关系，代码变更的频率越高，说明代码的质量相对较差，需要不断的改bug或改需求。</p>
+<h3 id="构建时，组件视角，时间段：配置项、版本"><a href="#构建时，组件视角，时间段：配置项、版本" class="headerlink" title="构建时，组件视角，时间段：配置项、版本"></a>构建时，组件视角，时间段：配置项、版本</h3><p>软件配置项是更宏观的软件管理单位，例如Git将文件作为软件配置项。软件版本则是特定时间下所有软件配置项的综合体，是软件的一个快照。软件版本管理通过记录软件配置项的变更，并维护软件版本中的软件配置项的内容，来实现记录软件开发的历史。</p>
+<h3 id="运行时，代码视角，时间点：代码快照、内存"><a href="#运行时，代码视角，时间点：代码快照、内存" class="headerlink" title="运行时，代码视角，时间点：代码快照、内存"></a>运行时，代码视角，时间点：代码快照、内存</h3><p>运行时的代码快照图是对代码当前引用和对象内容的一个抽象展示，体现出引用和对象是否可变，包含哪些内容，经历过哪些变化。内存则包含代码运行时的具体数据。</p>
+<h3 id="运行时，组件视角，时间段：包、动态链接、网络、硬件"><a href="#运行时，组件视角，时间段：包、动态链接、网络、硬件" class="headerlink" title="运行时，组件视角，时间段：包、动态链接、网络、硬件"></a>运行时，组件视角，时间段：包、动态链接、网络、硬件</h3><p>部署图展示了软件在运行时如何进行机器间的业务交互，通常是展示了包含网络通讯和远程服务的情况下，各中间节点机器的OS、软件支持、代码模块、代码逻辑，以及他们之间的数据链路。</p>
+<h3 id="运行时，代码视角，时间段：栈追踪、多线程"><a href="#运行时，代码视角，时间段：栈追踪、多线程" class="headerlink" title="运行时，代码视角，时间段：栈追踪、多线程"></a>运行时，代码视角，时间段：栈追踪、多线程</h3><p>代码中的调用栈信息可以展示出代码是如何一步步地进入当前函数的，常用于调试。</p>
+<h3 id="运行时，模块视角，时间段：事件日志、多进程"><a href="#运行时，模块视角，时间段：事件日志、多进程" class="headerlink" title="运行时，模块视角，时间段：事件日志、多进程"></a>运行时，模块视角，时间段：事件日志、多进程</h3><p>事件日志提供了宏观视角下的软件运行情况，可以用于分析软件的性能瓶颈和问题原因。</p>
+<h2 id="软件构造的阶段"><a href="#软件构造的阶段" class="headerlink" title="软件构造的阶段"></a>软件构造的阶段</h2><p>1.从无到代码：程序员设计代码<br>2.从代码到模块：程序员设计软件结构<br>3.从构建到运行：程序员将软件部署在设备上<br>4.从时间点到时间段：运行软件，获取结果和日志</p>
+<h2 id="软件设计的五个核心维度"><a href="#软件设计的五个核心维度" class="headerlink" title="软件设计的五个核心维度"></a>软件设计的五个核心维度</h2><p>核心：</p>
+<ul>
+<li><p>避免错误</p>
+</li>
+<li><p>易于理解</p>
+</li>
+<li><p>便于修改</p>
+</li>
+<li><p>其余：</p>
+</li>
+<li><p>高效开发</p>
+</li>
+<li><p>高效运行</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0/" rel="tag"># 软件构造</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/26/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-OOP%E4%B8%AD%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB%E5%85%B3%E8%81%94-%E4%BE%9D%E8%B5%96/" rel="prev" title="软件构造-OOP中类的关系关联/依赖">
+      <i class="fa fa-chevron-left"></i> 软件构造-OOP中类的关系关联/依赖
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%B8%89%E7%BB%B4%E5%BA%A6%E5%85%AB%E8%A7%86%E5%9B%BE"><span class="nav-number">1.</span> <span class="nav-text">软件三维度八视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E8%B1%A1%E9%99%90%E7%9A%84%E5%86%85%E5%AE%B9%E6%B5%85%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">各象限的内容浅析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%97%B6%EF%BC%8C%E4%BB%A3%E7%A0%81%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E7%82%B9%EF%BC%9A%E6%BA%90%E7%A0%81%E3%80%81AST%E3%80%81%E8%AF%AD%E6%84%8F"><span class="nav-number">2.1.</span> <span class="nav-text">构建时，代码视角，时间点：源码、AST、语意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%97%B6%EF%BC%8C%E7%BB%84%E4%BB%B6%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E6%AE%B5%EF%BC%9A%E5%8C%85%E3%80%81%E6%96%87%E4%BB%B6%E3%80%81%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E3%80%81%E6%9E%84%E5%BB%BA%E8%84%9A%E6%9C%AC"><span class="nav-number">2.2.</span> <span class="nav-text">构建时，组件视角，时间段：包、文件、测试用例、构建脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%97%B6%EF%BC%8C%E4%BB%A3%E7%A0%81%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E6%AE%B5%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%8F%98%E6%9B%B4"><span class="nav-number">2.3.</span> <span class="nav-text">构建时，代码视角，时间段：代码变更</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%97%B6%EF%BC%8C%E7%BB%84%E4%BB%B6%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E6%AE%B5%EF%BC%9A%E9%85%8D%E7%BD%AE%E9%A1%B9%E3%80%81%E7%89%88%E6%9C%AC"><span class="nav-number">2.4.</span> <span class="nav-text">构建时，组件视角，时间段：配置项、版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%EF%BC%8C%E4%BB%A3%E7%A0%81%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E7%82%B9%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%BF%AB%E7%85%A7%E3%80%81%E5%86%85%E5%AD%98"><span class="nav-number">2.5.</span> <span class="nav-text">运行时，代码视角，时间点：代码快照、内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%EF%BC%8C%E7%BB%84%E4%BB%B6%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E6%AE%B5%EF%BC%9A%E5%8C%85%E3%80%81%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E3%80%81%E7%BD%91%E7%BB%9C%E3%80%81%E7%A1%AC%E4%BB%B6"><span class="nav-number">2.6.</span> <span class="nav-text">运行时，组件视角，时间段：包、动态链接、网络、硬件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%EF%BC%8C%E4%BB%A3%E7%A0%81%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E6%AE%B5%EF%BC%9A%E6%A0%88%E8%BF%BD%E8%B8%AA%E3%80%81%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="nav-number">2.7.</span> <span class="nav-text">运行时，代码视角，时间段：栈追踪、多线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%EF%BC%8C%E6%A8%A1%E5%9D%97%E8%A7%86%E8%A7%92%EF%BC%8C%E6%97%B6%E9%97%B4%E6%AE%B5%EF%BC%9A%E4%BA%8B%E4%BB%B6%E6%97%A5%E5%BF%97%E3%80%81%E5%A4%9A%E8%BF%9B%E7%A8%8B"><span class="nav-number">2.8.</span> <span class="nav-text">运行时，模块视角，时间段：事件日志、多进程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0%E7%9A%84%E9%98%B6%E6%AE%B5"><span class="nav-number">3.</span> <span class="nav-text">软件构造的阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1%E7%9A%84%E4%BA%94%E4%B8%AA%E6%A0%B8%E5%BF%83%E7%BB%B4%E5%BA%A6"><span class="nav-number">4.</span> <span class="nav-text">软件设计的五个核心维度</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="辉夜"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">辉夜</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">辉夜</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
