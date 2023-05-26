@@ -156,6 +156,356 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/03/23/gRPC%E6%A1%86%E6%9E%B6%E8%B0%83%E7%A0%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/23/gRPC%E6%A1%86%E6%9E%B6%E8%B0%83%E7%A0%94/" class="post-title-link" itemprop="url">gRPC调研报告</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-23 17:53:19" itemprop="dateCreated datePublished" datetime="2022-03-23T17:53:19+08:00">2022-03-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-08 22:40:39" itemprop="dateModified" datetime="2023-03-08T22:40:39+08:00">2023-03-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><table>
+<thead>
+<tr>
+<th>框架名称</th>
+<th>开发者</th>
+<th>序列化协议</th>
+<th>传输协议</th>
+<th>支持语言</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>gRPC</td>
+<td>google</td>
+<td>protobuf</td>
+<td>http2.0</td>
+<td>多语言</td>
+<td>没有服务治理功能，序列化效率最好，性能较高</td>
+</tr>
+<tr>
+<td>rpcx</td>
+<td></td>
+<td>portobuf+多种</td>
+<td></td>
+<td>Go服务+多语言客户</td>
+<td>性能最高，</td>
+</tr>
+<tr>
+<td>Thrift</td>
+<td>facebook</td>
+<td>bin(compact) json</td>
+<td>tcp:socket http:frame file</td>
+<td>多语言</td>
+<td>性能一般，缺乏技术文档</td>
+</tr>
+<tr>
+<td>Motan</td>
+<td>Weibo</td>
+<td>json hessian2</td>
+<td>tcp</td>
+<td>Java</td>
+<td>基于Dubbo剪裁,擅长处理大批量负载</td>
+</tr>
+<tr>
+<td>brpc</td>
+<td>Baidu</td>
+<td>protobuf</td>
+<td></td>
+<td>C++</td>
+<td></td>
+</tr>
+</tbody></table>
+<!-- |erpc -->
+
+<h2 id="RPC简介，gRPC原理"><a href="#RPC简介，gRPC原理" class="headerlink" title="RPC简介，gRPC原理"></a>RPC简介，gRPC原理</h2><h2 id="gRPC"><a href="#gRPC" class="headerlink" title="gRPC"></a>gRPC</h2><ul>
+<li><p>优点</p>
+</li>
+<li><p>微服务：gRPC 设计用于低延迟和高吞吐量通信。 gRPC 对于效率至关重要的轻量级微服务非常有用。</p>
+</li>
+<li><p>网络带宽要求低：gRPC 消息使用 Protobuf进行序列化。 这种序列化方法的时空效率都要比json，thrift，hessian强</p>
+</li>
+<li><p>多语言环境：gRPC 工具支持所有常用的开发语言(C++，Java，Python，Ruby，Go…)</p>
+</li>
+<li><p>点对点实时通信：gRPC 对双向流式传输提供出色的支持。 gRPC 服务可以实时推送消息而无需轮询。</p>
+</li>
+<li><p>缺点</p>
+</li>
+<li><p>只有少数浏览器支持http2</p>
+</li>
+<li><p>移动端网络可能在wifi及4G频繁切换，无法体现出长连接以及多路复用的优势</p>
+</li>
+<li><p>相较于json，protobuf编码后数据可读性低</p>
+</li>
+</ul>
+<h2 id="rpcx、"><a href="#rpcx、" class="headerlink" title="rpcx、"></a>rpcx、</h2><h2 id="Thrift-vs-gRPC"><a href="#Thrift-vs-gRPC" class="headerlink" title="Thrift vs gRPC"></a>Thrift vs gRPC</h2><ul>
+<li>优点</li>
+</ul>
+<ul>
+<li>高性能，gPRC平均响应延迟差距在2倍左右</li>
+<li>序列化和传输层可拔插，提供了多种方法</li>
+</ul>
+<ul>
+<li>不足</li>
+</ul>
+<ul>
+<li>开发环境生态很差，缺乏说明文档和软件更新</li>
+<li>不擅长提供大量流式数据传输</li>
+</ul>
+<h2 id="Motan-vs-gPRC"><a href="#Motan-vs-gPRC" class="headerlink" title="Motan vs gPRC"></a>Motan vs gPRC</h2><ul>
+<li>优点</li>
+</ul>
+<ul>
+<li>提供了服务治理功能</li>
+<li>极限情况下的最长响应时间很短</li>
+</ul>
+<ul>
+<li>不足</li>
+</ul>
+<ul>
+<li>序列化效率较低</li>
+<li>综合运行效率较低</li>
+<li>只支持Java语言</li>
+</ul>
+<h2 id="erpc"><a href="#erpc" class="headerlink" title="erpc"></a>erpc</h2>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/03/19/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/19/%E4%B8%80%E7%94%9F%E4%B8%80%E8%8A%AF%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A/" class="post-title-link" itemprop="url">一生一芯 实验报告</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-19 21:42:32" itemprop="dateCreated datePublished" datetime="2022-03-19T21:42:32+08:00">2022-03-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-21 18:38:18" itemprop="dateModified" datetime="2022-04-21T18:38:18+08:00">2022-04-21</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>哈尔滨工业大学 于鸿利 22040866</p>
+</blockquote>
+<h1 id="预学习阶段"><a href="#预学习阶段" class="headerlink" title="预学习阶段"></a>预学习阶段</h1><h2 id="如何科学的提问"><a href="#如何科学的提问" class="headerlink" title="如何科学的提问"></a>如何科学的提问</h2><p>见读后感</p>
+<h2 id="Linux系统安装和基本使用"><a href="#Linux系统安装和基本使用" class="headerlink" title="Linux系统安装和基本使用"></a>Linux系统安装和基本使用</h2><ul>
+<li><p>安装一个linux操作系统</p>
+<p>  复用了wsl2-ubantu20.04</p>
+<p>  首先将windows版本更新到build 21362+（win11即可），然后以管理员权限打开命令行</p>
+<p>  输入wsl –update即可将已有的windows subsystem for linux更新到带有图形用户界面的版本</p>
+</li>
+<li><p>获取一生一芯框架代码</p>
+<p>添加ssh密钥</p>
+<p>按照讲义clone一个本地项目即可</p>
+</li>
+</ul>
+<h2 id="复习C语言"><a href="#复习C语言" class="headerlink" title="复习C语言"></a>复习C语言</h2><p>* </p>
+<h2 id="搭建verilator仿真环境"><a href="#搭建verilator仿真环境" class="headerlink" title="搭建verilator仿真环境"></a>搭建verilator仿真环境</h2><ul>
+<li><p>认识verilator</p>
+<p>  开源的数字电路仿真软件</p>
+</li>
+<li><p>安装verilator</p>
+<p> make install编译了十几分钟啧啧啧</p>
+</li>
+<li><p>运行示例</p>
+<p> 按照手册中的说明编写了our.v, sim_main.cpp，编译并运行了程序</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">verilator -Wall --cc --exe --build sim_main.cpp our.v</span><br></pre></td></tr></table></figure>
+<p> 结果是这样的</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Hello World</span><br><span class="line">our.v:2: Verilog $finish</span><br></pre></td></tr></table></figure></li>
+<li><p>对双控开关模块进行仿真</p>
+<p>  具体而言，需要调整的内容有：</p>
+<ol>
+<li><p>.v文件名要修改为top.v</p>
+</li>
+<li><p>cpp 文件中要引入头文件</p>
+</li>
+<li><p>cpp 文件中</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Vour* top = new Vour&#123;contextp&#125;;</span><br></pre></td></tr></table></figure>
+<p>  的类名要改为Vour</p>
+</li>
+<li><p>编译语句中的文件名要做相应的更改</p>
+</li>
+</ol>
+</li>
+</ul>
+<p>结果是这样的<br>  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">a = 1, b = 0, f = 1</span><br><span class="line">a = 0, b = 0, f = 0</span><br><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">a = 0, b = 1, f = 1</span><br><span class="line">^C</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p>理解RTL仿真的行为</p>
+</li>
+<li><p>一键仿真</p>
+<figure class="highlight mak"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#生成的可执行文件名称</span></span><br><span class="line">TOPNAME = top</span><br><span class="line"><span class="comment">#在指定文件夹中按扩展名查找所有源文件</span></span><br><span class="line">VSRC = <span class="variable">$(<span class="built_in">shell</span> find $(<span class="built_in">abspath</span> ./vsrc)</span> -name <span class="string">&quot;*.v&quot;</span>)</span><br><span class="line">CSRC = <span class="variable">$(<span class="built_in">shell</span> find $(<span class="built_in">abspath</span> ./csrc)</span> -name <span class="string">&quot;*.c&quot;</span> -or -name <span class="string">&quot;*.cc&quot;</span> -or -name <span class="string">&quot;*.cpp&quot;</span>)</span><br><span class="line"><span class="comment">#nvbroad自动绑定源文件，注意，如果没有$(BUILD_DIR)目录，将无法正确的生成该文件</span></span><br><span class="line">SRC_AUTO_BIND = <span class="variable">$(<span class="built_in">abspath</span> <span class="variable">$(BUILD_DIR)</span>/auto_bind.cpp)</span></span><br><span class="line">CSRC += <span class="variable">$(SRC_AUTO_BIND)</span></span><br><span class="line"><span class="comment">#nvbroad约束文件</span></span><br><span class="line">CONSTR = constr/top.nxdc</span><br><span class="line"></span><br><span class="line"><span class="comment">#构建目录、verilator目标目录、可执行文件存放路径</span></span><br><span class="line">BUILD_DIR = ./build</span><br><span class="line">OBJ_DIR = <span class="variable">$(BUILD_DIR)</span>/obj_dir</span><br><span class="line">BIN = <span class="variable">$(BUILD_DIR)</span>/<span class="variable">$(TOPNAME)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#传递给verilator的参数：以c++形式输出调试信息，并自动依据makefile进行构建</span></span><br><span class="line">VERIARG = -Wall --cc -MMD --build </span><br><span class="line"></span><br><span class="line"><span class="comment">#传递给preproject连接器的信息，添加SDL2库信息</span></span><br><span class="line">LDFLAGS += -lSDL2 -lSDL2_image</span><br><span class="line"></span><br><span class="line"><span class="comment">#包含文件路径，加前缀-I传递给g++，INC_PATH在nvbroad.mk中定义</span></span><br><span class="line">INCFLAGS = <span class="variable">$(<span class="built_in">addprefix</span> -I, <span class="variable">$(INC_PATH)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#传递给g++的编译参数，包括包含路径和TOP_NAME的定义</span></span><br><span class="line">CFLAGS += <span class="variable">$(INCFLAGS)</span>  -DTOP_NAME=<span class="string">&quot;\&quot;V<span class="variable">$(TOPNAME)\&quot;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#包含nvbroad.mk</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(NVBOARD_HOME)</span>/scripts/nvboard.mk</span><br><span class="line"><span class="comment">#新建构建目录，防止出现无法新建autobind.cpp的错误</span></span><br><span class="line"><span class="variable">$(<span class="built_in">shell</span> mkdir -p <span class="variable">$(BUILD_DIR)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#默认的构建对象</span></span><br><span class="line"><span class="section">sim:  <span class="variable">$(CSRC)</span> <span class="variable">$(VSRC)</span> <span class="variable">$(NVBOARD_ARCHIVE)</span></span></span><br><span class="line"><span class="comment">#提交当前存储区，提交信息为sim RTL</span></span><br><span class="line">	<span class="variable">$(<span class="built_in">call</span> git_commit, &quot;sim RTL&quot;)</span> <span class="comment"># DO NOT REMOVE THIS LINE!!!</span></span><br><span class="line">	</span><br><span class="line"><span class="comment">#运行verilator，传递给其编译参数</span></span><br><span class="line"><span class="comment">#指定top模块名称</span></span><br><span class="line"><span class="comment">#添加所有源文件和nvbroad库</span></span><br><span class="line"><span class="comment">#传递所有preproject连接器参数，加前缀</span></span><br><span class="line"><span class="comment">#传递所有编译器参数，加前缀</span></span><br><span class="line"><span class="comment">#指定生成对象目录，生成可执行文件，输出路径为预先指定的可执行文件存储路径</span></span><br><span class="line">	verilator <span class="variable">$(VERIARG)</span> \</span><br><span class="line">		-top <span class="variable">$(TOPNAME)</span> \</span><br><span class="line">		<span class="variable">$^</span> \</span><br><span class="line">		<span class="variable">$(<span class="built_in">addprefix</span> -LDFLAGS , <span class="variable">$(LDFLAGS)</span>)</span> \</span><br><span class="line">		<span class="variable">$(<span class="built_in">addprefix</span> -CFLAGS , <span class="variable">$(CFLAGS)</span>)</span> \</span><br><span class="line">		--Mdir <span class="variable">$(OBJ_DIR)</span>  --exe -o <span class="variable">$(<span class="built_in">abspath</span> <span class="variable">$(BIN)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#自动绑定文件，由于其被可执行文件依赖，会先生成该文件。调用python执行nvbroad自带的.py文件，输入约束文件，输出自动绑定文件</span></span><br><span class="line"><span class="variable">$(SRC_AUTO_BIND)</span>: <span class="variable">$(CONSTR)</span> </span><br><span class="line">	python3 <span class="variable">$(NVBOARD_HOME)</span>/scripts/auto_pin_bind.py  <span class="variable">$^</span> <span class="variable">$@</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>运行NVBoard示例</p>
+<p> 看到了一组循环显示数字的数码管，还有南京大学的 “北 大楼”（南大的高中同学告诉我的） </p>
+</li>
+<li><p>在NVBoard上实现双控开关</p>
+<p>  我使用如下的代码来完成引脚绑定:</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top=top</span><br><span class="line"></span><br><span class="line">a SW0<span class="comment">//开关0</span></span><br><span class="line">b SW1<span class="comment">//开关1</span></span><br><span class="line">f LD0<span class="comment">//LED0显示输出</span></span><br></pre></td></tr></table></figure>
+<p>配合如下激励代码来连接面板</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">nvboard_bind_all_pins</span>(&amp;dut);</span><br><span class="line"><span class="built_in">nvboard_init</span>();</span><br><span class="line"><span class="comment">/*verilate*/</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">  dut.<span class="built_in">eval</span>();</span><br><span class="line">  <span class="built_in">nvboard_update</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="数字电路基础实验"><a href="#数字电路基础实验" class="headerlink" title="数字电路基础实验"></a>数字电路基础实验</h2><h3 id="实验一-选择器"><a href="#实验一-选择器" class="headerlink" title="实验一 选择器"></a>实验一 选择器</h3><ul>
+<li>上板实验: 二位四选一选择器</li>
+</ul>
+<p>我使用如下的代码来搭建top模块:</p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> top(a,s,y);</span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>] a;</span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">1</span>:<span class="number">0</span>] s;</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">1</span>:<span class="number">0</span>] y;</span><br><span class="line">  MuxKeyWithDefault <span class="variable">#(4, 2, 2)</span> i0 (y, s, <span class="number">2&#x27;b00</span>, &#123;</span><br><span class="line">    <span class="number">2&#x27;b00</span>, a[<span class="number">1</span>:<span class="number">0</span>],</span><br><span class="line">    <span class="number">2&#x27;b01</span>, a[<span class="number">3</span>:<span class="number">2</span>],</span><br><span class="line">    <span class="number">2&#x27;b10</span>, a[<span class="number">5</span>:<span class="number">4</span>],</span><br><span class="line">    <span class="number">2&#x27;b11</span>, a[<span class="number">7</span>:<span class="number">6</span>]</span><br><span class="line">  &#125;);<span class="comment">//默认模板，参数分别为：输出端、选择端、默认值、选择-输出键值对</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+<p>可以看到, 双输出的选择器要改变a和y的位宽,调整模板的参数,并且对default output的位宽和键值对的输出值的位宽做相应的调整<br>我使用如下的代码来完成引脚绑定:</p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top=top     <span class="comment">//设置TOP_NAME为top</span></span><br><span class="line"></span><br><span class="line">s (SW1, SW0)<span class="comment">//这两个开关作为选择端</span></span><br><span class="line">a (SW9, SW8, SW7, SW6, SW5, SW4, SW3, SW2)<span class="comment">//这八个开关作为输入端，每两个开关一组，共四组。</span></span><br><span class="line">y (LD1, LD0)<span class="comment">//用LED显示输出</span></span><br></pre></td></tr></table></figure>
+<p>这里按照实验的建议用开关作为输入,led灯作为输出</p>
+<p>我使用如下的代码来完成激励代码的主体部分:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> TOP_NAME dut;<span class="comment">//nvbroad接口，宏自动展开为Vtop</span></span><br><span class="line"><span class="built_in">nvboard_bind_all_pins</span>(&amp;dut);<span class="comment">//绑定所有引脚</span></span><br><span class="line"><span class="built_in">nvboard_init</span>();<span class="comment">//初始化面板</span></span><br><span class="line"><span class="comment">/*verilate*/</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">  dut.<span class="built_in">eval</span>();<span class="comment">//获取当前数据</span></span><br><span class="line">  <span class="built_in">nvboard_update</span>();<span class="comment">//重绘面板</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>更新值并且更新版面图像即可,我已经看过了,非常漂亮.:&gt;</p>
+<h3 id="实验二-编码器和译码器"><a href="#实验二-编码器和译码器" class="headerlink" title="实验二 编码器和译码器"></a>实验二 编码器和译码器</h3><p>c源文件无需更改<br>verilog文件包含两个模块，数码管模块和编码器模块：</p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*top.v*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> top(x,en,l,h);</span><br><span class="line"><span class="comment">/*接口定义,x是输入,en是使能,l是编码结果,h是数码管输出结果*/</span></span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]x;</span><br><span class="line">  <span class="keyword">input</span>  en;</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>]l;</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">6</span>:<span class="number">0</span>]h;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*线路声明,用y存放编码结果,sign存放指示位*/</span></span><br><span class="line">  <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]y;</span><br><span class="line">  <span class="keyword">wire</span> sign = en &amp; (|x);<span class="comment">//若x至少有一位为1.且使能为1,结果就为1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*每当x或en发生变化时,都会进行译码,如果有使能,结果是x的为1的位的序号,高位优先,如果没有使能,结果为0*/</span></span><br><span class="line">  <span class="keyword">integer</span> i;</span><br><span class="line">  <span class="keyword">always</span> @(x <span class="keyword">or</span> en) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (en) <span class="keyword">begin</span></span><br><span class="line">      y = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">for</span>( i = <span class="number">0</span>; i &lt;= <span class="number">7</span>; i = i+<span class="number">1</span>)</span><br><span class="line">          <span class="keyword">if</span>(x[i] == <span class="number">1</span>)  y = i[<span class="number">2</span>:<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">else</span>  <span class="keyword">begin</span></span><br><span class="line">      y = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="comment">/*l是编码的总结果,包含符号位和数据位,实例化一个数码管*/</span></span><br><span class="line">  <span class="keyword">assign</span> l = &#123;sign,y&#125;;</span><br><span class="line">  seg seg1(</span><br><span class="line">    <span class="variable">.b</span>(l),</span><br><span class="line">    <span class="variable">.h</span>(h)</span><br><span class="line">  );</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*seg.v*/</span></span><br><span class="line"><span class="keyword">module</span> seg(</span><br><span class="line">  <span class="comment">/*输入输出定义,输入4位编码值,输出7位数码管的显示控制*/</span></span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">3</span>:<span class="number">0</span>] b,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">6</span>:<span class="number">0</span>] h</span><br><span class="line">);</span><br><span class="line"><span class="comment">/*每当b发生变化,都会重新更新输出*/</span></span><br><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*首先检验指示位,若指示位为0,默认显示为8(共阳极数码管)*/</span></span><br><span class="line">  <span class="keyword">if</span>(b[<span class="number">3</span>] == <span class="number">0</span>)</span><br><span class="line">    h = <span class="number">7&#x27;b0000000</span>;</span><br><span class="line">  <span class="keyword">else</span>  <span class="keyword">begin</span></span><br><span class="line">  <span class="comment">/*若v指示位不为0,则根据数据位进行译码,默认输出为8,*/</span></span><br><span class="line">  	<span class="keyword">case</span>(b[<span class="number">2</span>:<span class="number">0</span>])</span><br><span class="line">      <span class="number">3&#x27;d0</span> : h = ~<span class="number">7&#x27;b0111111</span>;</span><br><span class="line">      <span class="number">3&#x27;d1</span> : h = ~<span class="number">7&#x27;b0000110</span>;</span><br><span class="line">      <span class="number">3&#x27;d2</span> : h = ~<span class="number">7&#x27;b1011011</span>;</span><br><span class="line">      <span class="number">3&#x27;d3</span> : h = ~<span class="number">7&#x27;b1001111</span>;</span><br><span class="line">      <span class="number">3&#x27;d4</span> : h = ~<span class="number">7&#x27;b1100110</span>;</span><br><span class="line">      <span class="number">3&#x27;d5</span> : h = ~<span class="number">7&#x27;b1101101</span>;</span><br><span class="line">      <span class="number">3&#x27;d6</span> : h = ~<span class="number">7&#x27;b1111101</span>;</span><br><span class="line">      <span class="number">3&#x27;d7</span> : h = ~<span class="number">7&#x27;b0000111</span>;</span><br><span class="line">      <span class="comment">//&#x27;d8 : h = ~7&#x27;b1111111;</span></span><br><span class="line">      <span class="comment">//&#x27;d9 : h = ~7&#x27;b1101111;</span></span><br><span class="line">      <span class="keyword">default</span> : h = ~<span class="number">7&#x27;b1111111</span>;</span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line">  en</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>约束文件的绑定是这样的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top=top<span class="comment">//指定top接口名称</span></span><br><span class="line">x (SW7,SW6,SW5,SW4,SW3,SW2,SW1,SW0)<span class="comment">//八个开关作为输入</span></span><br><span class="line">en SW8<span class="comment">//使能</span></span><br><span class="line">l (LD3,LD2,LD1,LD0)<span class="comment">//四个led灯显示编码结果</span></span><br><span class="line">h (SEG0G, SEG0F, SEG0E, SEG0D, SEG0C, SEG0B, SEG0A)<span class="comment">//数码管0输出结果,注意链接顺序要与编码匹配</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="第三章-加法器和ALU"><a href="#第三章-加法器和ALU" class="headerlink" title="第三章 加法器和ALU"></a>第三章 加法器和ALU</h3><p>首先通过约束文件介绍一下整体功能</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">top=top</span><br><span class="line">operand (SW7,SW6,SW5,SW4,SW3,SW2,SW1,SW0)<span class="comment">//八个开关输入操作数</span></span><br><span class="line">button  (BTNC,BTNU,BTND,BTNL,BTNR)<span class="comment">//按钮:上下让指令加减2,左右让指令加减1,上下左右都会让使能归零,中间会让使能取反</span></span><br><span class="line"><span class="comment">//也就是实际使用的时候,每当调整指令,都会看到结果消失,按下中间的按钮结果才会再次出现</span></span><br><span class="line">instr_seg (SEG7G, SEG7F, SEG7E, SEG7D, SEG7C, SEG7B, SEG7A)<span class="comment">//最左端数码管显示指令号</span></span><br><span class="line"><span class="comment">/*为了提升视觉体验,没有用到的数码管全部设成空的*/</span></span><br><span class="line">empty_seg (SEG6G, SEG6F, SEG6E, SEG6D, SEG6C, SEG6B, SEG6A,SEG5G, SEG5F, SEG5E, SEG5D, SEG5C, SEG5B, SEG5A,SEG4G, SEG4F, SEG4E, SEG4D, SEG4C, SEG4B, SEG4A,SEG3G, SEG3F, SEG3E, SEG3D, SEG3C, SEG3B, SEG3A)</span><br><span class="line"><span class="comment">/*四个标识符,对应进位/0/负/溢出*/</span></span><br><span class="line">CF LD3</span><br><span class="line">ZF LD2</span><br><span class="line">SF LD1</span><br><span class="line">OF LD0</span><br><span class="line"><span class="comment">/*右边三个数码管输出结果,如果是负数会显示负号哦~*/</span></span><br><span class="line">value_seg (SEG2G, SEG2F, SEG2E, SEG2D, SEG2C, SEG2B, SEG2A,SEG1G, SEG1F, SEG1E, SEG1D, SEG1C, SEG1B, SEG1A,SEG0G, SEG0F, SEG0E, SEG0D, SEG0C, SEG0B, SEG0A)</span><br><span class="line"><span class="comment">/*左边的几个LED灯显示使能和运算结果的二进制表示,用作调试*/</span></span><br><span class="line">value (LD13,LD12,LD11,LD10)</span><br><span class="line">en LD15</span><br></pre></td></tr></table></figure>
+<p>seg模块复用了之前的模块,但是做了些许调整,以显示9,负号和空:</p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*seg.v*/</span></span><br><span class="line">  	<span class="keyword">case</span>(b[<span class="number">3</span>:<span class="number">0</span>])</span><br><span class="line">      ......</span><br><span class="line">      <span class="number">4&#x27;d9</span> : h = ~<span class="number">7&#x27;b1101111</span>;</span><br><span class="line">      <span class="number">4&#x27;d10</span> : h = <span class="number">7&#x27;b0111111</span>;<span class="comment">//负号</span></span><br><span class="line">      <span class="keyword">default</span> : h = <span class="number">7&#x27;b1111111</span>;<span class="comment">//空</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br></pre></td></tr></table></figure>
+<p>接下来是alu的主体部分:</p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*top.v*/</span></span><br><span class="line"><span class="keyword">module</span> top(</span><br><span class="line"><span class="comment">/*输入输出声明*/</span></span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]operand,</span><br><span class="line">  <span class="keyword">input</span>  [<span class="number">4</span>:<span class="number">0</span>]button,</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">6</span>:<span class="number">0</span>]instr_seg,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> CF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> ZF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> SF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> OF,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> en,</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">20</span>:<span class="number">0</span>]value_seg,</span><br><span class="line">  <span class="keyword">output</span> [<span class="number">27</span>:<span class="number">0</span>]empty_seg,</span><br><span class="line">  <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>]value);</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">2</span>:<span class="number">0</span>]instr;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]a;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]b;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>]value_num;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]value_sign;</span><br><span class="line"><span class="comment">/*将不需要使用的数码管置空*/</span></span><br><span class="line">  <span class="keyword">assign</span> empty_seg = &#123;<span class="number">28</span>&#123;<span class="number">1&#x27;b1</span>&#125;&#125;;</span><br><span class="line"><span class="comment">/*实例化:指令数码管,负号数码管,结果数码管,按钮控制器*/</span></span><br><span class="line">  seg seg7(</span><br><span class="line">    <span class="variable">.b</span>(&#123;<span class="number">1&#x27;b0</span>,instr&#125;),</span><br><span class="line">    <span class="variable">.h</span>(instr_seg)</span><br><span class="line">  );</span><br><span class="line">  seg seg0(</span><br><span class="line">    <span class="variable">.b</span>(value_num[<span class="number">3</span>:<span class="number">0</span>]),</span><br><span class="line">    <span class="variable">.h</span>(value_seg[<span class="number">6</span>:<span class="number">0</span>])</span><br><span class="line">  );</span><br><span class="line">  seg seg1(</span><br><span class="line">    <span class="variable">.b</span>(value_num[<span class="number">7</span>:<span class="number">4</span>]),</span><br><span class="line">    <span class="variable">.h</span>(value_seg[<span class="number">13</span>:<span class="number">7</span>])</span><br><span class="line">  );</span><br><span class="line">  seg seg2(</span><br><span class="line">    <span class="variable">.b</span>(value_sign[<span class="number">3</span>:<span class="number">0</span>]),</span><br><span class="line">    <span class="variable">.h</span>(value_seg[<span class="number">20</span>:<span class="number">14</span>])</span><br><span class="line">  );</span><br><span class="line">  button button0(</span><br><span class="line">    <span class="variable">.button</span>(button),</span><br><span class="line">    <span class="variable">.instr</span>(instr),</span><br><span class="line">    <span class="variable">.en</span>(en)</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line"><span class="comment">/*开关输入的操作数*/</span></span><br><span class="line">  <span class="keyword">assign</span> &#123;a,b&#125; = operand;</span><br><span class="line"><span class="comment">/*为减法运算进行的取反,这里不能加一,为了防止Tmin的符号判断错误*/</span> </span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]b_comp = &#123;<span class="number">4</span>&#123;instr[<span class="number">0</span>]&#125;&#125;^b;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/*操作数,使能,指令码之一变化,就重新输出结果*/</span></span><br><span class="line">  <span class="keyword">always</span> @(operand <span class="keyword">or</span> en <span class="keyword">or</span> instr) <span class="keyword">begin</span></span><br><span class="line">  <span class="keyword">if</span> (en) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">case</span> (instr)</span><br><span class="line">    <span class="comment">/*加减法*/</span></span><br><span class="line">    <span class="number">3&#x27;d0</span>, <span class="number">3&#x27;d1</span>: <span class="keyword">begin</span></span><br><span class="line">    <span class="comment">/*不能把a+b_comp+&#123;1&#x27;b0,instr&#125;直接赋给&#123;CF,value&#125;,否则当b=0时,b_comp+1会错误的进位*/</span></span><br><span class="line">    value =  b_comp + &#123;<span class="number">1&#x27;b0</span>,instr&#125;;</span><br><span class="line">    &#123;CF,value&#125; = value +a;</span><br><span class="line">    <span class="comment">/*计算溢出:操作数符号相同,结果与操作数符号不同*/</span></span><br><span class="line">    OF = (a[<span class="number">3</span>] == b_comp[<span class="number">3</span>]) &amp;&amp; (value[<span class="number">3</span>] != a[<span class="number">3</span>]);</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="comment">/*逻辑运算*/</span></span><br><span class="line">    <span class="number">3&#x27;d2</span> : <span class="keyword">begin</span>  value = ~a;    &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d3</span> : <span class="keyword">begin</span>  value = a &amp; b; &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d4</span> : <span class="keyword">begin</span>  value = a | b; &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d5</span> : <span class="keyword">begin</span>  value = a ^ b; &#123;CF,  OF&#125; =<span class="number">2&#x27;d0</span>;  <span class="keyword">end</span></span><br><span class="line">    <span class="comment">/*关系运算*/</span></span><br><span class="line">    <span class="number">3&#x27;d6</span> : <span class="keyword">begin</span>  value = &#123;<span class="number">3&#x27;b000</span>,a&lt;b&#125;; &#123;CF, OF&#125; =<span class="number">2&#x27;d0</span>; <span class="keyword">end</span></span><br><span class="line">    <span class="number">3&#x27;d7</span> : <span class="keyword">begin</span>  value = &#123;<span class="number">3&#x27;b000</span>,a==b&#125;;&#123;CF, OF&#125; =<span class="number">2&#x27;d0</span>; <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line">    ZF = value==<span class="number">0</span>;</span><br><span class="line">    SF = value[<span class="number">3</span>] == <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*若使能为0,所有结果都为0*/</span></span><br><span class="line">    value = <span class="number">0</span>;</span><br><span class="line">    &#123;CF, ZF, SF, OF&#125; =<span class="number">4&#x27;d0</span>;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">/*value_show是value的绝对值*/</span></span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>]value_show;</span><br><span class="line">  <span class="keyword">assign</span> value_show = SF ? (~value+<span class="number">1</span>) : value;</span><br><span class="line">  </span><br><span class="line"><span class="comment">/*value_num高四位是十位数,低四位是个位数,value_sign是负号或空*/</span></span><br><span class="line">  <span class="keyword">assign</span> value_num[<span class="number">7</span>:<span class="number">4</span>] = value_show / <span class="number">10</span>;</span><br><span class="line">  <span class="keyword">assign</span> value_num[<span class="number">3</span>:<span class="number">0</span>] = value_show % <span class="number">10</span>;</span><br><span class="line">  <span class="keyword">assign</span> value_sign[<span class="number">3</span>:<span class="number">0</span>] = <span class="number">4&#x27;d11</span> - &#123;<span class="number">3&#x27;b000</span>, (value[<span class="number">3</span>] == <span class="number">1</span>)&#125;;<span class="comment">//为10,当为负.为11,当为正</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+<p>接下来是按钮控制模块,相当于有多个触发条件和触发行为的触发器:</p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> button(</span><br><span class="line"><span class="comment">/*输入输出声明:输入中上下左右四个按钮的信号,输出指令编码和使能*/</span></span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">4</span>:<span class="number">0</span>]button,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]instr,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> en);</span><br><span class="line"><span class="comment">/*所有的五个按钮的上升沿都会触发指令或使能的改变*/</span></span><br><span class="line"> <span class="keyword">always</span> @(<span class="keyword">posedge</span> button[<span class="number">3</span>]<span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">2</span>] <span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">0</span>] <span class="keyword">or</span> <span class="keyword">posedge</span> button[<span class="number">4</span>]) <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*按一下中间的按钮可以让使能取反*/</span></span><br><span class="line">     <span class="keyword">if</span>(button[<span class="number">4</span>]) <span class="keyword">begin</span></span><br><span class="line">         en &lt;= ~en;</span><br><span class="line">     <span class="keyword">end</span></span><br><span class="line">     <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">     <span class="comment">/*上:指令+2;下:指令-2;左:指令+1;右:指令-1;这四个按钮都会让使能归零*/</span></span><br><span class="line">        <span class="keyword">case</span>(button)</span><br><span class="line">        <span class="number">5&#x27;b01000</span>:  <span class="keyword">begin</span> instr &lt;= instr+<span class="number">2</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="number">5&#x27;b00100</span>:  <span class="keyword">begin</span> instr &lt;= instr-<span class="number">2</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="number">5&#x27;b00010</span>:  <span class="keyword">begin</span> instr &lt;= instr+<span class="number">1</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="number">5&#x27;b00001</span>:  <span class="keyword">begin</span> instr &lt;= instr-<span class="number">1</span>; en &lt;= <span class="number">0</span>;<span class="keyword">end</span></span><br><span class="line">        <span class="keyword">default</span>:   en &lt;= <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">     <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span> </span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+<p>总体而言,按中间的按钮会执行当前指令的运算,然后可以调节开关,观察结果.如果按上下左右四个按钮,会看到指令码变化,结果消失,需要重新按一次中间的按钮才会出现结果(就好像计算器的”等于”键)</p>
+<h3 id="实验五-寄存器组以及存储器"><a href="#实验五-寄存器组以及存储器" class="headerlink" title="实验五 寄存器组以及存储器"></a>实验五 寄存器组以及存储器</h3><ul>
+<li><p>分析三个输出端口的存储器实例  </p>
+<figure class="highlight v"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk)</span><br><span class="line">  <span class="keyword">begin</span></span><br><span class="line">      <span class="keyword">if</span> (we)</span><br><span class="line">          ram[inaddr] &lt;= din;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line"><span class="comment">/*dout0在不进行写入的上升沿读取*/</span></span><br><span class="line">          dout0 &lt;= ram[outaddr];</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">always</span> @(<span class="keyword">negedge</span> clk)</span><br><span class="line">  <span class="keyword">begin</span></span><br><span class="line"><span class="comment">/*dout1在没有写使能的下降沿读取*/</span></span><br><span class="line">      <span class="keyword">if</span> (!we)</span><br><span class="line">          dout1 &lt;= ram[outaddr];</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*dout2永远直接读取输出信号*/</span></span><br><span class="line">  <span class="keyword">assign</span>  dout2 = ram[outaddr];</span><br></pre></td></tr></table></figure>
+<h2 id="完成PA1第一阶段"><a href="#完成PA1第一阶段" class="headerlink" title="完成PA1第一阶段"></a>完成PA1第一阶段</h2><h3 id="1-开天辟地的篇章"><a href="#1-开天辟地的篇章" class="headerlink" title="1. 开天辟地的篇章"></a>1. 开天辟地的篇章</h3></li>
+<li><p>尝试理解计算机如何计算</p>
+<p>  取指执行,以跳转实现控制流,以内存和寄存器实现变量</p>
+</li>
+<li><p>从状态机视角理解程序运行</p>
+</li>
+</ul>
+<p>先把程序写出来:</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// PC: instruction    | // label: statement</span><br><span class="line"><span class="number">0</span>: mov  r1, <span class="number">0</span>         |  pc0: r1 = <span class="number">0</span>;</span><br><span class="line"><span class="number">1</span>: mov  r2, <span class="number">0</span>         |  pc1: r2 = <span class="number">0</span>;</span><br><span class="line"><span class="number">2</span>: addi r2, r2, <span class="number">1</span>     |  pc2: r2 = r2 + <span class="number">1</span>;</span><br><span class="line"><span class="number">3</span>: add  r1, r1, r2    |  pc3: r1 = r1 + r2;</span><br><span class="line"><span class="number">4</span>: blt  r2, <span class="number">100</span>, <span class="number">2</span>    |  pc4: <span class="keyword">if</span>(r2&lt;<span class="number">100</span>) goto <span class="number">2</span></span><br><span class="line"><span class="number">5</span>: jmp <span class="number">5</span>              |  pc5: goto pc5;</span><br></pre></td></tr></table></figure>
+<p>然后是开头:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>, x, x) -&gt; (<span class="number">1</span>, <span class="number">0</span>, x) -&gt; (<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>) -&gt; (<span class="number">3</span>, <span class="number">0</span>, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>接下来的状态是:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">4</span>, <span class="number">1</span>, <span class="number">1</span>) -&gt; (<span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>) -&gt; (<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>) -&gt; (<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>) -&gt; (<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>) -&gt; (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>) -&gt; (<span class="number">4</span>, <span class="number">3</span>, <span class="number">4</span>)-&gt;...</span><br><span class="line">-&gt;(<span class="number">4</span>, <span class="number">4851</span>, <span class="number">98</span>) -&gt; (<span class="number">2</span>, <span class="number">4851</span>, <span class="number">98</span>) -&gt; (<span class="number">3</span>, <span class="number">4851</span>, <span class="number">99</span>) -&gt; (<span class="number">4</span>, <span class="number">4950</span>, <span class="number">99</span>) -&gt; (<span class="number">2</span>, <span class="number">4950</span>, <span class="number">99</span>) -&gt; (<span class="number">3</span>, <span class="number">4950</span>, <span class="number">100</span>) -&gt; (<span class="number">4</span>, <span class="number">5050</span>, <span class="number">100</span>) -&gt; (<span class="number">5</span>, <span class="number">5050</span>, <span class="number">100</span>) &lt;-&gt; (<span class="number">5</span>, <span class="number">5050</span>, <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/2022/01/19/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -296,7 +646,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-count">33</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
