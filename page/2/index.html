@@ -156,6 +156,122 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/" class="post-title-link" itemprop="url">软件构造-关于表示泄露1-基本内容</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-16 22:12:17" itemprop="dateCreated datePublished" datetime="2023-03-16T22:12:17+08:00">2023-03-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-26 17:19:31" itemprop="dateModified" datetime="2023-05-26T17:19:31+08:00">2023-05-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>我们将讨论表示泄露的几种情况，以及如何防止表示泄露<br>原创性声明：每一个字（除了代码和引用）都是我手敲的。</p>
+</blockquote>
+<h2 id="表示泄露的定义"><a href="#表示泄露的定义" class="headerlink" title="表示泄露的定义"></a>表示泄露的定义</h2><p>表示泄露，即Representation Exposure，指的是client端程序可以通过某种手段<br>查询、访问、修改ADT的<strong>内部结构</strong>。<br>我们将通过一些例子来感受这个定义。</p>
+<h2 id="最基本的表示泄露-来自访问权限"><a href="#最基本的表示泄露-来自访问权限" class="headerlink" title="最基本的表示泄露-来自访问权限"></a>最基本的表示泄露-来自访问权限</h2><p>在java的设计中，一个字段的访问权限有四种。<br><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/2023-03-22-16-57-49.png" alt="访问权限"><br>为了避免表示泄露，<strong>如果一个字段可以是private，那么它就应当是private</strong>。<br>下面我们来看一个因为访问权限导致表示泄露的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * This immutable data type represents a tweet from Twitter.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Tweet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String author;</span><br><span class="line">    <span class="keyword">public</span> String text;</span><br><span class="line">    <span class="keyword">public</span> Date timestamp;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Make a Tweet.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.author = author;</span><br><span class="line">        <span class="keyword">this</span>.text = text;</span><br><span class="line">        <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于这个结构，我们在创建之后可以任意访问修改它的字段，因为字段被声明为public：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Tweet t = <span class="keyword">new</span> Tweet(<span class="string">&quot;justinbieber&quot;</span>, </span><br><span class="line">                    <span class="string">&quot;Thanks to all those beliebers out there inspiring me every day&quot;</span>, </span><br><span class="line">                    <span class="keyword">new</span> Date());</span><br><span class="line">t.author = <span class="string">&quot;rbmllr&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>你可能会想：为什么改变一个对象的字段被认为是一种“泄露”呢？我们从软件构造的3个角度来回答:</p>
+<ol>
+<li>safe from bug: 通过赋值改变一个字段可能会导致错误，例如赋值不匹配的类型或无意义的类型。</li>
+<li>esay to understand： 赋值一个字段的行为可能是令人困惑的，尤其是当各个字段的含义并不是那么清楚的时候。</li>
+<li>ready for change：一旦对象的内部表示发生变化，所有的赋值都必须手动重写。如果用方法进行赋值，则可以很方便的重构。</li>
+</ol>
+<p>此外，随意修改变量使得我们不能构造“immutable”的对象，这将让我们的程序充满了危险，我们不得不非常小心的应对每一次方法调用，<br>我们不知道返回之后的对象是否保持它原来的样子，这真是太可怕了！（译制腔）</p>
+<p>为此，一个常见的方法是将所有字段声明为private， 并且如果要构建immutable对象的话，声明为private final.</p>
+<h2 id="稍微间接一点的表示泄露-来自传递引用"><a href="#稍微间接一点的表示泄露-来自传递引用" class="headerlink" title="稍微间接一点的表示泄露-来自传递引用"></a>稍微间接一点的表示泄露-来自传递引用</h2><p>当我们把所有字段设置为私有，你可能松了口气：现在我的数据类型是安全的了。但还没结束——客户端总是需要了解ADT的“属性”，除非<br>这个ADT是一个纯粹的功能类（比如Math）。既然如此，我们必须为客户端服务，把ADT的内部表示转换为客户端感兴趣的属性。大部分情况下，属性和内部表示的对应关系是比较简单的，例如我们为Tweet类型增加获取作者、内容、发送时间的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> Twitter user who wrote the tweet */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getAuthor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> author;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@return</span> text of the tweet */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getText</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> text;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@return</span> date/time when the tweet was sent */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看上去没什么问题，客户端不能直接访问我们的内部表示，因此如果我们要修改内部表示，例如把text分为title和content，我们只需要重写getText，比如返回title + content，而无需客户端做任何改动。</p>
+<p>但是还存在这样的一种情况：客户端拿到了这个属性之后，又修改了这个属性，这会发生什么呢？<br>考虑下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a tweet that retweets t, one hour later*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Tweet <span class="title">retweetLater</span><span class="params">(Tweet t)</span> </span>&#123;</span><br><span class="line">    Date d = t.getTimestamp();</span><br><span class="line">    d.setHours(d.getHours()+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, t.getText(), d);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>客户端获取了发推时间后，把时间加了一个小时，又用这个时间创建了新的Tweet。这里的<code>d</code>是通过<code>getTimestamp()</code>获得的，而在d上调用了<br><code>setHours()</code>方法将会改变d的值！因此结果是，t和新创建的Tweet现在都指向了一小时后的时间。<br><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-14-39.png" alt="表示泄露-来自传递引用"><br>这个例子中，我们的getter传递了一个引用类型<code>Date</code>，一个可变数据类型。因此，在引用d上调用mutator导致了表示泄露。<br>我们该怎样修改这个代码？通过一种称之为“防御性拷贝”的方式，创建引用的一个副本。这样对返回值的修改便不会影响到对象本身。具体来讲：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，我们就避免了getter（observor的一种）造成的访问泄露。对于所有的observor方法（返回值非空），我们都需要做如下的检查：只要返回的值不是基本数据类型，并且是可变数据类型，那么就要进行防御式拷贝。反之，如果返回值是基本数据类型或者是不可边类型，则可以直接返回。</p>
+<h2 id="稍微间接一点的表示泄露-来自接收引用"><a href="#稍微间接一点的表示泄露-来自接收引用" class="headerlink" title="稍微间接一点的表示泄露-来自接收引用"></a>稍微间接一点的表示泄露-来自接收引用</h2><p>引用类型始终是危险的：ADT内部的引用类型也可能被外部的客户端程序持有，这时一旦外部引用调用了mutator，ADT的内部表示也将同步发生变化。我们来看下面的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a list of 24 inspiring tweets, one per hour today */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Tweet&gt; <span class="title">tweetEveryHourToday</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">    List&lt;Tweet&gt; list = <span class="keyword">new</span> ArrayList&lt;Tweet&gt;(); </span><br><span class="line">    Date date = <span class="keyword">new</span> Date();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">24</span>; i++) &#123;</span><br><span class="line">        date.setHours(i);</span><br><span class="line">        list.add(<span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, <span class="string">&quot;keep it up! you can do it&quot;</span>, date));</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> list;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个例子中，我们试图创建24个Tweet，间隔1小时。然而，我们的构造器方法会直接将时间戳赋值给内部属性，因此当我们在循环中调用<code>setHours</code>时，所有Tweet内部的timestamp都将同步变化。最终，我们得到了24个时间相同的Tweet。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Make a Tweet.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-21-50.png" alt="表示泄露-接收引用"></p>
+<p>为此，我们在接收引用时也要使用防御式拷贝。如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样的，对基本数据类型和不可边数据类型，如String，不需要进行防御式拷贝。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这就是MIT课件中关于表示泄露的内容。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/Java%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02-%E5%AF%B9%E8%B1%A1%E5%92%8C%E7%B1%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1154,84 +1270,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%9B%9B%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/Android%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E5%9B%9B%EF%BC%89/" class="post-title-link" itemprop="url">Android学习笔记（四）</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-07-31 19:37:07" itemprop="dateCreated datePublished" datetime="2022-07-31T19:37:07+08:00">2022-07-31</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-03 22:56:14" itemprop="dateModified" datetime="2022-08-03T22:56:14+08:00">2022-08-03</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><p>Context是一个控制全局资源的抽象类，由Android系统负责具体实现。各个组件都需要利用Context才能访问res中的字符串，图片等资源。同时一些应用级功能也要通过Context实现</p>
-<h3 id="正常设置UI时的Context"><a href="#正常设置UI时的Context" class="headerlink" title="正常设置UI时的Context"></a>正常设置UI时的Context</h3><p>正常设置UI是使用setContentView(R.layout.activity_main),这个函数会调用<code>getDelegate().setContentView(layoutResID);</code>递归地查找并且生成定义在xml中的各个View:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//in AppCompatActivity.java</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContentView</span><span class="params">(<span class="meta">@LayoutRes</span> <span class="keyword">int</span> layoutResID)</span> </span>&#123;</span><br><span class="line">    initViewTreeOwners();</span><br><span class="line">    <span class="comment">//调用了Activity的Delegate的同名方法，设置了mDelegate.mContext</span></span><br><span class="line">    getDelegate().setContentView(layoutResID);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//in AppCompatDelegate.java</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContentView</span><span class="params">(<span class="keyword">int</span> resId)</span> </span>&#123;</span><br><span class="line">    ensureSubDecor();</span><br><span class="line">    ViewGroup contentParent = mSubDecor.findViewById(android.R.id.content);</span><br><span class="line">    contentParent.removeAllViews();</span><br><span class="line">    <span class="comment">/*这一句会触发后续的递归查找*/</span></span><br><span class="line">    LayoutInflater.from(mContext).inflate(resId, contentParent);</span><br><span class="line">    mAppCompatWindowCallback.getWrapped().onContentChanged();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在这个过程中<code>AppCompactDelegat</code>类带有一个字段mContext，这个字段用在了解析xml度过程中。可以看到，调用getDelegate时会设置这个字段</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Return The AppCompatDelegate being used by this Activity.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@NonNull</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> AppCompatDelegate <span class="title">getDelegate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (mDelegate == <span class="keyword">null</span>) &#123;</span><br><span class="line">        mDelegate = AppCompatDelegate.create(<span class="keyword">this</span>, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> mDelegate;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//in AppCompatDelegate.java（抽象类）</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> AppCompatDelegate <span class="title">create</span><span class="params">(<span class="meta">@NonNull</span> Activity activity, </span></span></span><br><span class="line"><span class="params"><span class="function"><span class="meta">@Nullable</span> AppCompatCallback callback)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> AppCompatDelegateImpl(activity, callback);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//in AppCompatDelegateImpl.java（实现）</span></span><br><span class="line">AppCompatDelegateImpl(Activity activity, AppCompatCallback callback) &#123;</span><br><span class="line">    <span class="comment">//调用另一个构造器</span></span><br><span class="line">    <span class="keyword">this</span>(activity, <span class="keyword">null</span>, callback, activity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//in AppCompatDelegateImpl.java</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">AppCompatDelegateImpl</span><span class="params">(Context context, Window window, AppCompatCallback callback,</span></span></span><br><span class="line"><span class="params"><span class="function">            Object host)</span> </span>&#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    mAppCompatCallback = callback;</span><br><span class="line">    mHost = host;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们可以发现Activity本身就是mDelegate的context和callback。事实上Activity隔着漫长的继承链继承了Context类。<br>正是因为有了Context，这个解析过程在能够把id和xml中的内容联系起来。</p>
-<h3 id="直接使用View"><a href="#直接使用View" class="headerlink" title="直接使用View"></a>直接使用View</h3><p>这里以imageview为例，通常我们都是在xml中定义的View组件，这样它们就会在上述的一系列过程中被加载出来，最后作为一整个activity呈现。<br>如果单独定义iv，就要显式指定Context，这里我们仍然用activity作为context，并通过他访问应用的启动图标，然后呈现在内容页</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ImageView iv = <span class="keyword">new</span> ImageView(<span class="keyword">this</span>);</span><br><span class="line">iv.setImageResource(R.mipmap.ic_launcher);</span><br><span class="line">setContentView(iv);</span><br></pre></td></tr></table></figure>
-
-<p>在这里，同样是通过Context才能用R文件中的int常量直接找到图片。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1303,7 +1341,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

@@ -241,6 +241,287 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
+            <a href="/INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+          
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-09-18 01:24:46" itemprop="dateCreated datePublished" datetime="2023-09-18T01:24:46+08:00">2023-09-18</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <!DOCTYPE html><html><head>
+      <title>INTEL 指令集手册-x86体系结构概览</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///c:\Users\huiyeruzhou\.vscode\extensions\shd101wyy.markdown-preview-enhanced-0.7.9\crossnote\dependencies\katex\katex.min.css">
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em!important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em!important;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em!important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px/2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      
+    </head>
+    <body for="html-export">
+      <div class="crossnote markdown-preview  ">
+      <h1 class="crossnote-header" id="intel%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C%E7%AC%94%E8%AE%B0-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88">INTEL指令集手册笔记-x86体系结构概览</h1>
+
+<div class="code-chunk" data-id="code-chunk-id-0" data-cmd="toc"><div class="input-div"><div class="btn-group"><div class="run-btn btn"><span>▶︎</span></div><div class="run-all-btn btn">all</div></div><div class="status">running...</div></div><div class="output-div"></div></div><ul>
+<li><a href="#intel%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C%E7%AC%94%E8%AE%B0-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88">INTEL指令集手册笔记-x86体系结构概览</a>
+<ul>
+<li><a href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%BC%80%E5%A7%8B">写在最开始</a>
+<ul>
+<li><a href="#%E5%85%B3%E4%BA%8E%E6%A8%A1%E5%BC%8F">关于“模式”</a></li>
+<li><a href="#%E5%85%B3%E4%BA%8E%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4">关于“地址空间”</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88">体系结构概览</a>
+<ul>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E7%BA%A7%E5%AF%84%E5%AD%98%E5%99%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">系统级寄存器和数据结构</a>
+<ul>
+<li><a href="#1-%E5%85%A8%E5%B1%80%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8gdt%E5%92%8C%E5%B1%80%E9%83%A8%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8ldt">1. 全局描述符表（GDT）和局部描述符表（LDT）</a></li>
+<li><a href="#2%E7%B3%BB%E7%BB%9F%E6%AE%B5%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%92%8C%E9%97%A8">2.系统段，段描述符和门</a></li>
+<li><a href="#3%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E6%AE%B5task-state-segment%E5%92%8C%E4%BB%BB%E5%8A%A1%E9%97%A8task-gates">3.任务状态段（Task-State Segment）和任务门（Task Gates）</a></li>
+<li><a href="#4%E4%B8%AD%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86">4.中断和异常处理</a></li>
+<li><a href="#5%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86">5.内存管理</a></li>
+<li><a href="#6%E7%B3%BB%E7%BB%9F%E5%AF%84%E5%AD%98%E5%99%A8">6.系统寄存器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 class="crossnote-header" id="%E5%86%99%E5%9C%A8%E6%9C%80%E5%BC%80%E5%A7%8B">写在最开始</h2>
+
+<p>本文是基于IA-32架构软件开发者手册（第三卷）的阅读笔记。作为软件开发者，这或许是我们所必须掌握的知识中最接近底层的一部分。在这里，我们将会看到计算机是如何工作的，以及我们的程序是如何被计算机执行的。</p>
+<p>这些内容十分的抽象、晦涩、冗杂，包含了大量的细节和术语。因此，我将会尽量使用简单的语言来描述这些内容。</p>
+<p>大多数时候，我使用无序列表来展示一些重要的概念，以期尽量精简的展示系统的结构。在开头和结尾，总是会有概括性的文字对于这部分内容进行概述和总结。对于特别重要或特别复杂的部分，我才会使用成段的文字展开讨论。我从不罗列内容，例如EFLAGS每个位置的含义，而只用文字解释图片中没有的信息。不过，我仍然会列出重要的几点供读者强化记忆。</p>
+<p>为了更好的理解这部分知识，我们首先需要对一些关键的术语（主要是中文术语）进行辨析，理清这些内容，对于我们理解之后的内容有很大帮助。下面的内容假设读者具有一定的汇编和体系结构方面的知识（比如学习过CSAPP）。</p>
+<h3 class="crossnote-header" id="%E5%85%B3%E4%BA%8E%E6%A8%A1%E5%BC%8F">关于“模式”</h3>
+
+<p>在Intel处理器中，存在许多的“模式”。我们将会看到，这些模式对应不同的寻址方式和内存布局。文中出现的模式大概有以下几种：</p>
+<ul>
+<li>
+<p>实模式：最早的模式，也是（目前）所有处理器启动时的默认模式。这种情况下，表示为<code>CS:IP</code>的地址值为<code>CS&lt;&lt;4 + IP</code>。至多管理1MB的内存。</p>
+<blockquote>
+<p>这是8086 16位体系结构的无奈之举，用这种方式配合20位地址总线，编程空间得以从令人难以忍受的64KB扩展到1MB。</p>
+</blockquote>
+</li>
+<li>
+<p>IA32（保护模式）：从80386开始启用的模式，这种情况下，可以用平坦分段管理至多4GB的内存</p>
+</li>
+<li>
+<p>IA32e（长模式）：支持64位的体系结构。提供至多48位的地址空间，并提供兼容32位OS和软件的“兼容模式”。不再使用段寄存器，段选择子固定为GDT，几乎完全采用页式地址管理。</p>
+</li>
+</ul>
+<p>值得注意的是，IA32e与IA64并不相同。前者是我们熟知的x86-64（有时也称为x64）体系结构的一部分，是目前主流的64位体系结构。而IA64则是一种激进的不兼容IA32的64位架构，由Intel与HP合作开发，目前已经被抛弃。</p>
+<h3 class="crossnote-header" id="%E5%85%B3%E4%BA%8E%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4">关于“地址空间”</h3>
+
+<p>我们知道，在计算机界为人津津乐道的（八股文）术语之一就是地址空间，逻辑地址、线性地址、虚拟地址、物理地址成为无数求职者和学子的噩梦。</p>
+<ul>
+<li>
+<p>物理地址（Physical Address，PA）：这个术语常常表示数据在物理内存条中的位置。在现代系统中，物理地址是由MMU（内存管理单元）通过页表变换得到的。</p>
+</li>
+<li>
+<p>线性地址（linear address）：这个术语通常用来描述理想状态下的连续地址空间。
+当我说“线性地址”时，我总是指的是CPU使用的地址。</p>
+<blockquote>
+<p>维基百科：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Linear_address_space">线性地址</a></p>
+</blockquote>
+</li>
+<li>
+<p>逻辑地址（logical address）：这个术语通常用来描述“分段模式下”的<code>段基址：偏移量</code>形式的地址。不过，它的本意实际上是“编程时使用的地址”。从这个角度来说，逻辑地址其实等同于线性地址。</p>
+<blockquote>
+<p>维基百科：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Memory_address">地址空间</a></p>
+</blockquote>
+</li>
+<li>
+<p>虚拟地址（Virtual Address，VA）：这个术语常常表示进程所看到的内存空间。由于保护模式和长模式的现代系统总是使用页表基址提供给进程一个完整的连续地址空间，虚拟地址也就等同于线性地址。</p>
+<p>对于实模式而言，很难谈论虚拟地址，有人认为虚拟地址等于段偏移量，有人认为虚拟地址等于逻辑地址，但这其实没有意义。</p>
+<blockquote>
+<p>MSDB: <a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/memory/virtual-address-space?redirectedfrom=MSDN">虚拟地址</a></p>
+</blockquote>
+</li>
+</ul>
+<p>以上的讨论仅限于本文，如果面试的时候被问到，请回答“逻辑地址经过段式变换得到线性地址，进程看到的线性地址（通过页表管理的线性地址）就是虚拟地址，虚拟地址经过页式变换得到物理地址”。</p>
+<h2 class="crossnote-header" id="%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88">体系结构概览</h2>
+
+<p>本章中，我们将关注系统的寄存器结构以及操作这些寄存器的系统指令。理解寻址、内存、中断处理、任务管理的机制以及其中的重要数据结构。并且看到计算机是如何从实模式切换到保护模式的。</p>
+<h3 class="crossnote-header" id="%E7%B3%BB%E7%BB%9F%E7%BA%A7%E5%AF%84%E5%AD%98%E5%99%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">系统级寄存器和数据结构</h3>
+
+<p>下图展示了保护模式和长模式下的系统寄存器和数据结构。其中：</p>
+<ul>
+<li>左上角的部分展示了寄存器，包括标志寄存器、控制寄存器、任务寄存器和其他通用寄存器</li>
+<li>TODO：</li>
+<li>底部展示了页表将线性地址映射到物理地址的方式</li>
+</ul>
+<p><img src="%22INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/image.png%22" alt="image{400x500}"></p>
+<div style="display: flex; justify-content: space-between;">
+    <div class="image">
+        <img src="INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/image-1.png" alt="Image 1" width="500" height="400">
+    </div>
+    <div class="image">
+        <img src="INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/image.png" alt="Image 2" width="500" height="400">
+</div>
+</div>
+<p style="text-align: center;"><strong><small>左：保护模式（IA32）下的系统寄存器和数据结构<br>右：长模式（IA32e）下的系统寄存器和数据结构</small></strong></p>
+<h4 class="crossnote-header" id="1-%E5%85%A8%E5%B1%80%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8gdt%E5%92%8C%E5%B1%80%E9%83%A8%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8ldt">1. 全局描述符表（GDT）和局部描述符表（LDT）</h4>
+
+<p>在保护模式下，所有访存都是通过描述符表——GDT和LDT完成的。</p>
+<ul>
+<li>
+<p>描述符表（Descriptor Table，DT）：用于内存、中断、任务管理的重要数据结构。</p>
+</li>
+<li>
+<p>段描述符（Segment descriptors）：描述符表的表项。定义了段的起始地址、访问权限（读写执行）和使用信息。</p>
+</li>
+<li>
+<p>段选择子（Segment Selector）：用来在GDT或LDT中定位段描述符。包含相对于DT基址的偏移量，一个全局/局部标志位，以及特权级。</p>
+</li>
+<li>
+<p>描述附表寄存器（Descriptor Table Register，DTR）：用来存储DT的线性地址基址。</p>
+<blockquote>
+<p>当前特权级（Current privilege level，CPL）：当前正在执行的代码所在的特权级。通常，特权级别从0~3，0表示内核态（完全权限），3表示用户态（最低权限）。</p>
+</blockquote>
+</li>
+</ul>
+<p>通过段选择子查询DT可以访问代码、数据、栈等段，其中的权限标志会阻止不合法的访问。</p>
+<blockquote>
+<p>长模式下描述符扩展为16字节，兼容模式下不进行这种扩展</p>
+</blockquote>
+<p>描述符机制是段式地址管理在现代系统中的实现，这种机制方便了内存的管理，并且提供了访问权限的控制。实模式下，总是直接访问物理地址，而保护模式下则至少要经过描述符的转换。从这个角度上来说，“实”指的是直接访问物理地址，“保护”指的是通过描述符表进行访问权限的保护。</p>
+<h4 class="crossnote-header" id="2%E7%B3%BB%E7%BB%9F%E6%AE%B5%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%92%8C%E9%97%A8">2.系统段，段描述符和门</h4>
+
+<ul>
+<li>
+<p>系统段：TSS（Task-state Segment）和LDT，称为系统段。其余的则是运行时环境包含的代码、数据、栈这等段。GDT不视作系统段因为其不通过段选择子访问。</p>
+</li>
+<li>
+<p>门（Gate）：特殊的段选择子，通过门进行的调用可以进行特权级别的转换。包含过程调用、中断、陷阱、任务等。</p>
+<blockquote>
+<ul>
+<li>调用门：可以执行更高特权级别的代码，还可用于16-32位代码段的相互访问。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<p>长模式下，调用门可以用于64位和32位模式的代码段的相互访问。任务切换门被设置为NULL，其余门（包括TSS选择子和LDT选择子）被扩展为16字节。不过，页表中的特权控制很大程度上代替了门的特权控制功能。如同之前一样，段描述符和门都是在保护中重要，而在长模式中不再重要的概念。</p>
+<p>门的使用方式和段选择子类似，通过门选择子查询GDT或LDT中的门描述符以获取基址，然后结合偏移量访问对应的数据。不过，门提供了特权级别的转换甚至是字长模式的转换，因而是一种特殊的段描述符。</p>
+<p>系统段，称其为“系统”，是相对于“应用”而言的。系统段的存在是为了支持操作系统的运行，包括任务上下文保存、地址管理、中断处理等。</p>
+<h4 class="crossnote-header" id="3%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E6%AE%B5task-state-segment%E5%92%8C%E4%BB%BB%E5%8A%A1%E9%97%A8task-gates">3.任务状态段（Task-State Segment）和任务门（Task Gates）</h4>
+
+<p>任务状态段包含了一个任务所需的上下文：</p>
+<ul>
+<li>通用寄存器</li>
+<li>条件码：EFLAGS</li>
+<li>程序计数器：EIP</li>
+<li>堆栈指针（3个特权级各一个）</li>
+<li>页表基址寄存器（CR3）</li>
+<li>局部描述符表选择子</li>
+</ul>
+<p>每次任务切换，操作系统都要保存状态，通过GDT选择新TSS并加载状态。</p>
+<p>任务状态段要么通过TSSs（任务状态段选择子）访问，要么通过任务门访问，后者可以提供特权控制。</p>
+<p>长模式下，不再能通过硬件切换任务，因此任务门不再有效。不过TSS仍然保留，且TSSs设置为指向TSS基址。</p>
+<p>任务状态段的存在是为了支持任务切换，而任务切换是为了支持多道程序。一个TSS保存的内容就是一个完整的上下文，包括当前的数据、状态、执行位置等基础信息，还包含其地址空间信息（页表基址寄存器和LDT选择子）。</p>
+<h4 class="crossnote-header" id="4%E4%B8%AD%E6%96%AD%E5%92%8C%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86">4.中断和异常处理</h4>
+
+<p>外部中断（指外设引发的异步中断），软件中断和异常都通过中断描述符表（IDT）进行管理。</p>
+<ul>
+<li>中断描述符：IDT中的表项，都是门描述符，包含了中断处理程序的地址、特权级别等信息，也可以是一个任务门。</li>
+<li>中断描述符表寄存器（IDTR）：用来存储IDT的线性地址基址。</li>
+<li>中断向量：中断描述符的索引，通过中断向量查询IDT中的门描述符。</li>
+</ul>
+<p>外设、处理器、软件都可以引发中断。软件中断使用INT系列或BOUND指令。三种形式的中断例如：键盘中断、浮点异常、系统调用。</p>
+<p>中断和陷阱会的处理等效于通过调用门调用处理函数，而指向任务门的中断向量会通过任务切换调用相应的处理函数。</p>
+<h4 class="crossnote-header" id="5%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86">5.内存管理</h4>
+
+<p>处理器支持物理地址或虚拟地址两种模式。分页启动时，所有的访存都是通过页表完成的。</p>
+<ul>
+<li>分页（Paging）：一种地址管理方式，将线性地址按照一定大小（通常是4K）映射到物理地址。这个映射往往是乱序的。</li>
+<li>页表（Page Table）：管理线性地址到物理地址的映射关系的数据结构。</li>
+<li>页帧（Page Frame）：物理内存中的页大小的连续区域。</li>
+<li>页表基址寄存器：用来存储页表的地址基址，是一个控制寄存器（Control Register，CR），即CR3。</li>
+<li>页表条目：包含页或下一级页表的基址，以及访问权限等信息。</li>
+</ul>
+<p>长模式下的页表分为4级，每级512个条目，每个条目8字节，每个页表恰好占用4K。页表基址寄存器指向最顶级页表的<strong>物理</strong>地址基址。</p>
+<h4 class="crossnote-header" id="6%E7%B3%BB%E7%BB%9F%E5%AF%84%E5%AD%98%E5%99%A8">6.系统寄存器</h4>
+
+<ul>
+<li>条件码寄存器（EFLAGS）：包含了一些标志位，用来表示上一条指令的执行结果。例如进位标志、溢出标志等。还包含模式切换中断处理等标志</li>
+<li>控制寄存器（CR）：包含了一些控制系统行为的标志位。例如分页开关。</li>
+<li></li>
+<li>任务寄存器（TR）：用来存储TSS选择子，用于任务切换。</li>
+<li>系统寄存器（MSR）：包含了一些系统相关的信息。例如时间戳计数器（TSC）。</li>
+</ul>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="辉夜">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉夜的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
             <a href="/INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/" class="post-title-link" itemprop="url">INTEL 指令集手册-x86体系结构概览</a>
         </h2>
 
@@ -260,7 +541,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-09-22 01:11:12" itemprop="dateModified" datetime="2023-09-22T01:11:12+08:00">2023-09-22</time>
+                <time title="修改时间：2023-09-22 18:10:41" itemprop="dateModified" datetime="2023-09-22T18:10:41+08:00">2023-09-22</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -308,9 +589,11 @@
 </li>
 <li><a href="#%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%BC%8F">运行模式</a><ul>
 <li><a href="#%E4%BB%8E%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%88%87%E6%8D%A2%E5%88%B0%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F">从实模式切换到保护模式</a></li>
+<li><a href="#%E4%BB%8E%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%88%87%E6%8D%A2%E5%88%B0%E5%AE%9E%E6%A8%A1%E5%BC%8F">从实模式切换到实模式</a></li>
 </ul>
 </li>
 <li><a href="#x86%E7%B3%BB%E7%BB%9F%E6%8C%87%E4%BB%A4%E5%AF%84%E5%AD%98%E5%99%A8">x86系统指令寄存器</a><ul>
+<li><a href="#1%E6%A0%87%E5%BF%97%E5%AF%84%E5%AD%98%E5%99%A8">1.标志寄存器</a></li>
 <li><a href="#2%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AF%84%E5%AD%98%E5%99%A8">2.内存管理寄存器</a></li>
 <li><a href="#3%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8">3.控制寄存器</a></li>
 </ul>
@@ -487,7 +770,7 @@
 <li>6.设置段寄存器，使得段寄存器指向GDT中的段描述符</li>
 <li>7.设置栈区，通常把栈区设置在引导位置之下，即0x0000~0x7c00</li>
 </ul>
-<p>从保护模式切换到实模式，要进行相反的过程</p>
+<h4 id="从实模式切换到实模式"><a href="#从实模式切换到实模式" class="headerlink" title="从实模式切换到实模式"></a>从实模式切换到实模式</h4><p>从保护模式切换到实模式，要进行类似的过程, 以维护正确的寻址方式和寄存器指向。</p>
 <ul>
 <li><ol>
 <li>关闭中断</li>
@@ -514,8 +797,11 @@
 </ol>
 </li>
 </ul>
-<h3 id="x86系统指令寄存器"><a href="#x86系统指令寄存器" class="headerlink" title="x86系统指令寄存器"></a>x86系统指令寄存器</h3><h4 id="2-内存管理寄存器"><a href="#2-内存管理寄存器" class="headerlink" title="2.内存管理寄存器"></a>2.内存管理寄存器</h4><p>这些寄存器用于保存系统全局或某个任务的寻址信息，因此称之为“内存管理寄存器”，主要的内容就是之前提到的几个表结构的基址以及限长。由于TR和LDTR是特殊的系统段，还保存了他们的段选择子和段描述符属性。</p>
-<p>这几个寄存器的内容如下所示：<br><img src="/INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/image-2.png" alt="Alt text"></p>
+<h3 id="x86系统指令寄存器"><a href="#x86系统指令寄存器" class="headerlink" title="x86系统指令寄存器"></a>x86系统指令寄存器</h3><p>系统指令寄存器，如同前面所说的，是保存着操作系统运行所需的关键内容的寄存器。事实上，基本上也只有操作系统有修改甚至访问这些寄存器的权限。读写对应寄存器的指令通常都是特权指令，只有在RING0才能执行。</p>
+<p>在操作系统层面，比较重要的几组寄存器包含标志寄存器、内存控制寄存器、控制寄存器。</p>
+<h4 id="1-标志寄存器"><a href="#1-标志寄存器" class="headerlink" title="1.标志寄存器"></a>1.标志寄存器</h4><p><img src="https://huiyeruzhou.github.io/INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/image-3.png" alt="Alt text"></p>
+<h4 id="2-内存管理寄存器"><a href="#2-内存管理寄存器" class="headerlink" title="2.内存管理寄存器"></a>2.内存管理寄存器</h4><p>这些寄存器用于保存系统全局或某个任务的寻址信息，因此称之为“内存管理寄存器”，主要的内容就是之前提到的几个表结构的基址以及限长。由于TR和LDTR是特殊的系统<strong>段</strong>，还保存了他们的段选择子和段描述符属性。</p>
+<p>这几个寄存器的内容如下所示，注意观察其中LDTR、TR和GDTR、IDTR的结构区别：<br><img src="https://huiyeruzhou.github.io/INTEL-%E6%8C%87%E4%BB%A4%E9%9B%86%E6%89%8B%E5%86%8C-x86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88/image-2.png" alt="Alt text"></p>
 <p>其中：</p>
 <ul>
 <li>基址指的是表&#x2F;段的首个字节(0字节)的<strong>线性</strong>地址，限长指的是表&#x2F;段的最大长度</li>
@@ -1178,122 +1464,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://huiyeruzhou.github.io/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="辉夜">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="辉夜的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/" class="post-title-link" itemprop="url">软件构造-关于表示泄露1-基本内容</a>
-        </h2>
-
-        <div class="post-meta">
-          
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-03-16 22:12:17" itemprop="dateCreated datePublished" datetime="2023-03-16T22:12:17+08:00">2023-03-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-05-26 17:19:31" itemprop="dateModified" datetime="2023-05-26T17:19:31+08:00">2023-05-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CS/" itemprop="url" rel="index"><span itemprop="name">CS</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>我们将讨论表示泄露的几种情况，以及如何防止表示泄露<br>原创性声明：每一个字（除了代码和引用）都是我手敲的。</p>
-</blockquote>
-<h2 id="表示泄露的定义"><a href="#表示泄露的定义" class="headerlink" title="表示泄露的定义"></a>表示泄露的定义</h2><p>表示泄露，即Representation Exposure，指的是client端程序可以通过某种手段<br>查询、访问、修改ADT的<strong>内部结构</strong>。<br>我们将通过一些例子来感受这个定义。</p>
-<h2 id="最基本的表示泄露-来自访问权限"><a href="#最基本的表示泄露-来自访问权限" class="headerlink" title="最基本的表示泄露-来自访问权限"></a>最基本的表示泄露-来自访问权限</h2><p>在java的设计中，一个字段的访问权限有四种。<br><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B21-%E5%9F%BA%E6%9C%AC%E5%86%85%E5%AE%B9/2023-03-22-16-57-49.png" alt="访问权限"><br>为了避免表示泄露，<strong>如果一个字段可以是private，那么它就应当是private</strong>。<br>下面我们来看一个因为访问权限导致表示泄露的例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * This immutable data type represents a tweet from Twitter.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Tweet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String author;</span><br><span class="line">    <span class="keyword">public</span> String text;</span><br><span class="line">    <span class="keyword">public</span> Date timestamp;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Make a Tweet.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.author = author;</span><br><span class="line">        <span class="keyword">this</span>.text = text;</span><br><span class="line">        <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>对于这个结构，我们在创建之后可以任意访问修改它的字段，因为字段被声明为public：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Tweet t = <span class="keyword">new</span> Tweet(<span class="string">&quot;justinbieber&quot;</span>, </span><br><span class="line">                    <span class="string">&quot;Thanks to all those beliebers out there inspiring me every day&quot;</span>, </span><br><span class="line">                    <span class="keyword">new</span> Date());</span><br><span class="line">t.author = <span class="string">&quot;rbmllr&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>你可能会想：为什么改变一个对象的字段被认为是一种“泄露”呢？我们从软件构造的3个角度来回答:</p>
-<ol>
-<li>safe from bug: 通过赋值改变一个字段可能会导致错误，例如赋值不匹配的类型或无意义的类型。</li>
-<li>esay to understand： 赋值一个字段的行为可能是令人困惑的，尤其是当各个字段的含义并不是那么清楚的时候。</li>
-<li>ready for change：一旦对象的内部表示发生变化，所有的赋值都必须手动重写。如果用方法进行赋值，则可以很方便的重构。</li>
-</ol>
-<p>此外，随意修改变量使得我们不能构造“immutable”的对象，这将让我们的程序充满了危险，我们不得不非常小心的应对每一次方法调用，<br>我们不知道返回之后的对象是否保持它原来的样子，这真是太可怕了！（译制腔）</p>
-<p>为此，一个常见的方法是将所有字段声明为private， 并且如果要构建immutable对象的话，声明为private final.</p>
-<h2 id="稍微间接一点的表示泄露-来自传递引用"><a href="#稍微间接一点的表示泄露-来自传递引用" class="headerlink" title="稍微间接一点的表示泄露-来自传递引用"></a>稍微间接一点的表示泄露-来自传递引用</h2><p>当我们把所有字段设置为私有，你可能松了口气：现在我的数据类型是安全的了。但还没结束——客户端总是需要了解ADT的“属性”，除非<br>这个ADT是一个纯粹的功能类（比如Math）。既然如此，我们必须为客户端服务，把ADT的内部表示转换为客户端感兴趣的属性。大部分情况下，属性和内部表示的对应关系是比较简单的，例如我们为Tweet类型增加获取作者、内容、发送时间的方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> Twitter user who wrote the tweet */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getAuthor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> author;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@return</span> text of the tweet */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getText</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> text;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** <span class="doctag">@return</span> date/time when the tweet was sent */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>看上去没什么问题，客户端不能直接访问我们的内部表示，因此如果我们要修改内部表示，例如把text分为title和content，我们只需要重写getText，比如返回title + content，而无需客户端做任何改动。</p>
-<p>但是还存在这样的一种情况：客户端拿到了这个属性之后，又修改了这个属性，这会发生什么呢？<br>考虑下面的代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a tweet that retweets t, one hour later*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Tweet <span class="title">retweetLater</span><span class="params">(Tweet t)</span> </span>&#123;</span><br><span class="line">    Date d = t.getTimestamp();</span><br><span class="line">    d.setHours(d.getHours()+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, t.getText(), d);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>客户端获取了发推时间后，把时间加了一个小时，又用这个时间创建了新的Tweet。这里的<code>d</code>是通过<code>getTimestamp()</code>获得的，而在d上调用了<br><code>setHours()</code>方法将会改变d的值！因此结果是，t和新创建的Tweet现在都指向了一小时后的时间。<br><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-14-39.png" alt="表示泄露-来自传递引用"><br>这个例子中，我们的getter传递了一个引用类型<code>Date</code>，一个可变数据类型。因此，在引用d上调用mutator导致了表示泄露。<br>我们该怎样修改这个代码？通过一种称之为“防御性拷贝”的方式，创建引用的一个副本。这样对返回值的修改便不会影响到对象本身。具体来讲：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Date <span class="title">getTimestamp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>现在，我们就避免了getter（observor的一种）造成的访问泄露。对于所有的observor方法（返回值非空），我们都需要做如下的检查：只要返回的值不是基本数据类型，并且是可变数据类型，那么就要进行防御式拷贝。反之，如果返回值是基本数据类型或者是不可边类型，则可以直接返回。</p>
-<h2 id="稍微间接一点的表示泄露-来自接收引用"><a href="#稍微间接一点的表示泄露-来自接收引用" class="headerlink" title="稍微间接一点的表示泄露-来自接收引用"></a>稍微间接一点的表示泄露-来自接收引用</h2><p>引用类型始终是危险的：ADT内部的引用类型也可能被外部的客户端程序持有，这时一旦外部引用调用了mutator，ADT的内部表示也将同步发生变化。我们来看下面的例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@return</span> a list of 24 inspiring tweets, one per hour today */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Tweet&gt; <span class="title">tweetEveryHourToday</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">    List&lt;Tweet&gt; list = <span class="keyword">new</span> ArrayList&lt;Tweet&gt;(); </span><br><span class="line">    Date date = <span class="keyword">new</span> Date();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">24</span>; i++) &#123;</span><br><span class="line">        date.setHours(i);</span><br><span class="line">        list.add(<span class="keyword">new</span> Tweet(<span class="string">&quot;rbmllr&quot;</span>, <span class="string">&quot;keep it up! you can do it&quot;</span>, date));</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> list;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个例子中，我们试图创建24个Tweet，间隔1小时。然而，我们的构造器方法会直接将时间戳赋值给内部属性，因此当我们在循环中调用<code>setHours</code>时，所有Tweet内部的timestamp都将同步变化。最终，我们得到了24个时间相同的Tweet。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Make a Tweet.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> author    Twitter user who wrote the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> text      text of the tweet</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> timestamp date/time when the tweet was sent</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = timestamp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0-%E5%85%B3%E4%BA%8E%E8%A1%A8%E7%A4%BA%E6%B3%84%E9%9C%B2/2023-03-22-17-21-50.png" alt="表示泄露-接收引用"></p>
-<p>为此，我们在接收引用时也要使用防御式拷贝。如下所示：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Tweet</span><span class="params">(String author, String text, Date timestamp)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.author = author;</span><br><span class="line">    <span class="keyword">this</span>.text = text;</span><br><span class="line">    <span class="keyword">this</span>.timestamp = <span class="keyword">new</span> Date(timestamp.getTime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>同样的，对基本数据类型和不可边数据类型，如String，不需要进行防御式拷贝。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这就是MIT课件中关于表示泄露的内容。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1365,7 +1535,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
