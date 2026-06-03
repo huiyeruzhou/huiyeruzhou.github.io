@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mounted Static Page Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #101414;
+        --panel: #f6f0df;
+        --text: #18201d;
+        --muted: #62706a;
+        --accent: #be4f39;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(720px, calc(100% - 32px));
+        padding: 34px;
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--text);
+      }
+
+      p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      a {
+        color: var(--accent);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>Mounted at <strong>/sites/demo/</strong></p>
+      <h1>独立静态网页示例</h1>
+      <p>这个页面不依赖博客主页的 CSS 或脚本。以后可以把任意构建好的静态站点复制到 <code>sites/your-page/</code> 下，它会作为独立页面发布。</p>
+      <a href="../../">返回博客首页</a>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>于鸿利 · Huiye Ruzhou</title>
+    <meta name="description" content="于鸿利的个人主页与博客，记录系统、AI 工具、工程实践和阅读笔记。">
+    <link rel="icon" href="assets/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="moon-field" aria-hidden="true">
+      <span class="moon"></span>
+      <span class="star star-a"></span>
+      <span class="star star-b"></span>
+      <span class="star star-c"></span>
+    </div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="回到首页">
+          <img src="assets/avatar.gif" alt="" class="avatar">
+          <span>
+            <strong>于鸿利</strong>
+            <small>Hongli Yu / Red Koi</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href="#about">关于</a>
+          <a href="#papers">论文</a>
+          <a href="#notes">文章</a>
+          <a href="#sites">静态页</a>
+          <a href="https://github.com/huiyeruzhou">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="about">
+        <div class="hero-copy">
+          <p class="eyebrow">Personal Site · Beijing</p>
+          <h1>繁花似锦，辉夜如昼</h1>
+          <p class="lead">我是于鸿利（Hongli Yu），2004年出生，来自中国北京，目前在清华大学智能产业研究院（AIR）攻读博士学位，同时在 ByteDance Seed 实习。我是字节清华联合实验室SIA-Lab 与 GENSI 课题组的成员。近期工作主要围绕长上下文记忆、LLM 强化学习。</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#papers">查看论文</a>
+            <a class="button" href="https://hongli.fish">hongli.fish</a>
+          </div>
+        </div>
+
+        <aside class="profile-panel" aria-label="个人资料">
+          <div class="profile-top">
+            <img src="assets/avatar.gif" alt="于鸿利的头像">
+            <div>
+              <p class="profile-name">huiyeruzhou</p>
+              <p class="profile-text">Hongli Yu, aka 🐟♥️💚.</p>
+            </div>
+          </div>
+          <dl class="profile-facts">
+            <div>
+              <dt>Location</dt>
+              <dd>Beijing, China</dd>
+            </div>
+            <div>
+              <dt>Focus</dt>
+              <dd>LLM, RLVR, Agentic System</dd>
+            </div>
+            <div>
+              <dt>Affiliation</dt>
+              <dd>THU-AIR · Seed · SIA-Lab · GENSI</dd>
+            </div>
+            <div>
+              <dt>Scholar</dt>
+              <dd><a href="https://scholar.google.com/citations?view_op=list_works&amp;hl=zh-CN&amp;user=W0Td88gAAAAJ">Hongli Yu</a></dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+      <section class="section" id="papers">
+        <div class="section-heading">
+          <p class="eyebrow">Papers</p>
+          <h2>论文与项目主页</h2>
+        </div>
+        <div class="paper-list">
+          <article class="paper-item feature">
+            <span class="paper-meta">2026 · ICLR Oral · First author</span>
+            <h3><strong>MemAgent: Reshaping Long-Context LLM with Multi-Conv RL-based Memory Agent</strong></h3>
+            <p>面向长上下文能力的 Memory Agent 与多轮对话强化学习方法，将记忆能力训练与长文本泛化结合起来。</p>
+            <div class="paper-links">
+              <a href="https://memagent-sialab.github.io/"><span aria-hidden="true">⌂</span> Project</a>
+              <a href="https://arxiv.org/abs/2507.02259"><span aria-hidden="true">□</span> Paper</a>
+              <a href="https://iclr.cc/virtual/2026/oral/10007826"><span aria-hidden="true">◈</span> ICLR Oral</a>
+            </div>
+          </article>
+          <article class="paper-item">
+            <span class="paper-meta">2026 · arXiv · Co-author</span>
+            <h3>CUDA Agent: Large-Scale Agentic RL for High-Performance CUDA Kernel Generation</h3>
+            <p>面向高性能 CUDA kernel 生成的 agentic RL 系统，结合数据合成、执行环境和长程 RL 训练。</p>
+            <div class="paper-links">
+              <a href="https://cuda-agent.github.io/"><span aria-hidden="true">⌂</span> Project</a>
+              <a href="https://arxiv.org/abs/2602.24286"><span aria-hidden="true">□</span> Paper</a>
+            </div>
+          </article>
+          <article class="paper-item">
+            <span class="paper-meta">2025 · arXiv · Co-author</span>
+            <h3>Seed Diffusion: A Large-Scale Diffusion Language Model with High-Speed Inference</h3>
+            <p>基于离散扩散的大规模语言模型，面向代码生成场景验证高速并行推理路线。</p>
+            <div class="paper-links">
+              <a href="https://seed.bytedance.com/zh/seed_diffusion"><span aria-hidden="true">⌂</span> Project</a>
+              <a href="https://arxiv.org/abs/2508.02193"><span aria-hidden="true">□</span> Paper</a>
+              <a href="https://studio.seed.ai/exp/seed_diffusion/"><span aria-hidden="true">✦</span> Demo</a>
+            </div>
+          </article>
+          <article class="paper-item">
+            <span class="paper-meta">2025 · NeurIPS Spotlight · Co-author</span>
+            <h3>Enigmata: Scaling Logical Reasoning in Large Language Models with Synthetic Verifiable Puzzles</h3>
+            <p>通过可验证合成谜题和多阶段 RL 训练提升大语言模型逻辑推理能力。</p>
+            <div class="paper-links">
+              <a href="https://seed-enigmata.github.io/"><span aria-hidden="true">⌂</span> Project</a>
+              <a href="https://arxiv.org/abs/2505.19914"><span aria-hidden="true">□</span> Paper</a>
+              <a href="https://papers.nips.cc/paper_files/paper/2025/hash/058460c719f190500568b341bd06875f-Abstract-Conference.html"><span aria-hidden="true">◈</span> NeurIPS</a>
+            </div>
+          </article>
+          <article class="paper-item">
+            <span class="paper-meta">2025 · NeurIPS · Co-author</span>
+            <h3>DAPO: An Open-Source LLM Reinforcement Learning System at Scale</h3>
+            <p>开源大规模 LLM 强化学习系统，提出 Decoupled Clip 与 Dynamic sAmpling Policy Optimization。</p>
+            <div class="paper-links">
+              <a href="https://dapo-sia.github.io/"><span aria-hidden="true">⌂</span> Project</a>
+              <a href="https://arxiv.org/abs/2503.14476"><span aria-hidden="true">□</span> Paper</a>
+              <a href="https://proceedings.neurips.cc/paper_files/paper/2025/hash/a4277440d50f1f15d2cb4c14f7e0c0d2-Abstract-Conference.html"><span aria-hidden="true">◈</span> NeurIPS</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div id="notes">
+          <div class="section-heading">
+            <p class="eyebrow">Notes</p>
+            <h2>文章</h2>
+          </div>
+        </div>
+
+        <div id="sites">
+          <div class="section-heading">
+            <p class="eyebrow">Mounted Sites</p>
+            <h2>静态页</h2>
+          </div>
+          <ul class="site-list">
+            <li>
+              <a href="sites/demo/">Demo static page</a>
+              <span>/sites/demo/</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 于鸿利 · Huiye Ruzhou</span>
+      <span>Moonlit static blog on GitHub Pages</span>
+    </footer>
+  </body>
+</html>
